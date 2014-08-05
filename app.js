@@ -139,8 +139,29 @@ io.on('connection', function(socket)
 			}
 			if(user.partner)
 			{
-				socket.emit('information', "[INFO] Found a chat partner! Say hello to " + user.partner.nick + "!");
-				user.partner.socket.emit('information', "[INFO] Found a chat partner! Say hello to " + user.nick + "!");
+				var found1 = "[INFO] Found a chat partner! Say hello to " + user.partner.nick + ", a ";
+				var found2 = "[INFO] Found a chat partner! Say hello to " + user.nick + ", a ";
+
+				if(user.partner.gender != "undisclosed")
+					found1 += user.partner.gender;
+				var nicerole1 = " switch.";
+				if(user.partner.role === "tist")
+					nicerole1 = " hypnotist.";
+				else if(user.partner.role === "sub")
+					nicerole1 = " subject.";
+				found1 += " " + nicerole1;
+
+				if(user.gender != "undisclosed")
+					found2 += user.gender;
+				var nicerole2 = " switch.";
+				if(user.role === "tist")
+					nicerole2 = " hypnotist.";
+				else if(user.role === "sub")
+					nicerole2 = " subject.";
+				found2 += " " + nicerole2;
+
+				socket.emit('information', found1);
+				user.partner.socket.emit('information', found2);
 				if(user.type === 'hypnosis' && user.partner.type === 'either')
 				{
 					user.partner.socket.emit('information', "[INFO] Please be aware that " + user.nick + " does not want to roleplay.");
