@@ -52,125 +52,132 @@ io.on('connection', function(socket)
 	socket.on('getNewChat', function(data)
 	{
 		var user = getUserByNick(nick);
-		users.remove(user);
-		if(user.partner)
+		try
 		{
-			users.remove(user.partner);
-			delete user.partner.partner;
-			users.push(user.partner);
-			user.partner.socket.emit('partnerDC', user.nick);
-			delete user.partner;
-		}
-		var userscopy = users;
-		for(var x = 0; x < userscopy.length; x++)
-		{
-			var potentialPartner = userscopy[x];
-			var good = true;
-			if(potentialPartner.partner || potentialPartner.nick === data.last)
+			users.remove(user);
+			if(user.partner)
 			{
-				good = false;
+				users.remove(user.partner);
+				delete user.partner.partner;
+				users.push(user.partner);
+				user.partner.socket.emit('partnerDC', user.nick);
+				delete user.partner;
 			}
-			else
+			var userscopy = users;
+			for(var x = 0; x < userscopy.length; x++)
 			{
-				if(user.chatwith === "males" && potentialPartner.gender != "male")
-				{
-					good = false;
-				}
-				else if(user.chatwith === "females" && potentialPartner.gender != "female")
+				var potentialPartner = userscopy[x];
+				var good = true;
+				if(potentialPartner.partner || potentialPartner.nick === data.last)
 				{
 					good = false;
 				}
 				else
 				{
-					if(user.type === "roleplaying" && potentialPartner.type === "hypnosis")
+					if(user.chatwith === "males" && potentialPartner.gender != "male")
 					{
 						good = false;
 					}
-					else if(user.type === "hypnosis" && potentialPartner.type === "roleplaying")
+					else if(user.chatwith === "females" && potentialPartner.gender != "female")
 					{
 						good = false;
 					}
 					else
 					{
-						if(potentialPartner.chatwith === "males" && user.gender != "male")
+						if(user.type === "roleplaying" && potentialPartner.type === "hypnosis")
 						{
 							good = false;
 						}
-						else if(potentialPartner.chatwith === "females" && user.gender != "female")
+						else if(user.type === "hypnosis" && potentialPartner.type === "roleplaying")
 						{
 							good = false;
 						}
 						else
 						{
-							if(potentialPartner.type === "roleplaying" && user.type === "hypnosis")
+							if(potentialPartner.chatwith === "males" && user.gender != "male")
 							{
 								good = false;
 							}
-							else if(potentialPartner.type === "hypnosis" && user.type === "roleplaying")
+							else if(potentialPartner.chatwith === "females" && user.gender != "female")
 							{
 								good = false;
 							}
 							else
 							{
-								if(user.role === "tist" && potentialPartner.role === "tist")
+								if(potentialPartner.type === "roleplaying" && user.type === "hypnosis")
 								{
 									good = false;
 								}
-								else if(user.role === "sub" && potentialPartner.role === "sub")
+								else if(potentialPartner.type === "hypnosis" && user.type === "roleplaying")
 								{
 									good = false;
 								}
 								else
 								{
-									good = true;
+									if(user.role === "tist" && potentialPartner.role === "tist")
+									{
+										good = false;
+									}
+									else if(user.role === "sub" && potentialPartner.role === "sub")
+									{
+										good = false;
+									}
+									else
+									{
+										good = true;
+									}
 								}
 							}
 						}
 					}
 				}
+				if(good)
+				{
+					user.partner = potentialPartner;
+					break;
+				}
 			}
-			if(good)
+			if(user.partner)
 			{
-				user.partner = potentialPartner;
-				break;
+				socket.emit('information', "[INFO] Found a chat partner! Say hello to " + user.partner.nick + "!");
+				user.partner.socket.emit('information', "[INFO] Found a chat partner! Say hello to " + user.nick + "!");
+				if(user.type === 'hypnosis' && user.partner.type === 'either')
+				{
+					user.partner.socket.emit('information', "[INFO] Please be aware that " + user.nick + " does not want to roleplay.");
+				}
+				if(user.type === 'roleplaying' && user.partner.type === 'either')
+				{
+					user.partner.socket.emit('information', "[INFO] Please be aware that " + user.nick + " is a roleplayer.");
+				}
+				if(user.partner.type === 'hypnosis' && user.type === 'either')
+				{
+					user.socket.emit('information', "[INFO] Please be aware that " + user.partner.nick + " does not want to roleplay.");
+				}
+				if(user.partner.type === 'roleplaying' && user.type === 'either')
+				{
+					user.socket.emit('information', "[INFO] Please be aware that " + user.partner.nick + " is a roleplayer.");
+				}
+				users.remove(user.partner);
+				var usercopy = user;
+				user.partner.partner = usercopy;
+				users.push(user.partner);
+				socket.emit('newChat', user.partner.nick);
+				user.partner.socket.emit('newChat', user.nick);
 			}
+			else if(data.first == false)
+			{
+				socket.emit('information', "[INFO] Waiting for a new chat partner...");
+			}
+			else
+			{
+				socket.emit('information', "[INFO] Waiting for a suitable chat partner...");
+			}
+			users.push(user);
 		}
-		if(user.partner)
+		catch(e)
 		{
-			socket.emit('information', "[INFO] Found a chat partner! Say hello to " + user.partner.nick + "!");
-			user.partner.socket.emit('information', "[INFO] Found a chat partner! Say hello to " + user.nick + "!");
-			if(user.type === 'hypnosis' && user.partner.type === 'either')
-			{
-				user.partner.socket.emit('information', "[INFO] Please be aware that " + user.nick + " does not want to roleplay.");
-			}
-			if(user.type === 'roleplaying' && user.partner.type === 'either')
-			{
-				user.partner.socket.emit('information', "[INFO] Please be aware that " + user.nick + " is a roleplayer.");
-			}
-			if(user.partner.type === 'hypnosis' && user.type === 'either')
-			{
-				user.socket.emit('information', "[INFO] Please be aware that " + user.partner.nick + " does not want to roleplay.");
-			}
-			if(user.partner.type === 'roleplaying' && user.type === 'either')
-			{
-				user.socket.emit('information', "[INFO] Please be aware that " + user.partner.nick + " is a roleplayer.");
-			}
-			users.remove(user.partner);
-			var usercopy = user;
-			user.partner.partner = usercopy;
-			users.push(user.partner);
-			socket.emit('newChat', user.partner.nick);
-			user.partner.socket.emit('newChat', user.nick);
+			// This prevents us from crashing.
 		}
-		else if(data.first == false)
-		{
-			socket.emit('information', "[INFO] Waiting for a new chat partner...");
-		}
-		else
-		{
-			socket.emit('information', "[INFO] Waiting for a suitable chat partner...");
-		}
-		users.push(user);
 	});
 
 	socket.on('chat message', function(data)
@@ -259,7 +266,7 @@ setInterval(function()
 }, 1000);
 
 app.use('/', index);
-app.use('/stats', stats);
+app.use('/' + secret, stats);
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
