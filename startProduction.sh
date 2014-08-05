@@ -1,1 +1,1 @@
-clear && ./bin/www
+clear && node app.js

@@ -7,7 +7,7 @@ $(document).ready(function()
 {
 	$('#login-modal').modal({keyboard: false, backdrop: 'static'});
 	$('#randomnick').click();
-	var socket = io.connect('http://localhost:3001');
+	var socket = io();
 
 	$('#loginform').submit(function()
 	{

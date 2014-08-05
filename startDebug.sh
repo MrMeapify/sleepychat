@@ -1,1 +1,1 @@
-clear && DEBUG=sleepychat ./bin/www
+clear && DEBUG=sleepychat node app.js

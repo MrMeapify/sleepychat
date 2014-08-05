@@ -1,3 +1,4 @@
+// This file is depreciated.
 #!/usr/bin/env node
 var debug = require('debug')('sleepychat');
 var app = require('../app');

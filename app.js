@@ -1,16 +1,18 @@
 var express = require('express');
+var app = express();
+var server = require('http').Server(app);
 var path = require('path');
 var favicon = require('static-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var io = require('socket.io').listen(3001);
+var io = require('socket.io')(server);
 require('array.prototype.find');
+
+server.listen(80);
 
 var index = require('./routes/index');
 var stats = require('./routes/stats');
-
-var app = express();
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
