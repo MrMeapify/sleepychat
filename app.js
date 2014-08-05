@@ -9,7 +9,7 @@ var bodyParser = require('body-parser');
 var io = require('socket.io')(server);
 require('array.prototype.find');
 
-server.listen(5000);
+server.listen(Number(process.env.PORT || 5000));
 
 var index = require('./routes/index');
 var stats = require('./routes/stats');
