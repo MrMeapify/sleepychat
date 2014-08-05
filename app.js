@@ -47,16 +47,21 @@ io.on('connection', function(socket)
 	socket.on('getNewChat', function(data)
 	{
 		var user = getUserByNick(nick);
-		if(user.partner)
-			user.partner.socket.emit('information', "[INFO] Your partner has disconnected.");
 		users.remove(user);
-		delete user.partner;
+		if(user.partner)
+		{
+			users.remove(user.partner);
+			delete user.partner.partner;
+			users.push(user.partner);
+			user.partner.socket.emit('partnerDC', user.nick);
+			delete user.partner;
+		}
 		var userscopy = users;
 		for(var x = 0; x < userscopy.length; x++)
 		{
 			var potentialPartner = userscopy[x];
 			var good = true;
-			if(potentialPartner.partner)
+			if(potentialPartner.partner || potentialPartner.nick === data.last)
 			{
 				good = false;
 			}
@@ -72,11 +77,11 @@ io.on('connection', function(socket)
 				}
 				else
 				{
-					if(user.type === "roleplaying" && potentialPartner.type != "roleplaying")
+					if(user.type === "roleplaying" && potentialPartner.type === "hypnosis")
 					{
 						good = false;
 					}
-					else if(user.type === "hypnosis" && potentialPartner.type != "hypnosis")
+					else if(user.type === "hypnosis" && potentialPartner.type === "roleplaying")
 					{
 						good = false;
 					}
@@ -92,17 +97,28 @@ io.on('connection', function(socket)
 						}
 						else
 						{
-							if(potentialPartner.type === "roleplaying" && user.type != "roleplaying")
+							if(potentialPartner.type === "roleplaying" && user.type === "hypnosis")
 							{
 								good = false;
 							}
-							else if(potentialPartner.type === "hypnosis" && user.type != "hypnosis")
+							else if(potentialPartner.type === "hypnosis" && user.type === "roleplaying")
 							{
 								good = false;
 							}
 							else
 							{
-								good = true;
+								if(user.role === "tist" && potentialPartner.role === "tist")
+								{
+									good = false;
+								}
+								else if(user.role === "sub" && potentialPartner.role === "sub")
+								{
+									good = false;
+								}
+								else
+								{
+									good = true;
+								}
 							}
 						}
 					}
@@ -118,6 +134,23 @@ io.on('connection', function(socket)
 		{
 			socket.emit('information', "[INFO] Found a chat partner! Say hello to " + user.partner.nick + "!");
 			user.partner.socket.emit('information', "[INFO] Found a chat partner! Say hello to " + user.nick + "!");
+			// TODO Tell the user that they've connected to someone with a type preference if they're set to either.
+			if(user.type === 'hypnosis' && user.partner.type === 'either')
+			{
+				user.partner.socket.emit('information', "[INFO] Please be aware that " + user.nick + " does not want to roleplay.");
+			}
+			if(user.type === 'roleplaying' && user.partner.type === 'either')
+			{
+				user.partner.socket.emit('information', "[INFO] Please be aware that " + user.nick + " is a roleplayer.");
+			}
+			if(user.partner.type === 'hypnosis' && user.type === 'either')
+			{
+				user.socket.emit('information', "[INFO] Please be aware that " + user.partner.nick + " does not want to roleplay.");
+			}
+			if(user.partner.type === 'roleplaying' && user.type === 'either')
+			{
+				user.socket.emit('information', "[INFO] Please be aware that " + user.partner.nick + " is a roleplayer.");
+			}
 			users.remove(user.partner);
 			var usercopy = user;
 			user.partner.partner = usercopy;
@@ -138,9 +171,12 @@ io.on('connection', function(socket)
 
 	socket.on('chat message', function(data)
 	{
-		var user = getUserByNick(nick);
-		user.partner.socket.emit('chat message', '<' + nick + '> ' + data.message);
-		socket.emit('chat message', '<' + nick + '> ' + data.message)
+		if(data.message != "")
+		{
+			var user = getUserByNick(nick);
+			user.partner.socket.emit('chat message', '<' + nick + '> ' + data.message);
+			socket.emit('chat message', '<' + nick + '> ' + data.message);
+		}
 	});
 
 	socket.on('disconnect', function()
@@ -150,7 +186,10 @@ io.on('connection', function(socket)
 		{
 			if(user.partner)
 			{
-				user.partner.socket.emit('information', "[INFO] Your partner has disconnected.");
+				users.remove(user.partner);
+				delete user.partner.partner;
+				users.push(user.partner);
+				user.partner.socket.emit('partnerDC', user.nick);
 			}
 			users.remove(user);
 		}

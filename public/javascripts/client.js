@@ -1,6 +1,7 @@
 var socket = io.connect('http://localhost:3001');
 var loggedIn = true;
 var lastChat = "";
+var chatting = false;
 
 $(document).ready(function()
 {
@@ -63,6 +64,14 @@ $(document).ready(function()
 			$('#messages').append($('<li>').text(moment().format('h:mm:ss a') + ": " + msg).css('font-style', 'italic').css('font-weight', 'bold'));
 		});
 
+		socket.on('partnerDC', function(nick)
+		{
+			chatting = false;
+			$('#sendbutton').attr('disabled', true);
+			var themsg = '[INFO] ' + nick + ' has disconnected from you.';
+			$('#messages').append($('<li>').text(moment().format('h:mm:ss a') + ": " + themsg).css('font-style', 'italic').css('font-weight', 'bold'));
+		});
+
 		socket.on('disconnect', function()
 		{
 			$('#messages').append($('<li>').text(moment().format('h:mm:ss a') + ": " + "[INFO] Sorry! You seem to have been disconnected from the server. Please reload the page and try again.").css('font-style', 'italic').css('font-weight', 'bold'));
@@ -79,19 +88,28 @@ $(document).ready(function()
 		socket.emit('getNewChat', { first: true });
 	});
 
+
+
 	socket.on('newChat', function(nick)
 	{
 		lastChat = nick;
-		$('#sendbutton').removeProp('disabled');
-		$('#dcbutton').removeProp('disabled');
+		chatting = true;
+		$('#sendbutton').removeAttr('disabled');
+		$('#dcbutton').removeAttr('disabled');
+		$('#dcbutton').unbind('click');
 		$('#dcbutton').click(function()
 		{
 			socket.emit('getNewChat', { first: false, last: lastChat });
-			$('#dcbutton').prop('disabled', true);
-			$('#sendbutton').prop('disabled', true);
-			var msg = "[INFO] You have disconnected from " + lastChat + ".";
-			$('#messages').append($('<li>').text(moment().format('h:mm:ss a') + ": " + msg).css('font-style', 'italic').css('font-weight', 'bold'));
+			$('#dcbutton').attr('disabled', true);
+			$('#sendbutton').attr('disabled', true);
+			if(chatting)
+			{
+				var msg = "[INFO] You have disconnected from " + lastChat + ".";
+				$('#messages').append($('<li>').text(moment().format('h:mm:ss a') + ": " + msg).css('font-style', 'italic').css('font-weight', 'bold'));
+			}
+			chatting = false;
 		});
+		$('#chatbar').unbind('submit');
 		$('#chatbar').submit(function()
 		{
 			socket.emit('chat message', { message: $('#m').val() });
