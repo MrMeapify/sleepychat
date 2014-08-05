@@ -1,4 +1,4 @@
-var socket = io.connect('http://localhost:3001');
+var socket = io();
 var loggedIn = true;
 var lastChat = "";
 var chatting = false;
