@@ -69,6 +69,7 @@ $(document).ready(function()
 				interval = setInterval(changeTitle, 1000);
 			}
 			$('#messages').append($('<li>').text(moment().format('h:mm:ss a') + ": " + msg));
+			$('body').animate({ scrollTop: $('body')[0].scrollHeight}, 500);
 		});
 
 		socket.on('information', function(msg)
@@ -80,6 +81,7 @@ $(document).ready(function()
 				interval = setInterval(changeTitle, 1000);
 			}
 			$('#messages').append($('<li>').text(moment().format('h:mm:ss a') + ": " + msg).css('font-style', 'italic').css('font-weight', 'bold'));
+			$('body').animate({ scrollTop: $('body')[0].scrollHeight}, 500);
 		});
 
 		socket.on('partnerDC', function(nick)
@@ -154,6 +156,8 @@ $(document).ready(function()
 		notify = false;
     	clearInterval(interval);
     	$("title").text(oldTitle);
+		$("title").text(oldTitle);
+		$("title").text(oldTitle);
 	});
 });
 
