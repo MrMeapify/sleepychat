@@ -66,6 +66,7 @@ $(document).ready(function()
 			{
 				snd.play();
 				newTitle = "*** " + lastChat + " messaged you! ***";
+				clearInterval(interval);
 				interval = setInterval(changeTitle, 1000);
 			}
 			$('#messages').append($('<li>').text(moment().format('h:mm:ss a') + ": " + msg));
@@ -78,6 +79,7 @@ $(document).ready(function()
 			{
 				snd.play();
 				newTitle = "*** New message! ***";
+				clearInterval(interval);
 				interval = setInterval(changeTitle, 1000);
 			}
 			$('#messages').append($('<li>').text(moment().format('h:mm:ss a') + ": " + msg).css('font-style', 'italic').css('font-weight', 'bold'));
@@ -94,6 +96,13 @@ $(document).ready(function()
 
 		socket.on('disconnect', function()
 		{
+			if(notify)
+			{
+				snd.play();
+				newTitle = "*** Alert ***";
+				clearInterval(interval);
+				interval = setInterval(changeTitle, 1000);
+			}
 			$('#messages').append($('<li>').text(moment().format('h:mm:ss a') + ": " + "[INFO] Sorry! You seem to have been disconnected from the server. Please reload the page and try again.").css('font-style', 'italic').css('font-weight', 'bold'));
 		});
 	});
@@ -122,6 +131,13 @@ $(document).ready(function()
 			$('#sendbutton').attr('disabled', true);
 			if(chatting)
 			{
+				if(notify)
+				{
+					snd.play();
+					newTitle = "*** Alert ***";
+					clearInterval(interval);
+					interval = setInterval(changeTitle, 1000);
+				}
 				var msg = "[INFO] You have disconnected from " + lastChat + ".";
 				$('#messages').append($('<li>').text(moment().format('h:mm:ss a') + ": " + msg).css('font-style', 'italic').css('font-weight', 'bold'));
 			}
@@ -156,8 +172,6 @@ $(document).ready(function()
 		notify = false;
     	clearInterval(interval);
     	$("title").text(oldTitle);
-		$("title").text(oldTitle);
-		$("title").text(oldTitle);
 	});
 });
 
