@@ -1,0 +1,21 @@
+{
+  "name": "sleepychat",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "array.prototype.find": "^0.1.1",
+    "body-parser": "~1.0.0",
+    "cookie-parser": "~1.0.1",
+    "crypto": "0.0.3",
+    "debug": "~0.7.4",
+    "ejs": "~0.8.5",
+    "express": "~4.2.0",
+    "moment": "^2.8.1",
+    "morgan": "~1.0.0",
+    "socket.io": "^1.0.6",
+    "static-favicon": "~1.0.0"
+  }
+}

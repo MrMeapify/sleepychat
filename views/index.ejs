@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title><%= title %></title>
+		<link rel='stylesheet' href='/stylesheets/bootstrap.min.css' />
+		<link rel='stylesheet' href='/stylesheets/bootstrap-theme.min.css' />
+		<link rel='stylesheet' href='/stylesheets/style.css' />
+	</head>
+	<body>
+		<div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-md">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" onclick="window.history.back()">
+							<span aria-hidden="true">×</span>
+							<span class="sr-only">Close</span>
+						</button>
+						<h4 class="modal-title" id="myLargeModalLabel">Sleepychat <%= version %></h4>
+					</div>
+					<div class="modal-body">
+						Welcome! With just a few bits of information, we can get you connected straight away!
+						<br/><br/>
+						<form action="" id="loginform">
+							<div class="form-group">
+								<label>Nickname</label>
+								<div class="input-group">
+									<input id="nickname" type="text" class="form-control">
+									<span class="input-group-btn">
+										<button id="randomnick" class="btn btn-default" type="button">Randomize!</button>
+									</span>
+								</div>
+								<br/><br/>
+								<div class="input-group">
+									<label>I am a...</label><br/>
+									<div class="btn-group" data-toggle="buttons">
+										<label class="btn btn-default">
+											<input name="iamgender" id="iammale" type="radio"> Male
+										</label>
+										<label class="btn btn-default">
+											<input name="iamgender" id="iamfemale" type="radio"> Female
+										</label>
+										<label class="btn btn-default active">
+											<input name="iamgender" id="iamundisclosed" type="radio" checked> Undisclosed
+										</label>
+									</div>
+									<br/><br/>
+									<div class="btn-group" data-toggle="buttons">
+										<label class="btn btn-default">
+											<input name="iamrole" id="iamtist" type="radio"> Hypnotist
+										</label>
+										<label class="btn btn-default">
+											<input name="iamrole" id="iamsub" type="radio"> Subject
+										</label>
+										<label class="btn btn-default active">
+											<input name="iamrole" id="iamswitch" type="radio" checked> Switch
+										</label>
+									</div>
+								</div>
+								<br/><br/>
+								<div class="input-group">
+									<label>looking to chat with...</label><br/>
+									<div class="btn-group" data-toggle="buttons">
+										<label class="btn btn-default">
+											<input name="chatwith" id="chatwithmales" type="radio"> Males Only
+										</label>
+										<label class="btn btn-default">
+											<input name="chatwith" id="chatwithfemales" type="radio"> Females Only
+										</label>
+										<label class="btn btn-default active">
+											<input name="chatwith" id="chatwitheither" type="radio" checked> Either
+										</label>
+									</div>
+								</div>
+								<br/><br/>
+								<div class="input-group">
+									<label>for...</label><br/>
+									<div class="btn-group" data-toggle="buttons">
+										<label class="btn btn-default">
+											<input name="iwant" id="iwantrp" type="radio"> Role Playing
+										</label>
+										<label class="btn btn-default">
+											<input name="iwant" id="iwanthyp" type="radio"> REAL Hypnosis
+										</label>
+										<label class="btn btn-default active">
+											<input name="iwant" id="iwanteither" type="radio" checked> Either
+										</label>
+									</div>
+								</div>
+								<br/><br/>
+								<button id="loginsubmit" type="submit" disabled class="btn btn-default btn-block">Connecting...</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="body">
+			<ul id="messages"></ul>
+	  		<form id="chatbar" action="">
+				<div class="form-group">
+					<div class="input-group">
+						<input id="m" type="text" autocomplete="off" class="form-control">
+						<span class="input-group-btn">
+							<button id="sendbutton" class="btn btn-default" type="submit" disabled>Send</button>
+							<button id="dcbutton" class="btn btn-danger" type="button" disabled>New Chat</button>
+						</span>
+					</div>
+				</div>
+	  		</form>
+		</div>
+	</body>
+	<script src="http://localhost:3001/socket.io/socket.io.js"></script>
+	<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+	<script src="/javascripts/bootstrap.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.7.0/moment.min.js"></script>
+	<script src="/javascripts/client.js"></script>
+</html>
