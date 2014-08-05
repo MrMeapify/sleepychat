@@ -185,8 +185,15 @@ io.on('connection', function(socket)
 			else
 			{
 				var user = getUserByNick(nick);
-				user.partner.socket.emit('chat message', '<' + nick + '> ' + data.message);
-				socket.emit('chat message', '<' + nick + '> ' + data.message);
+				try
+				{
+					user.partner.socket.emit('chat message', '<' + nick + '> ' + data.message);
+					socket.emit('chat message', '<' + nick + '> ' + data.message);
+				}
+				catch(e)
+				{
+					console.log('Bad message. ' + nick + ' ... ' + data.message);
+				}
 			}
 		}
 	});
