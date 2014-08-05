@@ -9,6 +9,9 @@ var bodyParser = require('body-parser');
 var io = require('socket.io')(server);
 require('array.prototype.find');
 
+// This here is the admin password. For obvious reasons, set the ADMINPASS variable in production.
+var secret = String(process.env.ADMINPASS || "testpassword");
+
 server.listen(Number(process.env.PORT || 5000));
 
 var index = require('./routes/index');
@@ -136,7 +139,6 @@ io.on('connection', function(socket)
 		{
 			socket.emit('information', "[INFO] Found a chat partner! Say hello to " + user.partner.nick + "!");
 			user.partner.socket.emit('information', "[INFO] Found a chat partner! Say hello to " + user.nick + "!");
-			// TODO Tell the user that they've connected to someone with a type preference if they're set to either.
 			if(user.type === 'hypnosis' && user.partner.type === 'either')
 			{
 				user.partner.socket.emit('information', "[INFO] Please be aware that " + user.nick + " does not want to roleplay.");
@@ -175,9 +177,17 @@ io.on('connection', function(socket)
 	{
 		if(data.message != "")
 		{
-			var user = getUserByNick(nick);
-			user.partner.socket.emit('chat message', '<' + nick + '> ' + data.message);
-			socket.emit('chat message', '<' + nick + '> ' + data.message);
+			if(data.message.lastIndexOf('/server ' + secret, 0) === 0)
+			{
+				var command = '/server ' + secret + ' ';
+				io.sockets.emit('information', "[ADMIN] " + data.message.substring(command.length));
+			}
+			else
+			{
+				var user = getUserByNick(nick);
+				user.partner.socket.emit('chat message', '<' + nick + '> ' + data.message);
+				socket.emit('chat message', '<' + nick + '> ' + data.message);
+			}
 		}
 	});
 

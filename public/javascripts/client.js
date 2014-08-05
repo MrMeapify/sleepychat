@@ -2,6 +2,12 @@ var socket = io();
 var loggedIn = true;
 var lastChat = "";
 var chatting = false;
+var isOldTitle = true;
+var oldTitle = "Sleepychat";
+var newTitle = "*** New message! ***";
+var interval = null;
+var notify = false;
+var snd = new Audio("/sounds/notify.ogg");
 
 $(document).ready(function()
 {
@@ -56,11 +62,23 @@ $(document).ready(function()
 
 		socket.on('chat message', function(msg)
 		{
+			if(notify)
+			{
+				snd.play();
+				newTitle = "*** " + lastChat + " messaged you! ***";
+				interval = setInterval(changeTitle, 1000);
+			}
 			$('#messages').append($('<li>').text(moment().format('h:mm:ss a') + ": " + msg));
 		});
 
 		socket.on('information', function(msg)
 		{
+			if(notify)
+			{
+				snd.play();
+				newTitle = "*** New message! ***";
+				interval = setInterval(changeTitle, 1000);
+			}
 			$('#messages').append($('<li>').text(moment().format('h:mm:ss a') + ": " + msg).css('font-style', 'italic').css('font-weight', 'bold'));
 		});
 
@@ -87,8 +105,6 @@ $(document).ready(function()
 		});
 		socket.emit('getNewChat', { first: true });
 	});
-
-
 
 	socket.on('newChat', function(nick)
 	{
@@ -127,7 +143,25 @@ $(document).ready(function()
 		$('#iamsub').parent().html('<input name="iamrole" id="iamsub" type="radio"> ' + "Subject (" + stats.role.sub + ")");
 		$('#iamswitch').parent().html('<input name="iamrole" id="iamswitch" type="radio"> ' + "Switch (" + stats.role.switchrole + ")");
 	});
+
+	$(window).blur(function()
+	{
+		notify = true;
+	});
+
+	$(window).focus(function()
+	{
+		notify = false;
+    	clearInterval(interval);
+    	$("title").text(oldTitle);
+	});
 });
+
+function changeTitle()
+{
+    document.title = isOldTitle ? oldTitle : newTitle;
+    isOldTitle = !isOldTitle;
+}
 
 $('#randomnick').click(function()
 {
