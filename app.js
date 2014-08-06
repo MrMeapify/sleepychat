@@ -76,7 +76,7 @@ io.on('connection', function(socket)
 			{
 				var potentialPartner = userscopy[x];
 				var good = true;
-				if(potentialPartner.partner || potentialPartner.nick === data.last)
+				if(potentialPartner.partner || potentialPartner.nick === data.last || potentialPartner.inBigChat)
 					good = false;
 				else
 				{
