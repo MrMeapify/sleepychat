@@ -8,6 +8,9 @@ var newTitle = "*** New message! ***";
 var interval = null;
 var notify = false;
 var snd = new Audio("/sounds/notify.ogg");
+var newchatclickedonce = false;
+var bigchat = false;
+var sound = true;
 
 $(document).ready(function()
 {
@@ -20,9 +23,24 @@ $(document).ready(function()
 		return false;
 	});
 
+	$('#mutebutton').click(function()
+	{
+		if(sound)
+		{
+			sound = false;
+			$('#mutebutton').html('<i class="fa fa-volume-off"></i>');
+		}
+		else
+		{
+			sound = true;
+			$('#mutebutton').html('<i class="fa fa-volume-up"></i>');
+		}
+	});
+
 	socket.on('connect', function()
 	{
-		$('#loginsubmit').prop('disabled', false).removeClass('btn-default').addClass('btn-success').text('Start!');
+		$('#loginsubmit').prop('disabled', false).removeClass('btn-default').addClass('btn-success').text('Start Matchmaking');
+		$('#bigchatsubmit').prop('disabled', false).removeClass('btn-default').addClass('btn-primary').text('or join the big group chat!');
 		$('#loginform').submit(function()
 		{
 			var nick = $('#nickname').val();
@@ -52,10 +70,53 @@ $(document).ready(function()
 				var type = 'roleplaying';
 			else if($('#iwanthyp').parent().hasClass('active'))
 				var type = 'hypnosis';
+			else if($('#iwantgeneral').parent().hasClass('active'))
+				var type = 'general';
 			else
 				var type = 'either';
 
-			socket.emit('login', { nick: nick, gender: gender, role: role, chatwith: chatwith, type: type});
+			socket.emit('login', { nick: nick, gender: gender, role: role, chatwith: chatwith, type: type });
+			$('#login-modal').modal('hide');
+			return false;
+		});
+
+		$('#bigchatsubmit').click(function()
+		{
+			bigchat = true;
+
+			var nick = $('#nickname').val();
+
+			if($('#iammale').parent().hasClass('active'))
+				var gender = 'male';
+			else if($('#iamfemale').parent().hasClass('active'))
+				var gender = 'female';
+			else
+				var gender = 'undisclosed';
+
+			if($('#iamtist').parent().hasClass('active'))
+				var role = 'tist';
+			else if($('#iamsub').parent().hasClass('active'))
+				var role = 'sub';
+			else
+				var role = 'switch';
+
+			if($('#chatwithmales').parent().hasClass('active'))
+				var chatwith = 'males';
+			else if($('#chatwithfemales').parent().hasClass('active'))
+				var chatwith = 'females';
+			else
+				var chatwith = 'either';
+
+			if($('#iwantrp').parent().hasClass('active'))
+				var type = 'roleplaying';
+			else if($('#iwanthyp').parent().hasClass('active'))
+				var type = 'hypnosis';
+			else if($('#iwantgeneral').parent().hasClass('active'))
+				var type = 'general';
+			else
+				var type = 'either';
+
+			socket.emit('login', { nick: nick, gender: gender, role: role, chatwith: chatwith, type: type, inBigChat: true });
 			$('#login-modal').modal('hide');
 			return false;
 		});
@@ -64,7 +125,8 @@ $(document).ready(function()
 		{
 			if(notify)
 			{
-				snd.play();
+				if(sound)
+					snd.play();
 				newTitle = "*** " + lastChat + " messaged you! ***";
 				clearInterval(interval);
 				interval = setInterval(changeTitle, 1000);
@@ -77,7 +139,8 @@ $(document).ready(function()
 		{
 			if(notify)
 			{
-				snd.play();
+				if(sound)
+					snd.play();
 				newTitle = "*** New message! ***";
 				clearInterval(interval);
 				interval = setInterval(changeTitle, 1000);
@@ -98,7 +161,8 @@ $(document).ready(function()
 		{
 			if(notify)
 			{
-				snd.play();
+				if(sound)
+					snd.play();
 				newTitle = "*** Alert ***";
 				clearInterval(interval);
 				interval = setInterval(changeTitle, 1000);
@@ -110,11 +174,26 @@ $(document).ready(function()
 	socket.on('loggedIn', function()
 	{
 		loggedIn = true;
-		$('#chatbar').submit(function()
+		if(bigchat)
 		{
-			return false;
-		});
-		socket.emit('getNewChat', { first: true });
+			$('#dcbutton').parent().hide();
+			$('#sendbutton').removeAttr('disabled');
+			$('#chatbar').unbind('submit');
+			$('#chatbar').submit(function()
+			{
+				socket.emit('chat message', { message: $('#m').val() });
+				$('#m').val('');
+				return false;
+			});
+		}
+		else
+		{
+			$('#chatbar').submit(function()
+			{
+				return false;
+			});
+			socket.emit('getNewChat', { first: true });
+		}
 	});
 
 	socket.on('newChat', function(nick)
@@ -126,22 +205,30 @@ $(document).ready(function()
 		$('#dcbutton').unbind('click');
 		$('#dcbutton').click(function()
 		{
-			socket.emit('getNewChat', { first: false, last: lastChat });
-			$('#dcbutton').attr('disabled', true);
-			$('#sendbutton').attr('disabled', true);
-			if(chatting)
+			if(newchatclickedonce)
 			{
-				if(notify)
+				$('#dcbutton').button('reset');
+				newchatclickedonce = false;
+				socket.emit('getNewChat', { first: false, last: lastChat });
+				$('#dcbutton').attr('disabled', true);
+				$('#sendbutton').attr('disabled', true);
+				if(chatting)
 				{
-					snd.play();
-					newTitle = "*** Alert ***";
-					clearInterval(interval);
-					interval = setInterval(changeTitle, 1000);
+					var msg = "[INFO] You have disconnected from " + lastChat + ".";
+					$('#messages').append($('<li>').text(moment().format('h:mm:ss a') + ": " + msg).css('font-style', 'italic').css('font-weight', 'bold'));
 				}
-				var msg = "[INFO] You have disconnected from " + lastChat + ".";
-				$('#messages').append($('<li>').text(moment().format('h:mm:ss a') + ": " + msg).css('font-style', 'italic').css('font-weight', 'bold'));
+				chatting = false;
 			}
-			chatting = false;
+			else
+			{
+				$('#dcbutton').button('really');
+				newchatclickedonce = true;
+				setTimeout(function ()
+				{
+              		$('#dcbutton').button('reset');
+					newchatclickedonce = false;
+            	}, 3000);
+			}
 		});
 		$('#chatbar').unbind('submit');
 		$('#chatbar').submit(function()
@@ -160,6 +247,7 @@ $(document).ready(function()
 		$('#iamtist').parent().html('<input name="iamrole" id="iamtist" type="radio"> ' + "Hypnotist (" + stats.role.tist + ")");
 		$('#iamsub').parent().html('<input name="iamrole" id="iamsub" type="radio"> ' + "Subject (" + stats.role.sub + ")");
 		$('#iamswitch').parent().html('<input name="iamrole" id="iamswitch" type="radio"> ' + "Switch (" + stats.role.switchrole + ")");
+		$('#bigchatsubmit').text('or join the big group chat! (' + stats.bigroom + ")");
 	});
 
 	$(window).blur(function()
@@ -174,6 +262,13 @@ $(document).ready(function()
     	$("title").text(oldTitle);
 	});
 });
+
+window.onbeforeunload = confirmExit;
+function confirmExit()
+{
+    if (chatting)
+        return "Wait, you're still in a chat session!";
+}
 
 function changeTitle()
 {

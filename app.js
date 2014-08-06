@@ -44,7 +44,15 @@ io.on('connection', function(socket)
 			nick = data.nick
 			users.push(data);
 			socket.emit('loggedIn');
-			socket.emit('information', "[INFO] Hi there, " + nick + "! You're now connected to the server.");
+			if(data.inBigChat)
+			{
+				socket.join('bigroom');
+				io.to('bigroom').emit('information', "[INFO] " + nick + " has joined.");
+			}
+			else
+			{
+				socket.emit('information', "[INFO] Hi there, " + nick + "! You're now connected to the server.");
+			}
 		}
 
 	});
@@ -69,63 +77,43 @@ io.on('connection', function(socket)
 				var potentialPartner = userscopy[x];
 				var good = true;
 				if(potentialPartner.partner || potentialPartner.nick === data.last)
-				{
 					good = false;
-				}
 				else
 				{
 					if(user.chatwith === "males" && potentialPartner.gender != "male")
-					{
 						good = false;
-					}
 					else if(user.chatwith === "females" && potentialPartner.gender != "female")
-					{
 						good = false;
-					}
 					else
 					{
 						if(user.type === "roleplaying" && potentialPartner.type === "hypnosis")
-						{
 							good = false;
-						}
 						else if(user.type === "hypnosis" && potentialPartner.type === "roleplaying")
-						{
 							good = false;
-						}
+						else if(user.type === "general" && potentialPartner.type != "general")
+							good = false;
 						else
 						{
 							if(potentialPartner.chatwith === "males" && user.gender != "male")
-							{
 								good = false;
-							}
 							else if(potentialPartner.chatwith === "females" && user.gender != "female")
-							{
 								good = false;
-							}
 							else
 							{
 								if(potentialPartner.type === "roleplaying" && user.type === "hypnosis")
-								{
 									good = false;
-								}
 								else if(potentialPartner.type === "hypnosis" && user.type === "roleplaying")
-								{
 									good = false;
-								}
+								else if(potentialPartner.type === "general" && user.type != "general")
+									good = false;
 								else
 								{
 									if(user.role === "tist" && potentialPartner.role === "tist")
-									{
 										good = false;
-									}
 									else if(user.role === "sub" && potentialPartner.role === "sub")
-									{
 										good = false;
-									}
 									else
-									{
 										good = true;
-									}
 								}
 							}
 						}
@@ -203,16 +191,35 @@ io.on('connection', function(socket)
 
 	socket.on('chat message', function(data)
 	{
-		if(data.message != "")
+		var user = getUserByNick(nick);
+		if(data.message != "" && user)
 		{
 			if(data.message.lastIndexOf('/server ' + secret, 0) === 0)
 			{
 				var command = '/server ' + secret + ' ';
 				io.sockets.emit('information', "[ADMIN] " + data.message.substring(command.length));
 			}
+			else if(data.message.lastIndexOf('/kick ' + secret, 0) === 0)
+			{
+				var command = '/kick ' + secret + ' ';
+				var tokick = getUserByNick(data.message.substring(command.length));
+				io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been kicked by the admin.");
+				tokick.socket.leave('bigroom');
+				tokick.socket.conn.close();
+			}
+			else if(user.inBigChat)
+			{
+				try
+				{
+					io.to('bigroom').emit('chat message', '<' + nick + '> ' + data.message);
+				}
+				catch(e)
+				{
+					console.log('Bad message. ' + nick + ' ... ' + data.message);
+				}
+			}
 			else
 			{
-				var user = getUserByNick(nick);
 				try
 				{
 					user.partner.socket.emit('chat message', '<' + nick + '> ' + data.message);
@@ -237,6 +244,10 @@ io.on('connection', function(socket)
 				delete user.partner.partner;
 				users.push(user.partner);
 				user.partner.socket.emit('partnerDC', user.nick);
+			}
+			if(user.inBigChat)
+			{
+				io.to('bigroom').emit('information', "[INFO] " + nick + " has left.");
 			}
 			users.remove(user);
 		}
@@ -265,9 +276,14 @@ setInterval(function()
 	var tist = 0;
 	var sub = 0;
 	var switchrole = 0;
+	var bigroom = 0;
+
 	for(var x = 0; x < usercopy.length; x++)
 	{
 		var workinguser = usercopy[x];
+
+		if(workinguser.inBigChat)
+			bigroom++;
 
 		if(workinguser.gender == 'male')
 			males++;
@@ -283,7 +299,7 @@ setInterval(function()
 		else
 			switchrole++;
 	}
-    io.sockets.emit('stats', { gender: { males: males, females: females, undisclosed: undisclosed }, role: { tist: tist, sub: sub, switchrole: switchrole } });
+    io.sockets.emit('stats', { gender: { males: males, females: females, undisclosed: undisclosed }, role: { tist: tist, sub: sub, switchrole: switchrole }, bigroom: bigroom });
 }, 1000);
 
 app.use('/', index);

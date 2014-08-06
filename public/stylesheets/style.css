@@ -9,3 +9,5 @@
 .body #messages li { padding: 5px 10px; }
 
 .body #messages li:nth-child(odd) { background: #eee; }
+
+.modal-body .input-group { margin-bottom: 20px; }

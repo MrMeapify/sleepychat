@@ -4,6 +4,7 @@
 		<title><%= title %></title>
 		<link rel='stylesheet' href='/stylesheets/bootstrap.min.css' />
 		<link rel='stylesheet' href='/stylesheets/bootstrap-theme.min.css' />
+		<link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css' />
 		<link rel='stylesheet' href='/stylesheets/style.css' />
 	</head>
 	<body>
@@ -29,7 +30,6 @@
 										<button id="randomnick" class="btn btn-default" type="button">Randomize!</button>
 									</span>
 								</div>
-								<br/><br/>
 								<div class="input-group">
 									<label>I am a...</label><br/>
 									<div class="btn-group" data-toggle="buttons">
@@ -56,7 +56,6 @@
 										</label>
 									</div>
 								</div>
-								<br/><br/>
 								<div class="input-group">
 									<label>looking to chat with...</label><br/>
 									<div class="btn-group" data-toggle="buttons">
@@ -71,7 +70,6 @@
 										</label>
 									</div>
 								</div>
-								<br/><br/>
 								<div class="input-group">
 									<label>for...</label><br/>
 									<div class="btn-group" data-toggle="buttons">
@@ -82,12 +80,16 @@
 											<input name="iwant" id="iwanthyp" type="radio"> REAL Hypnosis
 										</label>
 										<label class="btn btn-default active">
-											<input name="iwant" id="iwanteither" type="radio" checked> Either
+											<input name="iwant" id="iwanteither" type="radio" checked><i class="fa fa-chevron-left"></i> Either
+										</label>
+										<label class="btn btn-default">
+											<input name="iwant" id="iwantgeneral" type="radio"> General Chat
 										</label>
 									</div>
 								</div>
-								<br/><br/>
+								<br/>
 								<button id="loginsubmit" type="submit" disabled class="btn btn-default btn-block">Connecting...</button>
+								<button id="bigchatsubmit" type="button" disabled class="btn btn-default btn-block">Connecting...</button>
 							</div>
 						</form>
 					</div>
@@ -99,10 +101,13 @@
 	  		<form id="chatbar" action="">
 				<div class="form-group">
 					<div class="input-group">
+						<span class="input-group-btn">
+							<button id="dcbutton" class="btn btn-danger" data-really-text="Really?" type="button" disabled>New Chat</button>
+						</span>
 						<input id="m" type="text" autocomplete="off" class="form-control">
 						<span class="input-group-btn">
 							<button id="sendbutton" class="btn btn-default" type="submit" disabled>Send</button>
-							<button id="dcbutton" class="btn btn-danger" type="button" disabled>New Chat</button>
+							<button id="mutebutton" class="btn btn-default"><i class="fa fa-volume-up"></i></button>
 						</span>
 					</div>
 				</div>
