@@ -39,11 +39,11 @@ $(document).ready(function()
 
 	socket.on('connect', function()
 	{
-		$('#loginsubmit').prop('disabled', false).removeClass('btn-default').addClass('btn-success').text('Start Matchmaking');
-		$('#bigchatsubmit').prop('disabled', false).removeClass('btn-default').addClass('btn-primary').text('or join the big group chat!');
+		$('#loginsubmit').prop('disabled', false).removeClass('btn-default').addClass('btn-success').text('Start Matchmaking!');
+		$('#bigchatsubmit').prop('disabled', false).removeClass('btn-default').addClass('btn-primary').text('Or join the big group chat!');
 		$('#loginform').submit(function()
 		{
-			var nick = $('#nickname').val();
+			var nick = $('<div/>').text(($('#nickname').val())).html();
 
 			if($('#iammale').parent().hasClass('active'))
 				var gender = 'male';
@@ -84,7 +84,7 @@ $(document).ready(function()
 		{
 			bigchat = true;
 
-			var nick = $('#nickname').val();
+			var nick = $('<div/>').text(($('#nickname').val())).html();
 
 			if($('#iammale').parent().hasClass('active'))
 				var gender = 'male';
@@ -131,7 +131,7 @@ $(document).ready(function()
 				clearInterval(interval);
 				interval = setInterval(changeTitle, 1000);
 			}
-			$('#messages').append($('<li>').text(moment().format('h:mm:ss a') + ": " + msg));
+			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
 			$('body').animate({ scrollTop: $('body')[0].scrollHeight}, 500);
 		});
 
@@ -145,7 +145,7 @@ $(document).ready(function()
 				clearInterval(interval);
 				interval = setInterval(changeTitle, 1000);
 			}
-			$('#messages').append($('<li>').text(moment().format('h:mm:ss a') + ": " + msg).css('font-style', 'italic').css('font-weight', 'bold'));
+			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg).css('font-style', 'italic').css('font-weight', 'bold'));
 			$('body').animate({ scrollTop: $('body')[0].scrollHeight}, 500);
 		});
 
@@ -154,7 +154,7 @@ $(document).ready(function()
 			chatting = false;
 			$('#sendbutton').attr('disabled', true);
 			var themsg = '[INFO] ' + nick + ' has disconnected from you.';
-			$('#messages').append($('<li>').text(moment().format('h:mm:ss a') + ": " + themsg).css('font-style', 'italic').css('font-weight', 'bold'));
+			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + themsg).css('font-style', 'italic').css('font-weight', 'bold'));
 		});
 
 		socket.on('disconnect', function()
@@ -215,7 +215,7 @@ $(document).ready(function()
 				if(chatting)
 				{
 					var msg = "[INFO] You have disconnected from " + lastChat + ".";
-					$('#messages').append($('<li>').text(moment().format('h:mm:ss a') + ": " + msg).css('font-style', 'italic').css('font-weight', 'bold'));
+					$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg).css('font-style', 'italic').css('font-weight', 'bold'));
 				}
 				chatting = false;
 			}
@@ -247,7 +247,7 @@ $(document).ready(function()
 		$('#iamtist').parent().html('<input name="iamrole" id="iamtist" type="radio"> ' + "Hypnotist (" + stats.role.tist + ")");
 		$('#iamsub').parent().html('<input name="iamrole" id="iamsub" type="radio"> ' + "Subject (" + stats.role.sub + ")");
 		$('#iamswitch').parent().html('<input name="iamrole" id="iamswitch" type="radio"> ' + "Switch (" + stats.role.switchrole + ")");
-		$('#bigchatsubmit').text('or join the big group chat! (' + stats.bigroom + ")");
+		$('#bigchatsubmit').html('or join the big group chat! (' + stats.bigroom + ")");
 	});
 
 	$(window).blur(function()
@@ -259,7 +259,7 @@ $(document).ready(function()
 	{
 		notify = false;
     	clearInterval(interval);
-    	$("title").text(oldTitle);
+    	$("title").html(oldTitle);
 	});
 });
 
