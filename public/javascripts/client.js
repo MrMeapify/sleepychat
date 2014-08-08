@@ -259,7 +259,7 @@ $(document).ready(function()
 	{
 		notify = false;
     	clearInterval(interval);
-    	$("title").html(oldTitle);
+    	$("title").text(oldTitle);
 	});
 });
 
