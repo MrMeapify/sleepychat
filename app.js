@@ -269,13 +269,13 @@ io.on('connection', function(socket)
 function alterForCommands(s, nick) {
     var me = /\/me( .*)/g; //Matches "/me " followed by anything
     var italics = /\*([^*]+)\*/g; // matches stuff between * *
-    var link = /((?:[\w\-_.])+\.[\w\-_]+\/(?:[\w\-_()\/]*))/g //matches "google.com/" and "blog.google.com/" but not P.H.D
-    var subreddit = /(\/r\/\A\s*[\d\.]+\w{0,3}\s*\Z)/g //matches /r/Hello
+    var link = /(?:http:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/(?:[\w\-_()\/]*))/g //matches "google.com/" and "blog.google.com/" but not P.H.D
+    var subreddit = /\/r\/[A-Za-z0-9][A-Za-z0-9_]{2,20}/g //matches /r/Hello
     ans = s
     
     var ans = ans.replace(italics, "<i>$1</i>");
-    var ans = ans.replace(link, "<a href='$1'>$1</i>");
-    var ans = ans.replace(subreddit, "<a href='reddit.com/$1'>$1</a>");
+    var ans = ans.replace(link, "<a href='http://$&'>$&</i>");
+    var ans = ans.replace(subreddit, "<a href='http://www.reddit.com$&'>$&</a>");
     if (me.test(ans)){
     	return nick + (ans.replace(me, '$1'));
     }
