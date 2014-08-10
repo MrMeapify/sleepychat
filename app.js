@@ -53,7 +53,7 @@ io.on('connection', function(socket)
 				for(var x = 0; x < usercopy.length; x++)
 				{
 					if(usercopy[x].inBigChat)
-						list += usercopy[x].nick + " ";
+						list += "'" + usercopy[x].nick + "' ";
 				}
 				socket.emit('information', "[INFO] Users in the chatroom: [ " + list + "]");
 			}
@@ -230,7 +230,7 @@ io.on('connection', function(socket)
 				for(var x = 0; x < usercopy.length; x++)
 				{
 					if(usercopy[x].inBigChat)
-						list += usercopy[x].nick + " ";
+						list += "'" + usercopy[x].nick + "' ";
 				}
 				socket.emit('information', "[INFO] Users in the chatroom: [ " + list + "]");
 			}
