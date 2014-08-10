@@ -138,7 +138,7 @@ $(document).ready(function()
 			else
 				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
 
-			$('body').animate({ scrollTop: $('body')[0].scrollHeight}, 500);
+			scrollDown();
 		});
 
 		socket.on('information', function(msg)
@@ -152,7 +152,7 @@ $(document).ready(function()
 				interval = setInterval(changeTitle, 1000);
 			}
 			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
-			$('body').animate({ scrollTop: $('body')[0].scrollHeight}, 500);
+			scrollDown();
 		});
 
 		socket.on('partnerDC', function(nick)
@@ -161,6 +161,7 @@ $(document).ready(function()
 			$('#sendbutton').attr('disabled', true);
 			var themsg = '[INFO] ' + nick + ' has disconnected from you.';
 			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + themsg + "</span>"));
+			scrollDown();
 		});
 
 		socket.on('disconnect', function()
@@ -174,6 +175,7 @@ $(document).ready(function()
 				interval = setInterval(changeTitle, 1000);
 			}
 			$('#messages').append($('<li>').text(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Sorry! You seem to have been disconnected from the server. Please reload the page and try again.</span>"));
+			scrollDown();
 		});
 	});
 
@@ -222,6 +224,7 @@ $(document).ready(function()
 				{
 					var msg = "[INFO] You have disconnected from " + lastChat + ".";
 					$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
+					scrollDown();
 				}
 				chatting = false;
 			}
@@ -268,6 +271,11 @@ $(document).ready(function()
     	$("title").text(oldTitle);
 	});
 });
+
+function scrollDown()
+{
+	$('body,html').stop(true,true).animate({ scrollTop: $('body,html')[0].scrollHeight}, 500);
+}
 
 window.onbeforeunload = confirmExit;
 function confirmExit()
