@@ -41,7 +41,13 @@ io.on('connection', function(socket)
 		else
 		{
 			data.socket = socket;
-			nick = data.nick
+			nick = data.nick;
+			nick = nick.replace(/&/g, "&#38;"); 	//escape &
+			nick = nick.replace(/</g, "&lt;");  	//escape <
+			nick = nick.replace(/>/g, "&gt;");  	//escape >
+			nick = nick.replace(/"/g, "&quot;");	//escape "
+			nick = nick.replace(/'/g, "&#39;"); 	//escape '
+			data.nick = nick;
 			users.push(data);
 			socket.emit('loggedIn');
 			if(data.inBigChat)
