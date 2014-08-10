@@ -132,8 +132,12 @@ $(document).ready(function()
 				clearInterval(interval);
 				interval = setInterval(changeTitle, 1000);
 			}
-			if (who !== "me") $('#messages').append($('<li style="background: #eee;">').html(moment().format('h:mm:ss a') + ": " + msg));
-			else            $('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
+
+			if (who !== "me")
+				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg).addClass('self'));
+			else
+				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
+
 			$('body').animate({ scrollTop: $('body')[0].scrollHeight}, 500);
 		});
 
@@ -147,7 +151,7 @@ $(document).ready(function()
 				clearInterval(interval);
 				interval = setInterval(changeTitle, 1000);
 			}
-			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg).css('font-style', 'italic').css('font-weight', 'bold'));
+			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
 			$('body').animate({ scrollTop: $('body')[0].scrollHeight}, 500);
 		});
 
@@ -156,7 +160,7 @@ $(document).ready(function()
 			chatting = false;
 			$('#sendbutton').attr('disabled', true);
 			var themsg = '[INFO] ' + nick + ' has disconnected from you.';
-			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + themsg).css('font-style', 'italic').css('font-weight', 'bold'));
+			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + themsg + "</span>"));
 		});
 
 		socket.on('disconnect', function()
@@ -169,7 +173,7 @@ $(document).ready(function()
 				clearInterval(interval);
 				interval = setInterval(changeTitle, 1000);
 			}
-			$('#messages').append($('<li>').text(moment().format('h:mm:ss a') + ": " + "[INFO] Sorry! You seem to have been disconnected from the server. Please reload the page and try again.").css('font-style', 'italic').css('font-weight', 'bold'));
+			$('#messages').append($('<li>').text(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Sorry! You seem to have been disconnected from the server. Please reload the page and try again.</span>"));
 		});
 	});
 
@@ -217,7 +221,7 @@ $(document).ready(function()
 				if(chatting)
 				{
 					var msg = "[INFO] You have disconnected from " + lastChat + ".";
-					$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg).css('font-style', 'italic').css('font-weight', 'bold'));
+					$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
 				}
 				chatting = false;
 			}

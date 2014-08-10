@@ -315,7 +315,7 @@ function alterForCommands(s, nick)
     var ans = ans.replace(subreddit, "<a target='_blank' href='http://www.reddit.com$&'>$&</a>");
     var ans = ans.replace(emoticons, "<strong>$&</strong>");
     if (me.test(ans))
-		return "*" + nick + (ans.replace(me, '$1')) + "*";
+		return "<span style='font-weight: 300'>*" + nick + (ans.replace(me, '$1')) + "*</span>";
     else
     	return '&lt;' + nick + '&gt; ' + ans;
 }
