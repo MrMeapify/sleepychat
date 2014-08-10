@@ -219,7 +219,7 @@ io.on('connection', function(socket)
 			{
 				try
 				{
-					io.to('bigroom').emit('chat message', alterForCommands(message, nick));
+					io.to('bigroom').emit('chat message', alterForCommands(message, nick), "me");
 				}
 				catch(e)
 				{
@@ -232,8 +232,8 @@ io.on('connection', function(socket)
 				{
 					//user.partner.socket.emit('chat message', '<' + nick + '> ' + message);
 					//socket.emit('chat message', '<' + nick + '> ' + message);
-					user.partner.socket.emit('chat message',  alterForCommands(message, nick));
-					socket.emit('chat message', alterForCommands(message, nick));
+					user.partner.socket.emit('chat message',  alterForCommands(message, nick), "them");
+					socket.emit('chat message', alterForCommands(message, nick), "me");
 				}
 				catch(e)
 				{

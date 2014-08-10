@@ -6,8 +6,6 @@
 
 .body #messages { list-style-type: none; margin: 0; padding: 0; padding-bottom: 40px;}
 
-.body #messages li { padding: 5px 10px; }
-
-.body #messages li:nth-child(odd) { background: #eee; }
+.body #messages li { padding: 5px 10px; font-size: 1.4rem;}
 
 .modal-body .input-group { margin-bottom: 20px; }

@@ -121,8 +121,9 @@ $(document).ready(function()
 			return false;
 		});
 
-		socket.on('chat message', function(msg)
+		socket.on('chat message', function(msg, who)
 		{
+			console.log(who)
 			if(notify)
 			{
 				if(sound)
@@ -131,7 +132,8 @@ $(document).ready(function()
 				clearInterval(interval);
 				interval = setInterval(changeTitle, 1000);
 			}
-			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
+			if (who !== "me") $('#messages').append($('<li style="background: #eee;">').html(moment().format('h:mm:ss a') + ": " + msg));
+			else            $('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
 			$('body').animate({ scrollTop: $('body')[0].scrollHeight}, 500);
 		});
 
