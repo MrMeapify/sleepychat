@@ -3,7 +3,7 @@ var router = express.Router();
 
 router.get('/', function(req, res)
 {
-	res.render('index', { title: 'Sleepychat', version: 'Development Build 7' });
+	res.render('index', { title: 'Sleepychat', version: 'Development Build 8' });
 });
 
 module.exports = router;
