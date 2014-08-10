@@ -185,7 +185,8 @@ io.on('connection', function(socket)
 		}
 		catch(e)
 		{
-			// This prevents us from crashing.
+			// This prevents us from crashing. 
+			//Everybody, I just want you to know, this was MrMeapify's idea
 		}
 	});
 
@@ -194,15 +195,22 @@ io.on('connection', function(socket)
 		var user = getUserByNick(nick);
 		if(data.message != "" && user)
 		{
-			if(data.message.lastIndexOf('/server ' + secret, 0) === 0)
+			//escape html
+			message=data.message;
+			message = message.replace(/&/g, "&#38;"); //escape &
+			message = message.replace(/</g, "&lt;");  //escape <
+			message = message.replace(/>/g, "&gt;");  //escape >
+			message = message.replace(/"/g, "&quot;");//escape "
+			message = message.replace(/'/g, "&#39;"); //escape '
+			if(message.lastIndexOf('/server ' + secret, 0) === 0)
 			{
 				var command = '/server ' + secret + ' ';
-				io.sockets.emit('information', "[ADMIN] " + data.message.substring(command.length));
+				io.sockets.emit('information', "[ADMIN] " + message.substring(command.length));
 			}
-			else if(data.message.lastIndexOf('/kick ' + secret, 0) === 0)
+			else if(message.lastIndexOf('/kick ' + secret, 0) === 0)
 			{
 				var command = '/kick ' + secret + ' ';
-				var tokick = getUserByNick(data.message.substring(command.length));
+				var tokick = getUserByNick(message.substring(command.length));
 				io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been kicked by the admin.");
 				tokick.socket.leave('bigroom');
 				tokick.socket.conn.close();
@@ -211,23 +219,25 @@ io.on('connection', function(socket)
 			{
 				try
 				{
-					io.to('bigroom').emit('chat message', '<' + nick + '> ' + data.message);
+					io.to('bigroom').emit('chat message', alterForCommands(message, nick), "me");
 				}
 				catch(e)
 				{
-					console.log('Bad message. ' + nick + ' ... ' + data.message);
+					console.log('Bad message. ' + nick + ' ... ' + message + e);
 				}
 			}
 			else
 			{
 				try
 				{
-					user.partner.socket.emit('chat message', '<' + nick + '> ' + data.message);
-					socket.emit('chat message', '<' + nick + '> ' + data.message);
+					//user.partner.socket.emit('chat message', '<' + nick + '> ' + message);
+					//socket.emit('chat message', '<' + nick + '> ' + message);
+					user.partner.socket.emit('chat message',  alterForCommands(message, nick), "them");
+					socket.emit('chat message', alterForCommands(message, nick), "me");
 				}
 				catch(e)
 				{
-					console.log('Bad message. ' + nick + ' ... ' + data.message);
+					console.log('Bad message. ' + nick + ' ... ' + message);
 				}
 			}
 		}
@@ -253,6 +263,36 @@ io.on('connection', function(socket)
 		}
 	});
 });
+
+
+
+function link_replacer(match, p1, p2, offset, string) {
+    if ((p2 == '.jpg') || (p2 == '.jpeg') || (p2 == '.gif') || (p2 == '.png')) {a = "<a href='http://"+p1+"'><img src='http://"+p1+"' height='250'/></a>"}
+    else {a = "<a target='_blank' href='http://"+p1+"'>"+p1+"</i>"};
+    return a 
+};
+
+
+function alterForCommands(s, nick) {
+    var me = /\/me( .*)/g; //Matches "/me " followed by anything
+    var italics = /\*([^*]+)\*/g; // matches stuff between * *
+    var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/]*(\.[\w\-_()]+)?)/g //matches "google.com/" and "blog.google.com/" but not P.H.D
+    var subreddit = /\/r\/[A-Za-z0-9][A-Za-z0-9_]{2,20}/g //matches /r/Hello
+    var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:c)|(?:c\:)|(?:\:O)|(?:\;\))|(?:\;\())/g
+    ans = s
+    
+    var ans = ans.replace(italics, "<i>$1</i>");
+    var ans = ans.replace(link, link_replacer);
+    var ans = ans.replace(subreddit, "<a target='_blank' href='http://www.reddit.com$&'>$&</a>");
+    var ans = ans.replace(emoticons, "<strong>$&</strong>");
+    if (me.test(ans)){
+    	return nick + (ans.replace(me, '$1'));
+    }
+    else {
+    	return '&lt;' + nick + '&gt; ' + ans;
+    }
+}
+
 
 function getUserByNick(nick)
 {
