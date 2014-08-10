@@ -2,6 +2,7 @@ var socket = io();
 var loggedIn = true;
 var lastChat = "";
 var chatting = false;
+var nick = '';
 var isOldTitle = true;
 var oldTitle = "Sleepychat";
 var newTitle = "*** New message! ***";
@@ -84,7 +85,7 @@ $(document).ready(function()
 		{
 			bigchat = true;
 
-			var nick = $('<div/>').text(($('#nickname').val())).html();
+			var nick2 = $('<div/>').text(($('#nickname').val())).html();
 
 			if($('#iammale').parent().hasClass('active'))
 				var gender = 'male';
@@ -116,14 +117,15 @@ $(document).ready(function()
 			else
 				var type = 'either';
 
-			socket.emit('login', { nick: nick, gender: gender, role: role, chatwith: chatwith, type: type, inBigChat: true });
+			nick = nick2;
+
+			socket.emit('login', { nick: nick2, gender: gender, role: role, chatwith: chatwith, type: type, inBigChat: true });
 			$('#login-modal').modal('hide');
 			return false;
 		});
 
 		socket.on('chat message', function(msg, who)
 		{
-			console.log(who)
 			if(notify)
 			{
 				if(sound)
@@ -133,10 +135,15 @@ $(document).ready(function()
 				interval = setInterval(changeTitle, 1000);
 			}
 
-			if (who !== "me")
-				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg).addClass('self'));
-			else
-				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
+			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
+			if (who === "me")
+			{
+				$('#messages > li').filter(':last').addClass('self');
+			}
+			else if(who === "eval" && msg.indexOf(nick) != -1)
+			{
+				$('#messages > li').filter(':last').addClass('self');
+			}
 
 			scrollDown();
 		});

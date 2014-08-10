@@ -8,8 +8,8 @@
 
 .body #messages li { padding: 5px 10px; font-size: 1.4rem;}
 
-.body #messages li .self { background: #eee; }
-
 .body #messages .information { font-style: italic; font-weight: bold; }
 
 .modal-body .input-group { margin-bottom: 20px; }
+
+li.self { background: #eee; }

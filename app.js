@@ -244,7 +244,7 @@ io.on('connection', function(socket)
 			{
 				try
 				{
-					io.to('bigroom').emit('chat message', alterForCommands(message, nick), "me");
+					io.to('bigroom').emit('chat message', alterForCommands(message, nick), "eval");
 				}
 				catch(e)
 				{
