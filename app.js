@@ -215,6 +215,17 @@ io.on('connection', function(socket)
 				tokick.socket.leave('bigroom');
 				tokick.socket.conn.close();
 			}
+			else if(message.lastIndexOf('/list', 0) === 0 && user.inBigChat)
+			{
+				var usercopy = users;
+				var list = "";
+				for(var x = 0; x < usercopy.length; x++)
+				{
+					if(usercopy[x].inBigChat)
+						list += usercopy[x].nick + " ";
+				}
+				socket.emit('information', "[INFO] Users in the chatroom: [ " + list + "]");
+			}
 			else if(user.inBigChat)
 			{
 				try
