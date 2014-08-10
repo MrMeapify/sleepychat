@@ -276,7 +276,7 @@ function link_replacer(match, p1, p2, offset, string) {
 function alterForCommands(s, nick) {
     var me = /\/me( .*)/g; //Matches "/me " followed by anything
     var italics = /\*([^*]+)\*/g; // matches stuff between * *
-    var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/]*(\.[\w\-_()]+)?)/g //matches "google.com/" and "blog.google.com/" but not P.H.D
+    var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/]*(\.[\w\-_()]+)?(?:[\-\+=&;%@\.\w?#\/]*))/gi //matches "google.com/" and "blog.google.com/" and but not P.H.D. For details, see http://pastebin.com/8zQJmt9N
     var subreddit = /\/r\/[A-Za-z0-9][A-Za-z0-9_]{2,20}/g //matches /r/Hello
     var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:c)|(?:c\:)|(?:\:O)|(?:\;\))|(?:\;\())/g
     ans = s
