@@ -300,6 +300,11 @@ function changeTitle()
     isOldTitle = !isOldTitle;
 }
 
+$("#bugsandfeatures").click(function()
+{
+	window.location = "https://github.com/MrMeapify/sleepychat/issues";
+});
+
 $('#randomnick').click(function()
 {
 	var adjs = ['Good', 'Mindless', 'Little', 'Tired', 'Wise', 'Dreamy', 'Sleepy', 'Blank', 'Enchanted', 'Enchanting', 'Entranced', 'Hypnotic', 'Bad', 'The', 'Hypnotized'];
