@@ -229,6 +229,26 @@ io.on('connection', function(socket)
 				tokick.socket.leave('bigroom');
 				tokick.socket.conn.close();
 			}
+			else if(message.lastIndexOf('/coinflip', 0) === 0)
+			{
+				var result = "Heads";
+				if(Math.random()>0.5)
+				{
+					result = "Tails";
+				}
+				if(user.inBigChat)
+				{
+					io.to('bigroom').emit('chat message', alterForCommands(message, nick), "eval");
+					io.to('bigroom').emit('information', "[COINFLIP] " + result);
+				}
+				else
+				{
+					user.partner.socket.emit('chat message',  alterForCommands(message, nick), "them");
+					socket.emit('chat message', alterForCommands(message, nick), "me");
+					user.partner.socket.emit('information', "[COINFLIP] " + result);
+					socket.emit('information', "[COINFLIP] " + result);
+				}
+			}
 			else if(message.lastIndexOf('/list', 0) === 0 && user.inBigChat)
 			{
 				var usercopy = users;
