@@ -316,7 +316,7 @@ function link_replacer(match, p1, p2, offset, string)
     if ((p2 == '.jpg') || (p2 == '.jpeg') || (p2 == '.gif') || (p2 == '.png'))
 		a = "<a href='http://"+p1+"'><img src='http://"+p1+"' height='250'/></a>";
     else
-		a = "<a target='_blank' href='http://"+p1+"'>"+p1+"</i>";
+		a = "<a target='_blank' href='http://"+p1+"'>"+p1+"</a>";
     return a;
 };
 
