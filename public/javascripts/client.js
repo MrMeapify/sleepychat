@@ -130,7 +130,10 @@ $(document).ready(function()
 			{
 				if(sound)
 					snd.play();
-				newTitle = "*** " + lastChat + " messaged you! ***";
+				if(bigchat)
+					newTitle = "*** People are talking! ***";
+				else
+					newTitle = "*** " + lastChat + " messaged you! ***";
 				clearInterval(interval);
 				interval = setInterval(changeTitle, 1000);
 			}
