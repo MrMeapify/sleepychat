@@ -4,6 +4,7 @@ var server = require('http').Server(app);
 var path = require('path');
 var favicon = require('static-favicon');
 var logger = require('morgan');
+var crypto = require('crypto');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var io = require('socket.io')(server);
@@ -16,6 +17,7 @@ server.listen(Number(process.env.PORT || 5000));
 
 var index = require('./routes/index');
 var stats = require('./routes/stats');
+var privateroom = require('./routes/privateroom');
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -28,10 +30,12 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 var users = [];
+var privaterooms = [];
 
 io.on('connection', function(socket)
 {
 	var nick = "";
+	var room = null;
 	
 	socket.on('login', function(data)
 	{
@@ -62,6 +66,10 @@ io.on('connection', function(socket)
 			nick = nick.replace(/"/g, "&quot;");	//escape "
 			nick = nick.replace(/'/g, "&#39;"); 	//escape '
 			data.nick = nick;
+			var hasher = crypto.createHash('sha1');
+			hasher.update(nick + new Date().getTime() + "IAmA Salt AMA");
+			data.token = hasher.digest('hex');
+			console.log(nick + ' ' + data.token);
 			users.push(data);
 			socket.emit('loggedIn');
 			if(data.inBigChat)
@@ -83,6 +91,37 @@ io.on('connection', function(socket)
 			}
 		}
 
+	});
+	
+	socket.on('joinroom', function(roomtoken, usertoken)
+	{
+		for(var x = 0; x < privaterooms.length; x++)
+		{
+			if(privaterooms[x].token === roomtoken)
+			{
+				room = privaterooms[x];
+			}
+		}
+		try
+		{
+			console.log('Lookup user by ' + usertoken + "...");
+			var finduser = getUserByToken(usertoken);
+			console.log(finduser.nick);
+			nick = finduser.nick;
+			if(room)
+			{
+				socket.join(room.token);
+				io.to(room.token).emit('information', "[INFO] " + nick + " has joined.");
+			}
+			else
+			{
+				console.log('bad room');
+			}
+		}
+		catch(e)
+		{
+			console.log('Problems joining a private room. ' + e);
+		}
 	});
 
 	socket.on('getNewChat', function(data)
@@ -235,6 +274,73 @@ io.on('connection', function(socket)
 				var command = '/server ' + secret + ' ';
 				io.sockets.emit('information', "[ADMIN] " + message.substring(command.length));
 			}
+			else if(message.lastIndexOf('/room ', 0) === 0)
+			{
+				socket.emit('chat message', alterForCommands(message, nick));
+				var userWanted = getUserByNick(message.substring(6));
+				if(!userWanted)
+				{
+					socket.emit('information', "[INFO] That user was not found.");
+				}
+				else if(userWanted === user)
+				{
+					socket.emit('information', "[INFO] You can't start a chat with yourself!");
+				}
+				else
+				{
+					var roomfound = null;
+					for(var x = 0; x < privaterooms.length; x++)
+					{
+						var person1 = false;
+						var person2 = false;
+						for(var y = 0; y < privaterooms[x].users.length; y++)
+						{
+							if(privaterooms[x].users[y].nick === nick)
+							{
+								person1 = true;
+							}
+							if(privaterooms[x].users[y].token === userWanted.token)
+							{
+								person2 = true;
+							}
+						}
+						if(person1 && person2)
+						{
+							roomfound = privaterooms[x];
+						}
+					}
+					if(roomfound)
+					{
+						socket.emit('information', "[INFO] Joining " + userWanted.nick + "'s room...");
+						socket.emit('openroom', { roomtoken: roomfound.token, usertoken: user.token });
+					}
+					else
+					{
+						var hasher = crypto.createHash('sha1');
+						hasher.update(user.nick + userWanted.nick + new Date().getTime() + "IAmA Pepper AMA");
+						var newroom =
+						{
+							users: [user, userWanted],
+							token: hasher.digest('hex'),
+							lastchat: new Date().getTime()
+						};
+						privaterooms.push(newroom);
+						userWanted.socket.emit('information', "[INFO] " + nick + " would like to chat with you privately!");
+						userWanted.socket.emit('openroom', { roomtoken: newroom.token, usertoken: userWanted.token });
+						socket.emit('information', "[INFO] Request sent to " + userWanted.nick + ".");
+						socket.emit('openroom', { roomtoken: newroom.token, usertoken: user.token });
+					}
+				}
+			}
+			else if(message.lastIndexOf('/close', 0) === 0 && room)
+			{
+				try
+				{
+					privaterooms.remove(room);
+					io.to(room.token).emit('information', "[INFO] " + nick + " has closed the room.");
+				}
+				catch(e) {}
+			}
 			else if(message.lastIndexOf('/kick ' + secret, 0) === 0)
 			{
 				var command = '/kick ' + secret + ' ';
@@ -250,7 +356,12 @@ io.on('connection', function(socket)
 				{
 					result = "Tails";
 				}
-				if(user.inBigChat)
+				if(room)
+				{
+					io.to(room.token).emit('chat message', alterForCommands(message, nick), "eval");
+					io.to(room.token).emit('information', "[COINFLIP] " + result);
+				}
+				else if(user.inBigChat)
 				{
 					io.to('bigroom').emit('chat message', alterForCommands(message, nick), "eval");
 					io.to('bigroom').emit('information', "[COINFLIP] " + result);
@@ -276,6 +387,7 @@ io.on('connection', function(socket)
 			}
 			else if(message.lastIndexOf('/help', 0) === 0)
 			{
+				socket.emit('information', "[INFO] ~~~");
 				socket.emit('information', "[INFO] Welcome to Sleepychat!");
 				socket.emit('information', "[INFO] Sleepychat was created by MrMeapify in an attempt to solve the problems that chat sites before it posed the hypnosis community.");
 				socket.emit('information', "[INFO] ");
@@ -284,11 +396,28 @@ io.on('connection', function(socket)
 				socket.emit('information', "[INFO] -- /coinflip -- Publicly flips a coin.");
 				socket.emit('information', "[INFO] -- /names -- While in the big chatroom, this will list the names of every current user in the chatroom with you.");
 				socket.emit('information', "[INFO] -- /me did a thing -- Styles your message differently to indicate that you're doing an action.");
+				socket.emit('information', "[INFO] -- /room user -- Requests a private chat with the specified user.");
+				socket.emit('information', "[INFO] ~~~");
 			}
 			else if(message.lastIndexOf('/', 0) === 0 && !(message.lastIndexOf('/me', 0) === 0))
 			{
 				socket.emit('chat message', alterForCommands(message, nick));
 				socket.emit('information', "[INFO] Command not recognized. Try /help for a list of commands.");
+			}
+			else if(room)
+			{
+				console.log('outputting message');
+				try
+				{
+					io.to(room.token).emit('chat message', alterForCommands(message, nick), "eval");
+					privaterooms.remove(room);
+					room.lastchat = new Date().getTime();
+					privaterooms.push(room);
+				}
+				catch(e)
+				{
+					console.log('Bad message. ' + nick + ' ... ' + message + e);
+				}
 			}
 			else if(user.inBigChat)
 			{
@@ -320,21 +449,28 @@ io.on('connection', function(socket)
 
 	socket.on('disconnect', function()
 	{
-		var user = getUserByNick(nick);
-		if(user)
+		if(room)
 		{
-			if(user.partner)
+			io.to(room.token).emit('information', "[INFO] " + nick + " has left.");
+		}
+		else
+		{
+			var user = getUserByNick(nick);
+			if(user)
 			{
-				users.remove(user.partner);
-				delete user.partner.partner;
-				users.push(user.partner);
-				user.partner.socket.emit('partnerDC', user.nick);
+				if(user.partner)
+				{
+					users.remove(user.partner);
+					delete user.partner.partner;
+					users.push(user.partner);
+					user.partner.socket.emit('partnerDC', user.nick);
+				}
+				if(user.inBigChat)
+				{
+					io.to('bigroom').emit('information', "[INFO] " + nick + " has left.");
+				}
+				users.remove(user);
 			}
-			if(user.inBigChat)
-			{
-				io.to('bigroom').emit('information', "[INFO] " + nick + " has left.");
-			}
-			users.remove(user);
 		}
 	});
 });
@@ -383,6 +519,19 @@ function getUserByNick(nick)
 	return null;
 }
 
+function getUserByToken(token)
+{
+	var userscopy = users;
+	for(var x = 0; x < userscopy.length; x++)
+	{
+		if(userscopy[x].token === token)
+		{
+			return userscopy[x];
+		}
+	}
+	return null;
+}
+
 setInterval(function()
 {
 	var usercopy = users;
@@ -418,8 +567,28 @@ setInterval(function()
     io.sockets.emit('stats', { gender: { males: males, females: females, undisclosed: undisclosed }, role: { tist: tist, sub: sub, switchrole: switchrole }, bigroom: bigroom });
 }, 1000);
 
+setInterval(function()
+{
+	var roomscopy = privaterooms;
+	for(var x = 0; x < roomscopy.length; x++)
+	{
+		var room = roomscopy[x];
+		if(room.lastchat < new Date().getTime() - 43200)
+		{
+			privaterooms.remove(room);
+		}
+	}
+}, 3600);
+
+app.use(function(req,res,next)
+{
+	req.rooms = privaterooms;
+	next();
+});
+
 app.use('/', index);
 app.use('/' + secret, stats);
+app.use('/room', privateroom);
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next)
