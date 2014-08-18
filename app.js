@@ -37,6 +37,7 @@ io.on('connection', function(socket)
 		if(getUserByNick(nick))
 		{
 			socket.emit('information', "[INFO] The nickname you chose was in use. Please reload the page and choose another.");
+			socket.conn.close();
 		}
 		else
 		{
