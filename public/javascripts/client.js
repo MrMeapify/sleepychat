@@ -124,6 +124,11 @@ $(document).ready(function()
 			return false;
 		});
 		
+		socket.on('nickupdate', function(newnick)
+		{
+			nick = newnick;
+		});
+		
 		socket.on('openroom', function(data)
 		{
 			var url = window.location.protocol + "//" + window.location.host + "/room/" + data.roomtoken + "/" + data.usertoken;

@@ -55,6 +55,7 @@ io.on('connection', function(socket)
 			if(data.nick === "MrMeapify " + secret)
 			{
 				nick = "MrMeapify";
+				socket.emit('nickupdate', nick);
 			}
 			else
 			{

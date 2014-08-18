@@ -68,6 +68,11 @@ $(document).ready(function()
 			
 			scrollDown();
 		});
+		
+		socket.on('nickupdate', function(newnick)
+		{
+			nick = newnick;
+		});
 
 		socket.on('information', function(msg)
 		{
