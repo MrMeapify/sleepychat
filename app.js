@@ -249,7 +249,7 @@ io.on('connection', function(socket)
 					socket.emit('information', "[COINFLIP] " + result);
 				}
 			}
-			else if(message.lastIndexOf('/list', 0) === 0 && user.inBigChat)
+			else if((message.lastIndexOf('/list', 0) === 0 || message.lastIndexOf('/names', 0) === 0) && user.inBigChat)
 			{
 				var usercopy = users;
 				var list = "";
@@ -259,6 +259,22 @@ io.on('connection', function(socket)
 						list += "'" + usercopy[x].nick + "' ";
 				}
 				socket.emit('information', "[INFO] Users in the chatroom: [ " + list + "]");
+			}
+			else if(message.lastIndexOf('/help', 0) === 0)
+			{
+				socket.emit('information', "[INFO] Welcome to Sleepychat!");
+				socket.emit('information', "[INFO] Sleepychat was created by MrMeapify in an attempt to solve the problems that chat sites before it posed the hypnosis community.");
+				socket.emit('information', "[INFO] ");
+				socket.emit('information', "[INFO] While in chat, you can use several commands:");
+				socket.emit('information', "[INFO] -- /help -- Launches this message.");
+				socket.emit('information', "[INFO] -- /coinflip -- Publicly flips a coin.");
+				socket.emit('information', "[INFO] -- /names -- While in the big chatroom, this will list the names of every current user in the chatroom with you.");
+				socket.emit('information', "[INFO] -- /me did a thing -- Styles your message differently to indicate that you're doing an action.");
+			}
+			else if(message.lastIndexOf('/', 0) === 0 && !(message.lastIndexOf('/me', 0) === 0))
+			{
+				socket.emit('chat message', alterForCommands(message, nick));
+				socket.emit('information', "[INFO] Command not recognized. Try /help for a list of commands.");
 			}
 			else if(user.inBigChat)
 			{
@@ -326,7 +342,7 @@ function alterForCommands(s, nick)
     var italics = /\*([^*]+)\*/g; // Matches stuff between * *
     var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/]*(\.[\w\-_()]+)?(?:[\-\+=&;%@\.\w?#\/]*))/gi; //matches "google.com/" and "blog.google.com/" and but not P.H.D. For details, see http://pastebin.com/8zQJmt9N
     var subreddit = /\/r\/[A-Za-z0-9][A-Za-z0-9_]{2,20}/g; //matches /r/Hello
-    var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:c)|(?:c\:)|(?:\:O)|(?:\;\))|(?:\;\())/g;
+    var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:\:O)|(?:\;\))|(?:\;\())/g;
     ans = s;
     
     var ans = ans.replace(italics, "<i>$1</i>");
