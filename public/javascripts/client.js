@@ -290,7 +290,7 @@ function scrollDown()
 window.onbeforeunload = confirmExit;
 function confirmExit()
 {
-    if (chatting)
+    if (chatting || bigchat)
         return "Wait, you're still in a chat session!";
 }
 
