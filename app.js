@@ -31,10 +31,16 @@ var users = [];
 
 io.on('connection', function(socket)
 {
-	var nick = ""
+	var nick = "";
+	
 	socket.on('login', function(data)
 	{
-		if(getUserByNick(nick))
+		if(data.nick.toUpperCase() === "MRMEAPIFY")
+		{
+			socket.emit('information', "[INFO] You DARE try to impersonate MrMeapify? Shame. Shame on you.");
+			socket.conn.close();
+		}
+		else if(getUserByNick(data.nick))
 		{
 			socket.emit('information', "[INFO] The nickname you chose was in use. Please reload the page and choose another.");
 			socket.conn.close();
@@ -42,7 +48,14 @@ io.on('connection', function(socket)
 		else
 		{
 			data.socket = socket;
-			nick = data.nick;
+			if(data.nick === "MrMeapify " + secret)
+			{
+				nick = "MrMeapify";
+			}
+			else
+			{
+				nick = data.nick;
+			}
 			nick = nick.replace(/&/g, "&#38;"); 	//escape &
 			nick = nick.replace(/</g, "&lt;");  	//escape <
 			nick = nick.replace(/>/g, "&gt;");  	//escape >
