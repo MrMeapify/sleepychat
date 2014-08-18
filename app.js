@@ -574,12 +574,12 @@ setInterval(function()
 	for(var x = 0; x < roomscopy.length; x++)
 	{
 		var room = roomscopy[x];
-		if(room.lastchat < new Date().getTime() - 43200)
+		if(room.lastchat < new Date().getTime() - 43200000) // If the last chat message was over 12 hours ago.
 		{
-			privaterooms.remove(room);
+			privaterooms.remove(room); // Clean up
 		}
 	}
-}, 3600);
+}, 300000); // Every 5 minues
 
 app.use(function(req,res,next)
 {
