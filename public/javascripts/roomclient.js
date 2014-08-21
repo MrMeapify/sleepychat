@@ -61,7 +61,7 @@ $(document).ready(function()
 			{
 				$('#messages > li').filter(':last').addClass('self');
 			}
-			else if(who === "eval" && msg.indexOf(nick) != -1)
+			else if(who === "eval" && msg.lastIndexOf('<' + nick + '>', 0) === 0)
 			{
 				$('#messages > li').filter(':last').addClass('self');
 			}
