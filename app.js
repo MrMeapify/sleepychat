@@ -513,7 +513,7 @@ function getUserByNick(nick)
 	var userscopy = users;
 	for(var x = 0; x < userscopy.length; x++)
 	{
-		if(userscopy[x].nick == nick)
+		if(userscopy[x].nick.toUpperCase() === nick.toUpperCase())
 		{
 			return userscopy[x];
 		}
