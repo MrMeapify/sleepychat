@@ -160,7 +160,7 @@ $(document).ready(function()
 				$('#messages > li').filter(':last').addClass('self');
 			}
 			
-			if(msg.split('>')[1].substring(1).indexOf(nick) != -1)
+			if(bigchat && msg.split('>')[1].substring(1).indexOf(nick) != -1)
 			{
 				$('#messages > li').filter(':last').addClass('highlight');
 			}
