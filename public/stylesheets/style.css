@@ -13,3 +13,5 @@
 .modal-body .input-group { margin-bottom: 20px; }
 
 li.self { background: #eee; }
+
+li.highlight { background: #9cbcea; }

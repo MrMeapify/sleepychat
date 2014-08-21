@@ -151,13 +151,18 @@ $(document).ready(function()
 			}
 
 			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
-			if (who === "me")
+			if(who === "me")
 			{
 				$('#messages > li').filter(':last').addClass('self');
 			}
-			else if(who === "eval" && msg.indexOf(nick) != -1)
+			else if(who === "eval" && msg.lastIndexOf('<' + nick + '>', 0) === 0)
 			{
 				$('#messages > li').filter(':last').addClass('self');
+			}
+			
+			if(msg.split('>')[1].substring(1).indexOf(nick) != -1)
+			{
+				$('#messages > li').filter(':last').addClass('highlight');
 			}
 
 			scrollDown();
