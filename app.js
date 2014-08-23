@@ -281,7 +281,7 @@ io.on('connection', function(socket)
 				var userWanted = getUserByNick(message.substring(5, 5+message.substring(5).indexOf(' ')));
 				if(!userWanted)
 				{
-					socket.emit('information', "[INFO] User " + userWanted.nick + " was not found.");
+					socket.emit('information', "[INFO] User " + message.substring(5, 5+message.substring(5).indexOf(' ')) + " was not found.");
 				}
 				else if(userWanted === user)
 				{
@@ -298,7 +298,7 @@ io.on('connection', function(socket)
 				var userWanted = getUserByNick(message.substring(8));
 				if(!userWanted)
 				{
-					socket.emit('information', "[INFO] User " + userWanted.nick + " was not found.");
+					socket.emit('information', "[INFO] User " + message.substring(8) + " was not found.");
 				}
 				else if(userWanted === user)
 				{
@@ -308,6 +308,18 @@ io.on('connection', function(socket)
 				{
 					socket.emit('information', "[INFO] User " + userWanted.nick + "added to ignore list.");
 					socket.emit('ignore', userWanted.nick);
+				}
+			}
+			else if(message.lastIndexOf('/whois ', 0) === 0)
+			{
+				var userWanted = getUserByNick(message.substring(7));
+				if(!userWanted)
+				{
+					socket.emit('information', "[INFO] User " + message.substring(7) + " was not found.");
+				}
+				else
+				{
+					socket.emit('information', "[INFO] User " + userWanted.nick + " is a " + userWanted.gender + " " + userWanted.role);
 				}
 			}
 			else if(message.lastIndexOf('/room ', 0) === 0)
