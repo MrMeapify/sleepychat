@@ -281,7 +281,7 @@ io.on('connection', function(socket)
 				var userWanted = getUserByNick(message.substring(5, 5+message.substring(5).indexOf(' ')));
 				if(!userWanted)
 				{
-					socket.emit('information', "[INFO] User " + username + " was not found.");
+					socket.emit('information', "[INFO] User " + userWanted.nick + " was not found.");
 				}
 				else if(userWanted === user)
 				{
