@@ -275,6 +275,24 @@ io.on('connection', function(socket)
 				var command = '/server ' + secret + ' ';
 				io.sockets.emit('information', "[ADMIN] " + message.substring(command.length));
 			}
+			else if(message.lastIndexOf('/msg ', 0) === 0)
+			{
+				//socket.emit('chat message', alterForCommands(message, nick));
+				var userWanted = getUserByNick(message.substring(5, 5+message.substring(5).indexOf(' ')));
+				if(!userWanted)
+				{
+					socket.emit('information', "[INFO] User " + username + " was not found.");
+				}
+				else if(userWanted === user)
+				{
+					socket.emit('information', "[INFO] You can't message yourself!");
+				}
+				else
+				{
+					userWanted.socket.emit('chat message', "*" + userWanted.nick + "* " + message.substring(5+userWanted.nick));
+					socket.emit('information', "[INFO] Message sent to " + userWanted.nick + ".");
+				}
+			}
 			else if(message.lastIndexOf('/room ', 0) === 0)
 			{
 				socket.emit('chat message', alterForCommands(message, nick));
