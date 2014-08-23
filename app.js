@@ -442,10 +442,12 @@ io.on('connection', function(socket)
 				socket.emit('information', "[INFO] While in chat, you can use several commands:");
 				socket.emit('information', "[INFO] -- /help -- Launches this message.");
 				socket.emit('information', "[INFO] -- /coinflip -- Publicly flips a coin.");
+				socket.emit('information', "[INFO] -- /ignore user -- Ignores all messages for a user.");
 				socket.emit('information', "[INFO] -- /names -- While in the big chatroom, this will list the names of every current user in the chatroom with you.");
 				socket.emit('information', "[INFO] -- /me did a thing -- Styles your message differently to indicate that you're doing an action.");
 				socket.emit('information', "[INFO] -- /msg username message -- Sends a message to username that only they can see in chat.");
 				socket.emit('information', "[INFO] -- /room user -- Requests a private chat with the specified user.");
+				socket.emit('information', "[INFO] -- /whois user -- Display sex and role information for a user.");
 				socket.emit('information', "[INFO] ~~~");
 			}
 			else if(message.lastIndexOf('/', 0) === 0 && !(message.lastIndexOf('/me', 0) === 0))
