@@ -293,6 +293,23 @@ io.on('connection', function(socket)
 					socket.emit('information', "[INFO] Message sent to " + userWanted.nick + ".");
 				}
 			}
+			else if(message.lastIndexOf('/ignore ', 0) === 0)
+			{
+				var userWanted = getUserByNick(message.substring(8));
+				if(!userWanted)
+				{
+					socket.emit('information', "[INFO] User " + userWanted.nick + " was not found.");
+				}
+				else if(userWanted === user)
+				{
+					socket.emit('information', "[INFO] You can't ignore yourself!");
+				}
+				else
+				{
+					socket.emit('information', "[INFO] User " + userWanted.nick + "added to ignore list.");
+					socket.emit('ignore', userWanted.nick);
+				}
+			}
 			else if(message.lastIndexOf('/room ', 0) === 0)
 			{
 				socket.emit('chat message', alterForCommands(message, nick));

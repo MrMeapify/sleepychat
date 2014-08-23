@@ -40,6 +40,7 @@ $(document).ready(function()
 
 	socket.on('connect', function()
 	{
+		var ignore_list = new Array()
 		$('#loginsubmit').prop('disabled', false).removeClass('btn-default').addClass('btn-success').text('Start Matchmaking!');
 		$('#bigchatsubmit').prop('disabled', false).removeClass('btn-default').addClass('btn-primary').text('Or join the big group chat!');
 		$('#loginform').submit(function()
@@ -157,6 +158,8 @@ $(document).ready(function()
 			}
 
 			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
+			var user = msg.match(/&lt;(.+)&gt;/);
+			console.log(msg);
 			if(who === "me")
 			{
 				$('#messages > li').filter(':last').addClass('self');
@@ -169,6 +172,11 @@ $(document).ready(function()
 			if(bigchat && msg.split('>')[1].substring(1).indexOf(nick) != -1)
 			{
 				$('#messages > li').filter(':last').addClass('highlight');
+			}
+			console.log(user);
+			if (user && ignore_list.indexOf(user[1]) != -1)
+			{
+				$('#messages > li').filter(':last').hide();
 			}
 
 			scrollDown(scroll_down);
@@ -191,6 +199,11 @@ $(document).ready(function()
 			}
 			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
 			scrollDown(scroll_down);
+		});
+
+		socket.on('ignore', function(user)
+		{
+			ignore_list.push(user);
 		});
 
 		socket.on('partnerDC', function(nick)
