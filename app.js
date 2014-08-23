@@ -277,7 +277,6 @@ io.on('connection', function(socket)
 			}
 			else if(message.lastIndexOf('/msg ', 0) === 0)
 			{
-				//socket.emit('chat message', alterForCommands(message, nick));
 				var userWanted = getUserByNick(message.substring(5, 5+message.substring(5).indexOf(' ')));
 				if(!userWanted)
 				{
@@ -415,6 +414,7 @@ io.on('connection', function(socket)
 				socket.emit('information', "[INFO] -- /coinflip -- Publicly flips a coin.");
 				socket.emit('information', "[INFO] -- /names -- While in the big chatroom, this will list the names of every current user in the chatroom with you.");
 				socket.emit('information', "[INFO] -- /me did a thing -- Styles your message differently to indicate that you're doing an action.");
+				socket.emit('information', "[INFO] -- /msg username message -- Sends a message to username that only they can see in chat.");
 				socket.emit('information', "[INFO] -- /room user -- Requests a private chat with the specified user.");
 				socket.emit('information', "[INFO] ~~~");
 			}
