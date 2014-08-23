@@ -150,6 +150,12 @@ $(document).ready(function()
 				interval = setInterval(changeTitle, 1000);
 			}
 
+			scroll_down = false;
+			if ($(window).scrollTop() + $(window).height() >= $('body,html')[0].scrollHeight)
+			{
+				scroll_down = true;
+			}
+
 			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
 			if(who === "me")
 			{
@@ -165,7 +171,7 @@ $(document).ready(function()
 				$('#messages > li').filter(':last').addClass('highlight');
 			}
 
-			scrollDown();
+			scrollDown(scroll_down);
 		});
 
 		socket.on('information', function(msg)
@@ -178,8 +184,13 @@ $(document).ready(function()
 				clearInterval(interval);
 				interval = setInterval(changeTitle, 1000);
 			}
+			scroll_down = false;
+			if ($(window).scrollTop() + $(window).height() >= $('body,html')[0].scrollHeight)
+			{
+				scroll_down = true;
+			}
 			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
-			scrollDown();
+			scrollDown(scroll_down);
 		});
 
 		socket.on('partnerDC', function(nick)
@@ -187,8 +198,13 @@ $(document).ready(function()
 			chatting = false;
 			$('#sendbutton').attr('disabled', true);
 			var themsg = '[INFO] ' + nick + ' has disconnected from you.';
+			scroll_down = false;
+			if ($(window).scrollTop() + $(window).height() >= $('body,html')[0].scrollHeight)
+			{
+				scroll_down = true;
+			}
 			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + themsg + "</span>"));
-			scrollDown();
+			scrollDown(scroll_down);
 		});
 
 		socket.on('disconnect', function()
@@ -201,8 +217,13 @@ $(document).ready(function()
 				clearInterval(interval);
 				interval = setInterval(changeTitle, 1000);
 			}
+			scroll_down = false;
+			if ($(window).scrollTop() + $(window).height() >= $('body,html')[0].scrollHeight)
+			{
+				scroll_down = true;
+			}
 			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Sorry! You seem to have been disconnected from the server. Please reload the page and try again.</span>"));
-			scrollDown();
+			scrollDown(scroll_down);
 		});
 	});
 
@@ -250,8 +271,13 @@ $(document).ready(function()
 				if(chatting)
 				{
 					var msg = "[INFO] You have disconnected from " + lastChat + ".";
+					scroll_down = false;
+					if ($(window).scrollTop() + $(window).height() >= $('body,html')[0].scrollHeight)
+					{
+						scroll_down = true;
+					}
 					$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
-					scrollDown();
+					scrollDown(scroll_down);
 				}
 				chatting = false;
 			}
@@ -299,9 +325,12 @@ $(document).ready(function()
 	});
 });
 
-function scrollDown()
+function scrollDown(scroll_down)
 {
-	$('body,html').stop(true,true).animate({ scrollTop: $('body,html')[0].scrollHeight}, 500);
+	if (scroll_down)
+	{
+		$('body,html').stop(true,true).animate({ scrollTop: $('body,html')[0].scrollHeight}, 500);
+	}
 }
 
 window.onbeforeunload = confirmExit;
