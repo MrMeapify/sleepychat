@@ -426,6 +426,63 @@ io.on('connection', function(socket)
 					socket.emit('information', "[COINFLIP] " + result);
 				}
 			}
+			else if(message.lastIndexOf('/roll', 0) === 0)
+			{
+				var num = 1;
+                               
+				if (message.length > 6)
+				{
+				 var numString = message.substring(6);
+                                       
+				   try
+				   {
+				           num = parseInt(numString);
+				   }
+				    catch (e) { }
+				}
+				
+				if (num > 10)
+				{
+					num = 10;
+				}
+ 
+				var result = "Rolled " + num.toString();
+				if (num > 1)
+				{
+				       result += " dice: ";
+				}
+				else
+				{
+				        result += " die: ";
+				}
+				                              
+				for (var i = 0; i < num; i++)
+				{
+				       var rand = Math.floor(Math.random() * (7 - 1)) + 1;
+
+					result += "<img src='http://www.random.org/dice/dice" + rand.toString() + ".png'/>";
+					//result += rand.toString(); // If you don't want images...
+				}
+
+				
+				if(room)
+				{
+					io.to(room.token).emit('chat message', alterForCommands(message, nick), "eval");
+					io.to(room.token).emit('information', "[DICE ROLL] " + result);
+				}
+				else if(user.inBigChat)
+				{
+					io.to('bigroom').emit('chat message', alterForCommands(message, nick), "eval");
+					io.to('bigroom').emit('information', "[DICE ROLL] " + result);
+				}
+				else
+				{
+					user.partner.socket.emit('chat message',  alterForCommands(message, nick), "them");
+					socket.emit('chat message', alterForCommands(message, nick), "me");
+					user.partner.socket.emit('information', "[DICE ROLL] " + result);
+					socket.emit('information', "[DICE ROLL] " + result);
+				}
+			}
 			else if((message.lastIndexOf('/list', 0) === 0 || message.lastIndexOf('/names', 0) === 0) && user.inBigChat)
 			{
 
@@ -440,6 +497,7 @@ io.on('connection', function(socket)
 				socket.emit('information', "[INFO] While in chat, you can use several commands:");
 				socket.emit('information', "[INFO] -- /help -- Launches this message.");
 				socket.emit('information', "[INFO] -- /coinflip -- Publicly flips a coin.");
+				socket.emit('information', "[INFO] -- /roll number -- Publicly rolls up to 10 dice.");
 				socket.emit('information', "[INFO] -- /ignore user -- Ignores all messages for a user.");
 				socket.emit('information', "[INFO] -- /names -- While in the big chatroom, this will list the names of every current user in the chatroom with you.");
 				socket.emit('information', "[INFO] -- /me did a thing -- Styles your message differently to indicate that you're doing an action.");
