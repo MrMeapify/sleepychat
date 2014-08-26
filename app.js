@@ -270,10 +270,57 @@ io.on('connection', function(socket)
 			message = message.replace(/>/g, "&gt;");  	//escape >
 			message = message.replace(/"/g, "&quot;");	//escape "
 			message = message.replace(/'/g, "&#39;"); 	//escape '
+			message = message.replace(/^\s+|\s+$/g, '');
 			if(message.lastIndexOf('/server ' + secret, 0) === 0)
 			{
 				var command = '/server ' + secret + ' ';
 				io.sockets.emit('information', "[ADMIN] " + message.substring(command.length));
+			}
+			else if(message.lastIndexOf('/msg ', 0) === 0)
+			{
+				var userWanted = getUserByNick(message.substring(5, 5+message.substring(5).indexOf(' ')));
+				if(!userWanted)
+				{
+					socket.emit('information', "[INFO] User " + message.substring(5, 5+message.substring(5).indexOf(' ')) + " was not found.");
+				}
+				else if(userWanted === user)
+				{
+					socket.emit('information', "[INFO] You can't message yourself!");
+				}
+				else
+				{
+					userWanted.socket.emit('chat message', "*" + userWanted.nick + "* " + message.substring(5+userWanted.nick));
+					socket.emit('information', "[INFO] Message sent to " + userWanted.nick + ".");
+				}
+			}
+			else if(message.lastIndexOf('/ignore ', 0) === 0)
+			{
+				var userWanted = getUserByNick(message.substring(8));
+				if(!userWanted)
+				{
+					socket.emit('information', "[INFO] User " + message.substring(8) + " was not found.");
+				}
+				else if(userWanted === user)
+				{
+					socket.emit('information', "[INFO] You can't ignore yourself!");
+				}
+				else
+				{
+					socket.emit('information', "[INFO] User " + userWanted.nick + "added to ignore list.");
+					socket.emit('ignore', userWanted.nick);
+				}
+			}
+			else if(message.lastIndexOf('/whois ', 0) === 0)
+			{
+				var userWanted = getUserByNick(message.substring(7));
+				if(!userWanted)
+				{
+					socket.emit('information', "[INFO] User " + message.substring(7) + " was not found.");
+				}
+				else
+				{
+					socket.emit('information', "[INFO] User " + userWanted.nick + " is a " + userWanted.gender + " " + userWanted.role);
+				}
 			}
 			else if(message.lastIndexOf('/room ', 0) === 0)
 			{
@@ -395,9 +442,12 @@ io.on('connection', function(socket)
 				socket.emit('information', "[INFO] While in chat, you can use several commands:");
 				socket.emit('information', "[INFO] -- /help -- Launches this message.");
 				socket.emit('information', "[INFO] -- /coinflip -- Publicly flips a coin.");
+				socket.emit('information', "[INFO] -- /ignore user -- Ignores all messages for a user.");
 				socket.emit('information', "[INFO] -- /names -- While in the big chatroom, this will list the names of every current user in the chatroom with you.");
 				socket.emit('information', "[INFO] -- /me did a thing -- Styles your message differently to indicate that you're doing an action.");
+				socket.emit('information', "[INFO] -- /msg username message -- Sends a message to username that only they can see in chat.");
 				socket.emit('information', "[INFO] -- /room user -- Requests a private chat with the specified user.");
+				socket.emit('information', "[INFO] -- /whois user -- Display sex and role information for a user.");
 				socket.emit('information', "[INFO] ~~~");
 			}
 			else if(message.lastIndexOf('/', 0) === 0 && !(message.lastIndexOf('/me', 0) === 0))
@@ -493,7 +543,7 @@ function alterForCommands(str, nick)
 	var me = /\/me( .*)/g; // Matches "/me " followed by anything
 	var italics = /\*([^*]+)\*/g; // Matches stuff between * *
 	var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/]*(\.[\w\-_()]+)?(?:[\-\+=&;%@\.\w?#\/]*))/gi; //matches "google.com/" and "blog.google.com/" and but not P.H.D. For details, see http://pastebin.com/8zQJmt9N
-	var subreddit = /\/r\/[A-Za-z0-9][A-Za-z0-9_]{2,20}/g; //matches /r/Hello
+	var subreddit = /\/r\/[A-Za-z0-9][A-Za-z0-9_]{2,20}[^ ]*/g; //matches /r/Hello
 	var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:\:O)|(?:\;\))|(?:\;\())/g;
 	
 	ans = ans.replace(italics, "<i>$1</i>");
