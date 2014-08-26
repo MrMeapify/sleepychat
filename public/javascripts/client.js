@@ -135,6 +135,21 @@ $(document).ready(function()
 			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] <a id="toclick" href="' + url + '" target="_blank">Click here to enter the private room.</a>' + "</span>"));
 			setTimeout(function() { $('#toclick').click(); $('#toclick').attr("id","clicked"); }, 500);
 		});
+		
+		socket.on('whisper', function(sender, msg)
+		{
+			if(notify)
+			{
+				newTitle = "*** " + sender + " messaged you! ***";
+				clearInterval(interval);
+				interval = setInterval(changeTitle, 1000);
+			}
+			
+			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": *" + sender + " whispers to you* " + msg));
+			$('#messages > li').filter(':last').addClass('highlight');
+			
+			scrollDown();
+		});
 
 		socket.on('chat message', function(msg, who)
 		{
@@ -320,6 +335,11 @@ function changeTitle()
 $("#bugsandfeatures").click(function()
 {
 	window.location = "https://github.com/MrMeapify/sleepychat/issues";
+});
+
+$("#legalities").click(function()
+{
+	window.location = window.location.protocol + "//" + window.location.host + "/legal";
 });
 
 $('#randomnick').click(function()

@@ -39,6 +39,11 @@ io.on('connection', function(socket)
 	
 	socket.on('login', function(data)
 	{
+		if(data.nick.length > 64)
+		{
+			data.nick = data.nick.substring(0,63);
+			socket.emit('nickupdate', data.nick);
+		}
 		if(data.nick.toUpperCase() === "MRMEAPIFY")
 		{
 			socket.emit('information', "[INFO] You DARE try to impersonate MrMeapify? Shame. Shame on you.");
@@ -275,6 +280,19 @@ io.on('connection', function(socket)
 				var command = '/server ' + secret + ' ';
 				io.sockets.emit('information', "[ADMIN] " + message.substring(command.length));
 			}
+			else if(message.lastIndexOf('/whisper ', 0) === 0)
+			{
+				socket.emit('chat message', alterForCommands(message, nick));
+				var userWanted = getUserByNick(message.substring(9));
+				if(!userWanted)
+				{
+					socket.emit('information', "[INFO] That user was not found.");
+				}
+				else
+				{
+					userWanted.socket.emit('whisper', nick, alterForWhisper(message));
+				}
+			}
 			else if(message.lastIndexOf('/room ', 0) === 0)
 			{
 				socket.emit('chat message', alterForCommands(message, nick));
@@ -485,7 +503,23 @@ function link_replacer(match, p1, p2, offset, string)
     else
 		a = "<a target='_blank' href='http://"+p1+"'>"+p1+"</a>";
     return a;
-};
+}
+		
+function alterForWhisper(str)
+{
+	var ans = str; // Copies the variable so V8 can do it's optimizations.
+	var italics = /\*([^*]+)\*/g; // Matches stuff between * *
+	var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/]*(\.[\w\-_()]+)?(?:[\-\+=&;%@\.\w?#\/]*))/gi; //matches "google.com/" and "blog.google.com/" and but not P.H.D. For details, see http://pastebin.com/8zQJmt9N
+	var subreddit = /\/r\/[A-Za-z0-9][A-Za-z0-9_]{2,20}/g; //matches /r/Hello
+	var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:\:O)|(?:\;\))|(?:\;\())/g;
+	
+	ans = ans.replace(italics, "<i>$1</i>");
+	var prevans = ans;
+	ans = ans.replace(link, link_replacer);
+	if(ans === prevans) // Only if the link replacer hasn't done anything yet.
+		ans = ans.replace(subreddit, "<a target='_blank' href='http://www.reddit.com$&'>$&</a>");
+	ans = ans.replace(emoticons, "<strong>$&</strong>");
+}
 
 function alterForCommands(str, nick)
 {
@@ -513,7 +547,7 @@ function getUserByNick(nick)
 	var userscopy = users;
 	for(var x = 0; x < userscopy.length; x++)
 	{
-		if(userscopy[x].nick == nick)
+		if(userscopy[x].nick.toUpperCase() === nick.toUpperCase())
 		{
 			return userscopy[x];
 		}
@@ -591,6 +625,10 @@ app.use(function(req,res,next)
 app.use('/', index);
 app.use('/' + secret, stats);
 app.use('/room', privateroom);
+app.use('/legal', function(req, res)
+{
+	res.render('legal');
+});
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next)
