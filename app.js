@@ -270,6 +270,7 @@ io.on('connection', function(socket)
 		{
 			// escape html
 			message=data.message;
+			message = message.replace(/;/g, "&#59;"); 	//escape &
 			message = message.replace(/&/g, "&#38;"); 	//escape &
 			message = message.replace(/</g, "&lt;");  	//escape <
 			message = message.replace(/>/g, "&gt;");  	//escape >
@@ -542,21 +543,22 @@ function link_replacer(match, p1, p2, offset, string)
     return a;
 }
 		
-function alterForWhisper(str)
-{
-	var ans = str; // Copies the variable so V8 can do it's optimizations.
-	var italics = /\*([^*]+)\*/g; // Matches stuff between * *
-	var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/]*(\.[\w\-_()]+)?(?:[\-\+=&;%@\.\w?#\/]*))/gi; //matches "google.com/" and "blog.google.com/" and but not P.H.D. For details, see http://pastebin.com/8zQJmt9N
-	var subreddit = /\/r\/[A-Za-z0-9][A-Za-z0-9_]{2,20}/g; //matches /r/Hello
-	var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:\:O)|(?:\;\))|(?:\;\())/g;
+
+// function alterForWhisper(str)
+// {
+// 	var ans = str; // Copies the variable so V8 can do it's optimizations.
+// 	var italics = /\*([^*]+)\*/g; // Matches stuff between * *
+// 	var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/]*(\.[\w\-_()]+)?(?:[\-\+=&;%@\.\w?#\/]*))/gi; //matches "google.com/" and "blog.google.com/" and but not P.H.D. For details, see http://pastebin.com/8zQJmt9N
+// 	var subreddit = /\/r\/[A-Za-z0-9][A-Za-z0-9_]{2,20}/g; //matches /r/Hello
+// 	var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:\:O)|(?:&#59;\))|(?:&#59;\())/g;
 	
-	ans = ans.replace(italics, "<i>$1</i>");
-	var prevans = ans;
-	ans = ans.replace(link, link_replacer);
-	if(ans === prevans) // Only if the link replacer hasn't done anything yet.
-		ans = ans.replace(subreddit, "<a target='_blank' href='http://www.reddit.com$&'>$&</a>");
-	ans = ans.replace(emoticons, "<strong>$&</strong>");
-}
+// 	ans = ans.replace(italics, "<i>$1</i>");
+// 	var prevans = ans;
+// 	ans = ans.replace(link, link_replacer);
+// 	if(ans === prevans) // Only if the link replacer hasn't done anything yet.
+// 		ans = ans.replace(subreddit, "<a target='_blank' href='http://www.reddit.com$&'>$&</a>");
+// 	ans = ans.replace(emoticons, "<strong>$&</strong>");
+// }
 
 function alterForCommands(str, nick)
 {
