@@ -80,7 +80,7 @@ io.on('connection', function(socket)
 			nick = nick.replace(/'/g, "&#39;"); 	//escape '
 			data.nick = nick;
 			var hasher = crypto.createHash('sha1');
-			hasher.update(nick + new Date().getTime() + "IAmA Salt AMA");
+			hasher.update(nick + new Date().getTime() + "IAmA Salt AMA" + secret);
 			data.token = hasher.digest('hex');
 			console.log(nick + ' ' + data.token);
 			users.push(data);
@@ -369,7 +369,7 @@ io.on('connection', function(socket)
 					else
 					{
 						var hasher = crypto.createHash('sha1');
-						hasher.update(user.nick + userWanted.nick + new Date().getTime() + "IAmA Pepper AMA");
+						hasher.update(user.nick + userWanted.nick + new Date().getTime() + "IAmA Pepper AMA" + secret);
 						var newroom =
 						{
 							users: [user, userWanted],
