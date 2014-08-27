@@ -8,7 +8,7 @@
 
 .body #messages li { padding: 5px 10px; font-size: 1.4rem;}
 
-.body #messages .information { font-style: italic; font-weight: bold; font: 1.15em Helvetica, Arial;}
+.body #messages .information { font-style: italic; font-weight: 700; font: 1.11em Roboto, Helvetica, Arial;}
 
 .modal-body .input-group { margin-bottom: 20px; }
 
