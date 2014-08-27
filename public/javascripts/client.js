@@ -144,8 +144,19 @@ $(document).ready(function()
 				interval = setInterval(changeTitle, 1000);
 			}
 			
-			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": *" + sender + " whispers to you* " + msg));
-			$('#messages > li').filter(':last').addClass('highlight');
+			console.log(sender);
+			console.log(sender.length);
+			
+			if(sender !== nick)
+			{
+				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": *" + sender + " whispers: " + msg.substring(6 + msg.split(' ')[1].length) + "*"));
+				$('#messages > li').filter(':last').addClass('highlight');
+			}
+			else
+			{
+				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": *You whisper: " + msg.substring(6 + msg.split(' ')[1].length) + "*"));
+				$('#messages > li').filter(':last').addClass('self');
+			}
 			
 			scrollDown();
 		});

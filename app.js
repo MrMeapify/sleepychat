@@ -294,7 +294,7 @@ io.on('connection', function(socket)
 				else
 				{
 					userWanted.socket.emit('whisper', nick, alterForCommands(message, ""));
-					socket.emit('information', "[INFO] Message sent to " + userWanted.nick + ".");
+					socket.emit('whisper', nick, alterForCommands(message, ""));
 				}
 			}
 			else if(message.lastIndexOf('/ignore ', 0) === 0)
