@@ -569,8 +569,8 @@ function alterForCommands(str, nick)
 	var italics = /\*(.+?)\*/g; // Matches stuff between * *
 	var underline = /__(.+?)__/g; // Matches stuff between __ __
 	var strikethrough = /\-\-(.+?)\-\-/g; // Matches stuff between -- --
-	var monospace = /\`(.+?)\`/g; // Matches stuff between -- --
-	var serif = /\`\`(.+?)\`\`/g; // Matches stuff between -- --
+	var monospace = /\`(.+?)\`/g; // Matches stuff between ` `
+	var serif = /\`\`(.+?)\`\`/g; // Matches stuff between `` ``
 
 	var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/]*(\.[\w\-_()]+)?(?:[\-\+=&;%@\.\w?#\/]*))/gi; //matches "google.com/" and "blog.google.com/" and but not P.H.D. For details, see http://pastebin.com/8zQJmt9N
 	var subreddit = /\/r\/[A-Za-z0-9][A-Za-z0-9_]{2,20}[^ ]*/g; //matches /r/Hello

@@ -6,9 +6,10 @@
 		<link rel='stylesheet' href='/stylesheets/bootstrap-theme.min.css' />
 		<link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css' />
 		<link rel='stylesheet' href='/stylesheets/style.css' />
+		<link href='http://fonts.googleapis.com/css?family=Roboto:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
 	</head>
 	<body>
-		<div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+		<div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="font-family: Roboto">
 			<div class="modal-dialog modal-md">
 				<div class="modal-content">
 					<div class="modal-header">
@@ -22,7 +23,7 @@
 						<p>Welcome! This is Sleepychat, a website for hypnotists, subjects, and people who just want to learn! All kinds of hypnosis are acceptable here, from theraputic to recreational to erotic. The only rule here is that you should be kind :) </p>
 						<p>With just a few bits of information, we can get you connected staightaway!</p>
 						<form action="" id="loginform">
-							<div class="form-group">
+							<span class="form-group">
 								<label>Nickname</label>
 								<div class="input-group">
 									<input id="nickname" type="text" class="form-control">
@@ -92,7 +93,7 @@
 								<button id="bigchatsubmit" type="button" disabled class="btn btn-default btn-block">Connecting...</button>
 								<button id="bugsandfeatures" type="button" class="btn btn-danger btn-block">Feature Requests &amp; Bug Reports</button>
 								<button id="legalities" type="button" class="btn btn-default btn-block">Legalities</button>
-							</div>
+							</span>
 						</form>
 					</div>
 				</div>

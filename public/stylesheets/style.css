@@ -1,4 +1,4 @@
-.body { margin: 0; padding: 0; box-sizing: border-box; font: 13px Helvetica, Arial; }
+.body { margin: 0; padding: 0; box-sizing: border-box; font: 1.1em Roboto, Helvetica, Arial; }
 
 .body form { background: #afafaf; padding: 3px; position: fixed; bottom: 0; width: 100%; }
 
