@@ -72,8 +72,6 @@ $(document).ready(function()
 				var type = 'roleplaying';
 			else if($('#iwanthyp').parent().hasClass('active'))
 				var type = 'hypnosis';
-			else if($('#iwantgeneral').parent().hasClass('active'))
-				var type = 'general';
 			else
 				var type = 'either';
 
