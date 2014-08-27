@@ -46,6 +46,22 @@ io.on('connection', function(socket)
 			data.nick = data.nick.substring(0,63);
 			socket.emit('nickupdate', data.nick);
 		}
+		else if(data.nick.length < 1)
+		{
+			socket.emit('information', "[INFO] Please choose a nickname.");
+			socket.conn.close();
+		}
+		if(data.nick.indexOf(' ') != -1 && data.nick !== "MrMeapify " + secret)
+		{
+			var parts = data.nick.split(' ');
+			var newnick = "";
+			for(var i = 0; i < parts.length; i++)
+			{
+				newnick += parts[i];
+			}
+			data.nick = newnick;
+			socket.emit('nickupdate', data.nick);
+		}
 		if(data.nick.toUpperCase() === "MRMEAPIFY")
 		{
 			socket.emit('information', "[INFO] You DARE try to impersonate MrMeapify? Shame. Shame on you.");
