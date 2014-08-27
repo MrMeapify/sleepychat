@@ -485,6 +485,33 @@ io.on('connection', function(socket)
 					socket.emit('information', "[DICE ROLL] " + result);
 				}
 			}
+			else if(message.lastIndexOf('/banana', 0) === 0)
+			{
+				var rand = Math.floor(Math.random() * (7 - 1));
+				var pies = [
+					"http://hostedmedia.reimanpub.com/TOH/Images/Photos/37/300x300/exps1055_TH1601C25A.jpg",
+					"http://www.kraftrecipes.com/assets/recipe_images/Black-Bottom_Banana_Cream_Pie.jpg",
+					"http://hostedmedia.reimanpub.com/TOH/Images/Photos/37/300x300/exps26090_THAT2453289D12_14_5b.jpg",
+					"http://mormonmommyblogs.com/wp-content/uploads/2011/04/Banana-Pie.jpg",
+					"http://s3.amazonaws.com/cdn2/cocos_menu-cocos-premium-pies-desserts-banana-cream-slice_full_image.jpg",
+					"http://www.villageinn.com/i/pies/profile/bananacream_main1.jpg",
+				];
+				var result = pies[rand];
+				if(room)
+				{
+					io.to(room.token).emit('chat message', alterForCommands(result, nick), "eval");
+				}
+				else if(user.inBigChat)
+				{
+					io.to('bigroom').emit('chat message', alterForCommands(result, nick), "eval");
+				}
+				else
+				{
+					var toSend = alterForCommands(result, nick);
+					user.partner.socket.emit('chat message', toSend, "them");
+					socket.emit('chat message', toSend, "me");
+				}
+			}
 			else if((message.lastIndexOf('/list', 0) === 0 || message.lastIndexOf('/names', 0) === 0) && user.inBigChat)
 			{
 				var usercopy = users;
@@ -505,6 +532,7 @@ io.on('connection', function(socket)
 				socket.emit('information', "[INFO] While in chat, you can use several commands:");
 				socket.emit('information', "[INFO] -- /help -- Launches this message.");
 				socket.emit('information', "[INFO] -- /coinflip -- Publicly flips a coin.");
+				socket.emit('information', "[INFO] -- /banana -- Sends a picture of banana cream pie.");
 				socket.emit('information', "[INFO] -- /roll number -- Publicly rolls up to 10 dice.");
 				socket.emit('information', "[INFO] -- /ignore user -- Ignores all messages for a user.");
 				socket.emit('information', "[INFO] -- /names -- While in the big chatroom, this will list the names of every current user in the chatroom with you.");
