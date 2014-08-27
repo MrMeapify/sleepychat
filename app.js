@@ -564,16 +564,21 @@ function alterForCommands(str, nick)
 {
 	var ans = str; // Copies the variable so V8 can do it's optimizations.
 	var me = /\/me( .*)/g; // Matches "/me " followed by anything
-	var italics = /\*([^*]+)\*/g; // Matches stuff between * *
+	var bold = /\*\*(.+?)\*\*/g; // Matches stuff between ** **
+	var italics = /\*(.+?)\*/g; // Matches stuff between * *
 	var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/]*(\.[\w\-_()]+)?(?:[\-\+=&;%@\.\w?#\/]*))/gi; //matches "google.com/" and "blog.google.com/" and but not P.H.D. For details, see http://pastebin.com/8zQJmt9N
 	var subreddit = /\/r\/[A-Za-z0-9][A-Za-z0-9_]{2,20}[^ ]*/g; //matches /r/Hello
 	var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:\:O)|(?:&#59\;\))|(?:&#59\;\())/g;
 	
-	ans = ans.replace(italics, "<i>$1</i>");
-	var prevans = ans;
+	var prevans = ans
+	ans = ans.replace(bold, "<strong>$1</strong>"); console.log(ans);
+	ans = ans.replace(italics, "<i>$1</i>"); console.log(ans);
+	
+	prevans = ans;
 	ans = ans.replace(link, link_replacer);
 	if(ans === prevans) // Only if the link replacer hasn't done anything yet.
 		ans = ans.replace(subreddit, "<a target='_blank' href='http://www.reddit.com$&'>$&</a>");
+
 	ans = ans.replace(emoticons, "<strong>$&</strong>");
 	if (ans.lastIndexOf('/me ', 0) === 0)
 		return "<span style='font-weight: 300'>*" + nick + (ans.replace(me, '$1')) + "*</span>";
