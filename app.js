@@ -39,6 +39,8 @@ io.on('connection', function(socket)
 	
 	socket.on('login', function(data)
 	{
+		namereg = /^[^ ♂♀↑↓↕']*$/ // Note: Sleepychat currently allows names with no text; I like that and it should continue. If you don't want it to, then change "*" to "+"
+		                      // You may want to add some common homoglyphs in there, to prevent cheaters
 		if(data.nick.length > 64)
 		{
 			data.nick = data.nick.substring(0,63);
@@ -70,6 +72,11 @@ io.on('connection', function(socket)
 			socket.emit('information', "[INFO] The nickname you chose was in use. Please reload the page and choose another.");
 			socket.conn.close();
 		}
+		else if(!namereg.test(data.nick))
+		{
+			socket.emit('information', "[INFO] Sorry, your name contained a space or other charecter that we didn't like. Try again, please");
+			socket.conn.close();
+		}
 		else
 		{
 			data.socket = socket;
@@ -96,16 +103,7 @@ io.on('connection', function(socket)
 			socket.emit('loggedIn');
 			if(data.inBigChat)
 			{
-				socket.join('bigroom');
-				io.to('bigroom').emit('information', "[INFO] " + nick + " has joined.");
-				var usercopy = users;
-				var list = "";
-				for(var x = 0; x < usercopy.length; x++)
-				{
-					if(usercopy[x].inBigChat)
-						list += "'" + usercopy[x].nick + "' ";
-				}
-				socket.emit('information', "[INFO] Users in the chatroom: [ " + list + "]");
+				socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users)+ "]");
 			}
 			else
 			{
@@ -530,14 +528,8 @@ io.on('connection', function(socket)
 			}
 			else if((message.lastIndexOf('/list', 0) === 0 || message.lastIndexOf('/names', 0) === 0) && user.inBigChat)
 			{
-				var usercopy = users;
-				var list = "";
-				for(var x = 0; x < usercopy.length; x++)
-				{
-					if(usercopy[x].inBigChat)
-						list += "'" + usercopy[x].nick + "' ";
-				}
-				socket.emit('information', "[INFO] Users in the chatroom: [ " + list + "]");
+
+				socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users)+ "]");
 			}
 			else if(message.lastIndexOf('/help', 0) === 0)
 			{
@@ -634,6 +626,22 @@ io.on('connection', function(socket)
 	});
 });
 
+
+function getUsers(users){
+	var usercopy = users;
+	var list = "";
+	for(var x = 0; x < usercopy.length; x++)
+	{
+		if(usercopy[x].inBigChat)
+		{
+			name = usercopy[x].nick 
+			name += (usercopy[x].gender=="male") ? "♂" : ((usercopy[x].gender=="female") ? "♀" : ""); // put a gender symbol by the name
+			name += (usercopy[x].role=="hypnotist") ? "↑" : ((usercopy[x].role=="subject") ? "↓" : "↕"); // put an arrow for subs and tists
+			list += "'" + name + "' ";
+		}
+	}
+	return list
+}
 
 
 function link_replacer(match, p1, p2, offset, string)
