@@ -15,3 +15,5 @@
 li.self { background: #eee; }
 
 li.highlight { background: #EEAA22!important; }
+
+.login-modal { font-family: Roboto, Helvetica, Arial; }
