@@ -172,21 +172,24 @@ $(document).ready(function()
 
 			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
 			var user = msg.match(/&lt;(.+)&gt;/);
-			console.log(msg);
 			if(who === "me")
 			{
 				$('#messages > li').filter(':last').addClass('self');
 			}
-			else if(who === "eval" && msg.lastIndexOf('<' + nick + '>', 0) === 0)
+			else if(who === "eval" && msg.lastIndexOf('&lt;' + nick + '&gt;', 0) === 0)
 			{
 				$('#messages > li').filter(':last').addClass('self');
 			}
 			
-			if(bigchat && msg.split('>')[1].substring(1).indexOf(nick) != -1)
+			try
 			{
-				$('#messages > li').filter(':last').addClass('highlight');
+				if(bigchat && msg.split('&gt;')[1].substring(1).indexOf(nick) != -1)
+				{
+					$('#messages > li').filter(':last').addClass('highlight');
+				}
 			}
-			console.log(user);
+			catch(e) {}
+			
 			if (user && ignore_list.indexOf(user[1]) != -1)
 			{
 				$('#messages > li').filter(':last').hide();
