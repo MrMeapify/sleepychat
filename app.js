@@ -487,7 +487,6 @@ io.on('connection', function(socket)
 			}
 			else if(message.lastIndexOf('/banana', 0) === 0)
 			{
-				var rand = Math.floor(Math.random() * (7 - 1));
 				var pies = [
 					"http://hostedmedia.reimanpub.com/TOH/Images/Photos/37/300x300/exps1055_TH1601C25A.jpg",
 					"http://www.kraftrecipes.com/assets/recipe_images/Black-Bottom_Banana_Cream_Pie.jpg",
@@ -496,6 +495,7 @@ io.on('connection', function(socket)
 					"http://s3.amazonaws.com/cdn2/cocos_menu-cocos-premium-pies-desserts-banana-cream-slice_full_image.jpg",
 					"http://www.villageinn.com/i/pies/profile/bananacream_main1.jpg",
 				];
+				var rand = Math.floor(Math.random() * pies.length);
 				var result = pies[rand];
 				if(room)
 				{
