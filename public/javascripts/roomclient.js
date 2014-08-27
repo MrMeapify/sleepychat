@@ -36,9 +36,7 @@ $(document).ready(function()
 	});
 
 	socket.on('connect', function()
-	{	
-		$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + "[INFO] You have joined the room." + "</span>"));
-		
+	{
 		$('#chatbar').unbind('submit');
 		$('#chatbar').submit(function()
 		{
