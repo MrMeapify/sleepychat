@@ -270,11 +270,12 @@ io.on('connection', function(socket)
 		{
 			// escape html
 			message=data.message;
-			message = message.replace(/&/g, "&#38;"); 	//escape &
-			message = message.replace(/</g, "&lt;");  	//escape <
-			message = message.replace(/>/g, "&gt;");  	//escape >
-			message = message.replace(/"/g, "&quot;");	//escape "
-			message = message.replace(/'/g, "&#39;"); 	//escape '
+			message = message.replace(/;/g, "&#59;"); 		//escape ;
+			message = message.replace(/&(?:[^#]|$)/g, "&#38;"); 	//escape &
+			message = message.replace(/</g, "&lt;");  		//escape <
+			message = message.replace(/>/g, "&gt;");  		//escape >
+			message = message.replace(/"/g, "&quot;");		//escape "
+			message = message.replace(/'/g, "&#39;"); 		//escape '
 			message = message.replace(/^\s+|\s+$/g, '');
 			if(message.lastIndexOf('/server ' + secret, 0) === 0)
 			{
@@ -427,6 +428,63 @@ io.on('connection', function(socket)
 					socket.emit('information', "[COINFLIP] " + result);
 				}
 			}
+			else if(message.lastIndexOf('/roll', 0) === 0)
+			{
+				var num = 1;
+                               
+				if (message.length > 6)
+				{
+				 var numString = message.substring(6);
+                                       
+				   try
+				   {
+				           num = parseInt(numString);
+				   }
+				    catch (e) { }
+				}
+				
+				if (num > 10)
+				{
+					num = 10;
+				}
+ 
+				var result = "Rolled " + num.toString();
+				if (num > 1)
+				{
+				       result += " dice: ";
+				}
+				else
+				{
+				        result += " die: ";
+				}
+				                              
+				for (var i = 0; i < num; i++)
+				{
+				       var rand = Math.floor(Math.random() * (7 - 1)) + 1;
+
+					result += "<img src='http://www.random.org/dice/dice" + rand.toString() + ".png'/>";
+					//result += rand.toString(); // If you don't want images...
+				}
+
+				
+				if(room)
+				{
+					io.to(room.token).emit('chat message', alterForCommands(message, nick), "eval");
+					io.to(room.token).emit('information', "[DICE ROLL] " + result);
+				}
+				else if(user.inBigChat)
+				{
+					io.to('bigroom').emit('chat message', alterForCommands(message, nick), "eval");
+					io.to('bigroom').emit('information', "[DICE ROLL] " + result);
+				}
+				else
+				{
+					user.partner.socket.emit('chat message',  alterForCommands(message, nick), "them");
+					socket.emit('chat message', alterForCommands(message, nick), "me");
+					user.partner.socket.emit('information', "[DICE ROLL] " + result);
+					socket.emit('information', "[DICE ROLL] " + result);
+				}
+			}
 			else if((message.lastIndexOf('/list', 0) === 0 || message.lastIndexOf('/names', 0) === 0) && user.inBigChat)
 			{
 				var usercopy = users;
@@ -447,6 +505,7 @@ io.on('connection', function(socket)
 				socket.emit('information', "[INFO] While in chat, you can use several commands:");
 				socket.emit('information', "[INFO] -- /help -- Launches this message.");
 				socket.emit('information', "[INFO] -- /coinflip -- Publicly flips a coin.");
+				socket.emit('information', "[INFO] -- /roll number -- Publicly rolls up to 10 dice.");
 				socket.emit('information', "[INFO] -- /ignore user -- Ignores all messages for a user.");
 				socket.emit('information', "[INFO] -- /names -- While in the big chatroom, this will list the names of every current user in the chatroom with you.");
 				socket.emit('information', "[INFO] -- /me did a thing -- Styles your message differently to indicate that you're doing an action.");
@@ -542,36 +601,52 @@ function link_replacer(match, p1, p2, offset, string)
     return a;
 }
 		
-function alterForWhisper(str)
-{
-	var ans = str; // Copies the variable so V8 can do it's optimizations.
-	var italics = /\*([^*]+)\*/g; // Matches stuff between * *
-	var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/]*(\.[\w\-_()]+)?(?:[\-\+=&;%@\.\w?#\/]*))/gi; //matches "google.com/" and "blog.google.com/" and but not P.H.D. For details, see http://pastebin.com/8zQJmt9N
-	var subreddit = /\/r\/[A-Za-z0-9][A-Za-z0-9_]{2,20}/g; //matches /r/Hello
-	var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:\:O)|(?:\;\))|(?:\;\())/g;
+
+// function alterForWhisper(str)
+// {
+// 	var ans = str; // Copies the variable so V8 can do it's optimizations.
+// 	var italics = /\*([^*]+)\*/g; // Matches stuff between * *
+// 	var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/]*(\.[\w\-_()]+)?(?:[\-\+=&;%@\.\w?#\/]*))/gi; //matches "google.com/" and "blog.google.com/" and but not P.H.D. For details, see http://pastebin.com/8zQJmt9N
+// 	var subreddit = /\/r\/[A-Za-z0-9][A-Za-z0-9_]{2,20}/g; //matches /r/Hello
+// 	var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:\:O)|(?:&#59\;\))|(?:&#59\;\())/g;
 	
-	ans = ans.replace(italics, "<i>$1</i>");
-	var prevans = ans;
-	ans = ans.replace(link, link_replacer);
-	if(ans === prevans) // Only if the link replacer hasn't done anything yet.
-		ans = ans.replace(subreddit, "<a target='_blank' href='http://www.reddit.com$&'>$&</a>");
-	ans = ans.replace(emoticons, "<strong>$&</strong>");
-}
+// 	ans = ans.replace(italics, "<i>$1</i>");
+// 	var prevans = ans;
+// 	ans = ans.replace(link, link_replacer);
+// 	if(ans === prevans) // Only if the link replacer hasn't done anything yet.
+// 		ans = ans.replace(subreddit, "<a target='_blank' href='http://www.reddit.com$&'>$&</a>");
+// 	ans = ans.replace(emoticons, "<strong>$&</strong>");
+// }
 
 function alterForCommands(str, nick)
 {
 	var ans = str; // Copies the variable so V8 can do it's optimizations.
 	var me = /\/me( .*)/g; // Matches "/me " followed by anything
-	var italics = /\*([^*]+)\*/g; // Matches stuff between * *
+
+	var bold = /\*\*(.+?)\*\*/g; // Matches stuff between ** **
+	var italics = /\*(.+?)\*/g; // Matches stuff between * *
+	var underline = /__(.+?)__/g; // Matches stuff between __ __
+	var strikethrough = /\-\-(.+?)\-\-/g; // Matches stuff between -- --
+	var monospace = /\`(.+?)\`/g; // Matches stuff between ` `
+	var serif = /\`\`(.+?)\`\`/g; // Matches stuff between `` ``
+
 	var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/]*(\.[\w\-_()]+)?(?:[\-\+=&;%@\.\w?#\/]*))/gi; //matches "google.com/" and "blog.google.com/" and but not P.H.D. For details, see http://pastebin.com/8zQJmt9N
 	var subreddit = /\/r\/[A-Za-z0-9][A-Za-z0-9_]{2,20}[^ ]*/g; //matches /r/Hello
-	var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:\:O)|(?:\;\))|(?:\;\())/g;
+
+	var emoticons = /([^ ](?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:[oO]\.[oO])|(?:\>\:\))|(?:\>\:\()|(?:\:O)|(?:&#59\;\))|(?:&#59\;\())/g;
+
+	ans = ans.replace(bold, "<strong>$1</strong>"); 
+	ans = ans.replace(italics, "<i>$1</i>"); 
+	ans = ans.replace(underline, "<span style='text-decoration: underline;'>$1</span>"); 
+	ans = ans.replace(strikethrough, "<span style='text-decoration: line-through;'>$1</span>"); 
+	ans = ans.replace(serif, "<span style='font-family: Georgia, serif'>$1</span>"); 
+	ans = ans.replace(monospace, "<span style='font-family: monospace'>$1</span>"); 
 	
-	ans = ans.replace(italics, "<i>$1</i>");
 	var prevans = ans;
 	ans = ans.replace(link, link_replacer);
 	if(ans === prevans) // Only if the link replacer hasn't done anything yet.
 		ans = ans.replace(subreddit, "<a target='_blank' href='http://www.reddit.com$&'>$&</a>");
+
 	ans = ans.replace(emoticons, "<strong>$&</strong>");
 	if (ans.lastIndexOf('/me ', 0) === 0)
 		return "<span style='font-weight: 300'>*" + nick + (ans.replace(me, '$1')) + "*</span>";

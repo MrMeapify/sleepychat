@@ -1,4 +1,4 @@
-.body { margin: 0; padding: 0; box-sizing: border-box; font: 13px Helvetica, Arial; }
+.body { margin: 0; padding: 0; box-sizing: border-box; font: 1.11em Roboto, Helvetica, Arial; }
 
 .body form { background: #afafaf; padding: 3px; position: fixed; bottom: 0; width: 100%; }
 
@@ -8,7 +8,7 @@
 
 .body #messages li { padding: 5px 10px; font-size: 1.4rem;}
 
-.body #messages .information { font-style: italic; font-weight: bold; }
+.body #messages .information { font-style: italic; font-weight: bold; font: 1.15em Helvetica, Arial;}
 
 .modal-body .input-group { margin-bottom: 20px; }
 
