@@ -270,7 +270,7 @@ io.on('connection', function(socket)
 		{
 			// escape html
 			message=data.message;
-			message = message.replace(/;/g, "&#59;"); 	//escape &
+			message = message.replace(/;/g, "&#59;"); 	//escape ;
 			message = message.replace(/&/g, "&#38;"); 	//escape &
 			message = message.replace(/</g, "&lt;");  	//escape <
 			message = message.replace(/>/g, "&gt;");  	//escape >
@@ -550,7 +550,7 @@ function link_replacer(match, p1, p2, offset, string)
 // 	var italics = /\*([^*]+)\*/g; // Matches stuff between * *
 // 	var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/]*(\.[\w\-_()]+)?(?:[\-\+=&;%@\.\w?#\/]*))/gi; //matches "google.com/" and "blog.google.com/" and but not P.H.D. For details, see http://pastebin.com/8zQJmt9N
 // 	var subreddit = /\/r\/[A-Za-z0-9][A-Za-z0-9_]{2,20}/g; //matches /r/Hello
-// 	var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:\:O)|(?:&#59;\))|(?:&#59;\())/g;
+// 	var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:\:O)|(?:&#59\;\))|(?:&#59\;\())/g;
 	
 // 	ans = ans.replace(italics, "<i>$1</i>");
 // 	var prevans = ans;
@@ -567,7 +567,7 @@ function alterForCommands(str, nick)
 	var italics = /\*([^*]+)\*/g; // Matches stuff between * *
 	var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/]*(\.[\w\-_()]+)?(?:[\-\+=&;%@\.\w?#\/]*))/gi; //matches "google.com/" and "blog.google.com/" and but not P.H.D. For details, see http://pastebin.com/8zQJmt9N
 	var subreddit = /\/r\/[A-Za-z0-9][A-Za-z0-9_]{2,20}[^ ]*/g; //matches /r/Hello
-	var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:\:O)|(?:\;\))|(?:\;\())/g;
+	var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:\:O)|(?:&#59\;\))|(?:&#59\;\())/g;
 	
 	ans = ans.replace(italics, "<i>$1</i>");
 	var prevans = ans;
