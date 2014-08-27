@@ -270,12 +270,12 @@ io.on('connection', function(socket)
 		{
 			// escape html
 			message=data.message;
-			message = message.replace(/;/g, "&#59;"); 	//escape ;
-			message = message.replace(/&/g, "&#38;"); 	//escape &
-			message = message.replace(/</g, "&lt;");  	//escape <
-			message = message.replace(/>/g, "&gt;");  	//escape >
-			message = message.replace(/"/g, "&quot;");	//escape "
-			message = message.replace(/'/g, "&#39;"); 	//escape '
+			message = message.replace(/;/g, "&#59;"); 		//escape ;
+			message = message.replace(/&(?:[^#]|$)/g, "&#38;"); 	//escape &
+			message = message.replace(/</g, "&lt;");  		//escape <
+			message = message.replace(/>/g, "&gt;");  		//escape >
+			message = message.replace(/"/g, "&quot;");		//escape "
+			message = message.replace(/'/g, "&#39;"); 		//escape '
 			message = message.replace(/^\s+|\s+$/g, '');
 			if(message.lastIndexOf('/server ' + secret, 0) === 0)
 			{
