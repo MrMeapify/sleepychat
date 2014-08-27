@@ -17,3 +17,5 @@ li.self { background: #eee; }
 li.highlight { background: #f7ff6a!important; }
 
 .login-modal { font-family: Roboto, Helvetica, Arial; }
+
+.embedded_image { max-height: 250px; }
