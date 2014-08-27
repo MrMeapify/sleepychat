@@ -575,14 +575,14 @@ function alterForCommands(str, nick)
 	var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/]*(\.[\w\-_()]+)?(?:[\-\+=&;%@\.\w?#\/]*))/gi; //matches "google.com/" and "blog.google.com/" and but not P.H.D. For details, see http://pastebin.com/8zQJmt9N
 	var subreddit = /\/r\/[A-Za-z0-9][A-Za-z0-9_]{2,20}[^ ]*/g; //matches /r/Hello
 
-	var emoticons = /([$ ](?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:\:O)|(?:&#59\;\))|(?:&#59\;\())/g;
+	var emoticons = /([^ ](?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:[oO]\.[oO])|(?:\>\:\))|(?:\>\:\()|(?:\:O)|(?:&#59\;\))|(?:&#59\;\())/g;
 
-	ans = ans.replace(bold, "<strong>$1</strong>"); console.log(ans);
-	ans = ans.replace(italics, "<i>$1</i>"); console.log(ans);
-	ans = ans.replace(underline, "<span style='text-decoration: underline;'>$1</span>"); console.log(ans);
-	ans = ans.replace(strikethrough, "<span style='text-decoration: line-through;'>$1</span>"); console.log(ans);
-	ans = ans.replace(serif, "<span style='font-family: Georgia, serif'>$1</span>"); console.log(ans);
-	ans = ans.replace(monospace, "<span style='font-family: monospace'>$1</span>"); console.log(ans);
+	ans = ans.replace(bold, "<strong>$1</strong>"); 
+	ans = ans.replace(italics, "<i>$1</i>"); 
+	ans = ans.replace(underline, "<span style='text-decoration: underline;'>$1</span>"); 
+	ans = ans.replace(strikethrough, "<span style='text-decoration: line-through;'>$1</span>"); 
+	ans = ans.replace(serif, "<span style='font-family: Georgia, serif'>$1</span>"); 
+	ans = ans.replace(monospace, "<span style='font-family: monospace'>$1</span>"); 
 	
 	var prevans = ans;
 	ans = ans.replace(link, link_replacer);
