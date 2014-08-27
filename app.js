@@ -293,7 +293,7 @@ io.on('connection', function(socket)
 				}
 				else
 				{
-					userWanted.socket.emit('whisper', nick, alterForWhisper(message));
+					userWanted.socket.emit('whisper', nick, alterForCommands(message, ""));
 					socket.emit('information', "[INFO] Message sent to " + userWanted.nick + ".");
 				}
 			}
@@ -432,13 +432,13 @@ io.on('connection', function(socket)
                                
 				if (message.length > 6)
 				{
-				 var numString = message.substring(6);
+					var numString = message.substring(6);
                                        
-				   try
-				   {
-				           num = parseInt(numString);
-				   }
-				    catch (e) { }
+					try
+					{
+						num = parseInt(numString);
+					}
+					catch (e) { }
 				}
 				
 				if (num > 10)
@@ -458,7 +458,7 @@ io.on('connection', function(socket)
 				                              
 				for (var i = 0; i < num; i++)
 				{
-				       var rand = Math.floor(Math.random() * (7 - 1)) + 1;
+					var rand = Math.floor(Math.random() * (7 - 1)) + 1;
 
 					result += "<img src='http://www.random.org/dice/dice" + rand.toString() + ".png'/>";
 					//result += rand.toString(); // If you don't want images...
@@ -608,23 +608,6 @@ function link_replacer(match, p1, p2, offset, string)
 		a = "<a target='_blank' href='http://"+p1+"'>"+p1+"</a>";
     return a;
 }
-		
-
-// function alterForWhisper(str)
-// {
-// 	var ans = str; // Copies the variable so V8 can do it's optimizations.
-// 	var italics = /\*([^*]+)\*/g; // Matches stuff between * *
-// 	var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/]*(\.[\w\-_()]+)?(?:[\-\+=&;%@\.\w?#\/]*))/gi; //matches "google.com/" and "blog.google.com/" and but not P.H.D. For details, see http://pastebin.com/8zQJmt9N
-// 	var subreddit = /\/r\/[A-Za-z0-9][A-Za-z0-9_]{2,20}/g; //matches /r/Hello
-// 	var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:\:O)|(?:&#59\;\))|(?:&#59\;\())/g;
-	
-// 	ans = ans.replace(italics, "<i>$1</i>");
-// 	var prevans = ans;
-// 	ans = ans.replace(link, link_replacer);
-// 	if(ans === prevans) // Only if the link replacer hasn't done anything yet.
-// 		ans = ans.replace(subreddit, "<a target='_blank' href='http://www.reddit.com$&'>$&</a>");
-// 	ans = ans.replace(emoticons, "<strong>$&</strong>");
-// }
 
 function alterForCommands(str, nick)
 {
@@ -657,9 +640,21 @@ function alterForCommands(str, nick)
 
 	ans = ans.replace(emoticons, "<strong>$&</strong>");
 	if (ans.lastIndexOf('/me ', 0) === 0)
+	{
 		return "<span style='font-weight: 300'>*" + nick + (ans.replace(me, '$1')) + "*</span>";
+	}
 	else
-		return '&lt;' + nick + '&gt; ' + ans;
+	{
+		if(nick) // Empty string is falsey, so pass empty string to post a message without a nick.
+		{
+			return '&lt;' + nick + '&gt; ' + ans;
+		}
+		else
+		{
+			return ans; // Used for /msg command.
+		}
+	}
+		
 }
 
 function getUserByNick(nick)
