@@ -51,13 +51,7 @@ io.on('connection', function(socket)
 		}
 		if(data.nick.indexOf(' ') != -1 && data.nick !== "MrMeapify " + secret)
 		{
-			var parts = data.nick.split(' ');
-			var newnick = "";
-			for(var i = 0; i < parts.length; i++)
-			{
-				newnick += parts[i];
-			}
-			data.nick = newnick;
+			data.nick = data.nick.replace(' ', '');
 			socket.emit('nickupdate', data.nick);
 		}
 		if(data.nick.toUpperCase() === "MRMEAPIFY")
@@ -533,6 +527,7 @@ io.on('connection', function(socket)
 				socket.emit('information', "[INFO] ");
 				socket.emit('information', "[INFO] While in chat, you can use several commands:");
 				socket.emit('information', "[INFO] -- /help -- Launches this message.");
+				socket.emit('information', "[INFO] -- /formatting -- Shows formatting tips.");
 				socket.emit('information', "[INFO] -- /coinflip -- Publicly flips a coin.");
 				socket.emit('information', "[INFO] -- /banana -- Sends a picture of banana cream pie.");
 				socket.emit('information', "[INFO] -- /roll &lt;number (optional)&gt; -- Publicly rolls up to 10 dice.");
@@ -543,6 +538,15 @@ io.on('connection', function(socket)
 				socket.emit('information', "[INFO] -- /r OR /reply &lt;message&gt; -- Replies to the last person to PM you.");
 				socket.emit('information', "[INFO] -- /room &lt;user&gt; -- Requests a private chat with the specified user.");
 				socket.emit('information', "[INFO] -- /whois &lt;user&gt; -- Display sex and role information for a user.");
+				socket.emit('information', "[INFO] ~~~");
+			}
+			else if(message.lastIndexOf('/formatting', 0) === 0)
+			{
+				socket.emit('information', "[INFO] ~~~");
+				socket.emit('information', "[INFO] -- Text surrounded by double dash (--) is striked through.");
+				socket.emit('information', "[INFO] -- Text surrounded by double underscore (__) is underlined.");
+				socket.emit('information', "[INFO] -- Text surrounded by double asterisk (**) is bolded.");
+				socket.emit('information', "[INFO] -- Text surrounded by single asterisk (*) is italicized.");
 				socket.emit('information', "[INFO] ~~~");
 			}
 			else if(message.lastIndexOf('/', 0) === 0 && !(message.lastIndexOf('/me', 0) === 0))
@@ -639,14 +643,13 @@ function getUsers(users){
 	{
 		if(usercopy[x].inBigChat)
 		{
-			name = usercopy[x].nick 
+			name = usercopy[x].nick;
 			name += (usercopy[x].gender=="male") ? "♂" : ((usercopy[x].gender=="female") ? "♀" : ""); // put a gender symbol by the name
 			name += (usercopy[x].role=="tist") ? "↑" : ((usercopy[x].role=="sub") ? "↓" : "↕"); // put an arrow for subs and tists
 			list += "'" + name + "' ";
 		}
 	}
-	console.log(list)
-	return list
+	return list;
 }
 
 

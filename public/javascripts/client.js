@@ -145,9 +145,6 @@ $(document).ready(function()
 				interval = setInterval(changeTitle, 1000);
 			}
 			
-			console.log(sender);
-			console.log(sender.length);
-			
 			var scroll_down = false;
 			if ($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight)
 			{
