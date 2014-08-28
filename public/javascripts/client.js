@@ -12,6 +12,7 @@ var snd = new Audio("/sounds/notify.ogg");
 var newchatclickedonce = false;
 var bigchat = false;
 var sound = true;
+var lastMessenger = "";
 
 $(document).ready(function()
 {
@@ -154,6 +155,8 @@ $(document).ready(function()
 			}
 			if(sender !== nick)
 			{
+				lastMessenger = sender;
+		
 				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": *" + sender + " whispers: " + msg.substring(6 + msg.split(' ')[1].length) + "*"));
 				$('#messages > li').filter(':last').addClass('highlight');
 			}
@@ -282,7 +285,16 @@ $(document).ready(function()
 			$('#chatbar').unbind('submit');
 			$('#chatbar').submit(function()
 			{
-				socket.emit('chat message', { message: $('#m').val() });
+				var msgInBox = $('#m').val();
+				if (msgInBox.lastIndexOf("/r ", 0) === 0 || msgInBox.lastIndexOf("/reply ", 0) === 0)
+				{
+					if (lastMessenger !== "")
+					{
+						msgInBox = msgInBox.replace("/reply", "/msg " + lastMessenger);
+						msgInBox = msgInBox.replace("/r", "/msg " + lastMessenger);
+					}
+				}
+				socket.emit('chat message', { message: msgInBox });
 				$('#m').val('');
 				return false;
 			});
@@ -340,7 +352,16 @@ $(document).ready(function()
 		$('#chatbar').unbind('submit');
 		$('#chatbar').submit(function()
 		{
-			socket.emit('chat message', { message: $('#m').val() });
+			var msgInBox = $('#m').val();
+			if (msgInBox.lastIndexOf("/r ", 0) === 0 || msgInBox.lastIndexOf("/reply ", 0) === 0)
+			{
+				if (lastMessenger !== "")
+				{
+					msgInBox = msgInBox.replace("/reply", "/msg " + lastMessenger);
+					msgInBox = msgInBox.replace("/r", "/msg " + lastMessenger);
+				}
+			}
+			socket.emit('chat message', { message: msgInBox });
 			$('#m').val('');
 			return false;
 		});
