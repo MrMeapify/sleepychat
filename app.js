@@ -680,11 +680,11 @@ function alterForCommands(str, nick)
 		ans = ans.replace(subreddit, "<a target='_blank' href='http://www.reddit.com$&'>$&</a>");
 
 	ans = ans.replace(emoticons, "<strong>$&</strong>");
-	if (ans.lastIndexOf('/me ', 0) === 0)
+	if (me.test(ans))       // if the message starts with "/me "
 	{
 		return "<span style='font-weight: 300'>*" + nick + (ans.replace(me, '$1')) + "*</span>";
 	}
-	else
+	else  // For some reason MrMeapify doesn't want /me in /msg
 	{
 		if(nick) // Empty string is falsey, so pass empty string to post a message without a nick.
 		{
