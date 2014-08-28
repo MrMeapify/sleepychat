@@ -98,14 +98,7 @@ io.on('connection', function(socket)
 			{
 				socket.join('bigroom');
 				io.to('bigroom').emit('information', "[INFO] " + nick + " has joined.");
-				var usercopy = users;
-				var list = "";
-				for(var x = 0; x < usercopy.length; x++)
-				{
-					if(usercopy[x].inBigChat)
-						list += "'" + usercopy[x].nick + "' ";
-				}
-				socket.emit('information', "[INFO] Users in the chatroom: [ " + list + "]");
+				socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users) + "]");
 			}
 			else
 			{
@@ -530,14 +523,7 @@ io.on('connection', function(socket)
 			}
 			else if((message.lastIndexOf('/list', 0) === 0 || message.lastIndexOf('/names', 0) === 0) && user.inBigChat)
 			{
-				var usercopy = users;
-				var list = "";
-				for(var x = 0; x < usercopy.length; x++)
-				{
-					if(usercopy[x].inBigChat)
-						list += "'" + usercopy[x].nick + "' ";
-				}
-				socket.emit('information', "[INFO] Users in the chatroom: [ " + list + "]");
+				socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users) + "]");
 			}
 			else if(message.lastIndexOf('/help', 0) === 0)
 			{
@@ -645,6 +631,24 @@ function link_replacer(match, p1, p2, offset, string)
 		a = "<a target='_blank' href='http://"+p1+"'>"+p1+"</a>";
     return a;
 }
+
+function getUsers(users){
+	var usercopy = users;
+	var list = "";
+	for(var x = 0; x < usercopy.length; x++)
+	{
+		if(usercopy[x].inBigChat)
+		{
+			name = usercopy[x].nick 
+			name += (usercopy[x].gender=="male") ? "♂" : ((usercopy[x].gender=="female") ? "♀" : ""); // put a gender symbol by the name
+			name += (usercopy[x].role=="tist") ? "↑" : ((usercopy[x].role=="sub") ? "↓" : "↕"); // put an arrow for subs and tists
+			list += "'" + name + "' ";
+		}
+	}
+	console.log(list)
+	return list
+}
+
 
 function alterForCommands(str, nick)
 {
