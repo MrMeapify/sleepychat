@@ -549,13 +549,14 @@ io.on('connection', function(socket)
 				socket.emit('information', "[INFO] -- /help -- Launches this message.");
 				socket.emit('information', "[INFO] -- /coinflip -- Publicly flips a coin.");
 				socket.emit('information', "[INFO] -- /banana -- Sends a picture of banana cream pie.");
-				socket.emit('information', "[INFO] -- /roll number -- Publicly rolls up to 10 dice.");
+				socket.emit('information', "[INFO] -- /roll &lt;number (optional)&gt; -- Publicly rolls up to 10 dice.");
 				socket.emit('information', "[INFO] -- /ignore user -- Ignores all messages for a user.");
-				socket.emit('information', "[INFO] -- /names -- While in the big chatroom, this will list the names of every current user in the chatroom with you.");
-				socket.emit('information', "[INFO] -- /me did a thing -- Styles your message differently to indicate that you're doing an action.");
-				socket.emit('information', "[INFO] -- /msg username message -- Sends a message to username that only they can see in chat.");
-				socket.emit('information', "[INFO] -- /room user -- Requests a private chat with the specified user.");
-				socket.emit('information', "[INFO] -- /whois user -- Display sex and role information for a user.");
+				socket.emit('information', "[INFO] -- /names OR /list -- While in the big chatroom, this will list the names of every current user in the chatroom with you.");
+				socket.emit('information', "[INFO] -- /me &lt;did a thing&gt; -- Styles your message differently to indicate that you're doing an action.");
+				socket.emit('information', "[INFO] -- /msg &lt;username&gt; &lt;message&gt; -- Sends a message to username that only they can see in chat.");
+				socket.emit('information', "[INFO] -- /r OR /reply &lt;message&gt; -- Replies to the last person to PM you.");
+				socket.emit('information', "[INFO] -- /room &lt;user&gt; -- Requests a private chat with the specified user.");
+				socket.emit('information', "[INFO] -- /whois &lt;user&gt; -- Display sex and role information for a user.");
 				socket.emit('information', "[INFO] ~~~");
 			}
 			else if(message.lastIndexOf('/', 0) === 0 && !(message.lastIndexOf('/me', 0) === 0))
