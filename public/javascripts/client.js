@@ -147,6 +147,11 @@ $(document).ready(function()
 			console.log(sender);
 			console.log(sender.length);
 			
+			scroll_down = false;
+			if ($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight)
+			{
+				scroll_down = true;
+			}
 			if(sender !== nick)
 			{
 				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": *" + sender + " whispers: " + msg.substring(6 + msg.split(' ')[1].length) + "*"));
@@ -158,7 +163,7 @@ $(document).ready(function()
 				$('#messages > li').filter(':last').addClass('self');
 			}
 			
-			scrollDown();
+			scrollDown(scroll_down);
 		});
 
 		socket.on('chat message', function(msg, who)
