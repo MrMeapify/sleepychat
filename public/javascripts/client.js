@@ -147,7 +147,7 @@ $(document).ready(function()
 			console.log(sender);
 			console.log(sender.length);
 			
-			scroll_down = false;
+			var scroll_down = false;
 			if ($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight)
 			{
 				scroll_down = true;
@@ -180,7 +180,7 @@ $(document).ready(function()
 				interval = setInterval(changeTitle, 1000);
 			}
 
-			scroll_down = false;
+			var scroll_down = false;
 			if ($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight)
 			{
 				scroll_down = true;
@@ -224,7 +224,7 @@ $(document).ready(function()
 				clearInterval(interval);
 				interval = setInterval(changeTitle, 1000);
 			}
-			scroll_down = false;
+			var scroll_down = false;
 			if ($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight)
 			{
 				scroll_down = true;
@@ -243,7 +243,7 @@ $(document).ready(function()
 			chatting = false;
 			$('#sendbutton').attr('disabled', true);
 			var themsg = '[INFO] ' + nick + ' has disconnected from you.';
-			scroll_down = false;
+			var scroll_down = false;
 			if ($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight)
 			{
 				scroll_down = true;
@@ -262,7 +262,7 @@ $(document).ready(function()
 				clearInterval(interval);
 				interval = setInterval(changeTitle, 1000);
 			}
-			scroll_down = false;
+			var scroll_down = false;
 			if ($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight)
 			{
 				scroll_down = true;
@@ -284,6 +284,7 @@ $(document).ready(function()
 			{
 				socket.emit('chat message', { message: $('#m').val() });
 				$('#m').val('');
+				scrollDown(($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight));
 				return false;
 			});
 		}
@@ -316,7 +317,7 @@ $(document).ready(function()
 				if(chatting)
 				{
 					var msg = "[INFO] You have disconnected from " + lastChat + ".";
-					scroll_down = false;
+					var scroll_down = false;
 					if ($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight)
 					{
 						scroll_down = true;
@@ -332,9 +333,9 @@ $(document).ready(function()
 				newchatclickedonce = true;
 				setTimeout(function ()
 				{
-              		$('#dcbutton').button('reset');
+					$('#dcbutton').button('reset');
 					newchatclickedonce = false;
-            	}, 3000);
+				}, 3000);
 			}
 		});
 		$('#chatbar').unbind('submit');
@@ -342,6 +343,7 @@ $(document).ready(function()
 		{
 			socket.emit('chat message', { message: $('#m').val() });
 			$('#m').val('');
+			scrollDown(($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight));
 			return false;
 		});
 	});
@@ -365,8 +367,8 @@ $(document).ready(function()
 	$(window).focus(function()
 	{
 		notify = false;
-    	clearInterval(interval);
-    	$("title").text(oldTitle);
+		clearInterval(interval);
+		$("title").text(oldTitle);
 	});
 });
 
@@ -381,14 +383,14 @@ function scrollDown(scroll_down)
 window.onbeforeunload = confirmExit;
 function confirmExit()
 {
-    if (chatting || bigchat)
-        return "Wait, you're still in a chat session!";
+	if (chatting || bigchat)
+		return "Wait, you're still in a chat session!";
 }
 
 function changeTitle()
 {
-    document.title = isOldTitle ? oldTitle : newTitle;
-    isOldTitle = !isOldTitle;
+	document.title = isOldTitle ? oldTitle : newTitle;
+	isOldTitle = !isOldTitle;
 }
 
 $("#bugsandfeatures").click(function()
