@@ -86,6 +86,7 @@ io.on('connection', function(socket)
 			hasher.update(nick + new Date().getTime() + "IAmA Salt AMA" + secret);
 			data.token = hasher.digest('hex');
 			console.log(nick + ' ' + data.token);
+			data.AFK = false
 			users.push(data);
 			socket.emit('loggedIn');
 			if(data.inBigChat)
@@ -630,6 +631,28 @@ io.on('connection', function(socket)
 			}
 		}
 	});
+	socket.on('AFK', function(data)
+	{
+		console.log(data);
+		user = getUserByNick(data.nick);
+
+		for(var x = 0; x < users.length; x++)
+		{
+			if(users[x] === user)
+			{
+				users[x].AFK = data.isAFK
+			}
+		}
+		if (data.isAFK)
+		{
+			io.to('bigroom').emit('information', "[INFO] " + data.nick + " is AFK."); 
+		}
+		else
+		{
+			io.to('bigroom').emit('information', "[INFO] " + data.nick + " has returned!"); 
+		}
+
+	});
 });
 
 
@@ -653,10 +676,18 @@ function getUsers(users){
 	{
 		if(usercopy[x].inBigChat)
 		{
-			
-			list += "'" + nameAppend(usercopy[x].nick, usercopy[x].gender, usercopy[x].role) + "' ";
+			console.log(usercopy[x].AFK)
+			if (usercopy[x].AFK)
+			{
+				list += "'" + "<span  style='color: #777777;'>" + nameAppend(usercopy[x].nick, usercopy[x].gender, usercopy[x].role) + "</span>" + "' ";
+			}
+			else
+			{
+				list += "'" + nameAppend(usercopy[x].nick, usercopy[x].gender, usercopy[x].role) + "' ";
+			}
 		}
 	}
+	console.log(list)
 	return list;
 }
 

@@ -10,6 +10,8 @@
 
 .body #messages .information { font-style: italic; font-weight: 700; font: 1.11em Roboto, Helvetica, Arial;}
 
+/*.afk { font-style: italic; font-weight: 700; font: 1.11em Roboto, Helvetica, Arial; color: #111111}*/
+
 .modal-body .input-group { margin-bottom: 20px; }
 
 li.self { background: #eee; }

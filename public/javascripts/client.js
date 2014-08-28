@@ -14,6 +14,10 @@ var bigchat = false;
 var sound = true;
 var lastMessenger = "";
 
+var date = new Date();
+var timeSinceLastMessage = Date.now();
+var isAFK = false;
+
 $(document).ready(function()
 {
 	$('#login-modal').modal({keyboard: false, backdrop: 'static'});
@@ -77,6 +81,8 @@ $(document).ready(function()
 				var type = 'either';
 
 			socket.emit('login', { nick: nick, gender: gender, role: role, chatwith: chatwith, type: type });
+			
+			timeSinceLastMessage = Date.now();
 			$('#login-modal').modal('hide');
 			return false;
 		});
@@ -120,6 +126,8 @@ $(document).ready(function()
 			nick = nick2;
 
 			socket.emit('login', { nick: nick2, gender: gender, role: role, chatwith: chatwith, type: type, inBigChat: true });
+			
+
 			$('#login-modal').modal('hide');
 			return false;
 		});
@@ -144,6 +152,7 @@ $(document).ready(function()
 				clearInterval(interval);
 				interval = setInterval(changeTitle, 1000);
 			}
+
 			
 			var scroll_down = false;
 			if ($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight)
@@ -213,9 +222,9 @@ $(document).ready(function()
 
 			scrollDown(scroll_down);
 		});
-
 		socket.on('information', function(msg)
 		{
+
 			if(notify)
 			{
 				if(sound)
@@ -275,6 +284,7 @@ $(document).ready(function()
 	socket.on('loggedIn', function()
 	{
 		loggedIn = true;
+		timeSinceLastMessage = Date.now();
 		if(bigchat)
 		{
 			$('#dcbutton').parent().hide();
@@ -292,6 +302,7 @@ $(document).ready(function()
 					}
 				}
 				socket.emit('chat message', { message: msgInBox });
+				timeSinceLastMessage = Date.now();
 				$('#m').val('');
 				scrollDown(($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight));
 				return false;
@@ -304,6 +315,7 @@ $(document).ready(function()
 				return false;
 			});
 			socket.emit('getNewChat', { first: true });
+
 		}
 	});
 
@@ -360,6 +372,7 @@ $(document).ready(function()
 				}
 			}
 			socket.emit('chat message', { message: msgInBox });
+			timeSinceLastMessage = Date.now();
 			$('#m').val('');
 			scrollDown(($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight));
 			return false;
@@ -388,6 +401,28 @@ $(document).ready(function()
 		clearInterval(interval);
 		$("title").text(oldTitle);
 	});
+
+	var afkTime = 7*60*1000; // 7 minutes in milliseconds
+
+	var afk = setInterval(function(){
+		if(bigchat)
+		{
+			timenow = Date.now()
+			if ((!isAFK) && (timenow - timeSinceLastMessage > afkTime)) // If we're not AFK, but we haven't said anything in 2 seconds, then mark ourselves as afk
+		    {
+		    	socket.emit('AFK', {isAFK: true, nick: nick})
+		    	console.log("AFK");
+		    	isAFK = true;
+		    }
+		    else if(isAFK && (timenow - timeSinceLastMessage <= afkTime)) // If we're AFK, but we have said something in the last 2 seconds, then mark ourselves as not afk
+		    {
+		    	socket.emit('AFK', {isAFK: false, nick: nick})
+		    	console.log("Not AFK");
+		    	isAFK = false;
+		    }
+		}
+
+	}, 250);
 });
 
 function scrollDown(scroll_down)
