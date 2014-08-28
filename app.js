@@ -649,14 +649,13 @@ function getUsers(users){
 	{
 		if(usercopy[x].inBigChat)
 		{
-			name = usercopy[x].nick 
+			name = usercopy[x].nick;
 			name += (usercopy[x].gender=="male") ? "♂" : ((usercopy[x].gender=="female") ? "♀" : ""); // put a gender symbol by the name
 			name += (usercopy[x].role=="tist") ? "↑" : ((usercopy[x].role=="sub") ? "↓" : "↕"); // put an arrow for subs and tists
 			list += "'" + name + "' ";
 		}
 	}
-	console.log(list)
-	return list
+	return list;
 }
 
 
