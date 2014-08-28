@@ -547,6 +547,7 @@ io.on('connection', function(socket)
 				socket.emit('information', "[INFO] ");
 				socket.emit('information', "[INFO] While in chat, you can use several commands:");
 				socket.emit('information', "[INFO] -- /help -- Launches this message.");
+				socket.emit('information', "[INFO] -- /formatting -- Shows formatting tips.");
 				socket.emit('information', "[INFO] -- /coinflip -- Publicly flips a coin.");
 				socket.emit('information', "[INFO] -- /banana -- Sends a picture of banana cream pie.");
 				socket.emit('information', "[INFO] -- /roll &lt;number (optional)&gt; -- Publicly rolls up to 10 dice.");
@@ -557,6 +558,15 @@ io.on('connection', function(socket)
 				socket.emit('information', "[INFO] -- /r OR /reply &lt;message&gt; -- Replies to the last person to PM you.");
 				socket.emit('information', "[INFO] -- /room &lt;user&gt; -- Requests a private chat with the specified user.");
 				socket.emit('information', "[INFO] -- /whois &lt;user&gt; -- Display sex and role information for a user.");
+				socket.emit('information', "[INFO] ~~~");
+			}
+			else if(message.lastIndexOf('/formatting', 0) === 0)
+			{
+				socket.emit('information', "[INFO] ~~~");
+				socket.emit('information', "[INFO] -- Text surrounded by double dash (--) is striked through.");
+				socket.emit('information', "[INFO] -- Text surrounded by double underscore (__) is underlined.");
+				socket.emit('information', "[INFO] -- Text surrounded by double asterisk (**) is bolded.");
+				socket.emit('information', "[INFO] -- Text surrounded by single asterisk (*) is italicized.");
 				socket.emit('information', "[INFO] ~~~");
 			}
 			else if(message.lastIndexOf('/', 0) === 0 && !(message.lastIndexOf('/me', 0) === 0))
