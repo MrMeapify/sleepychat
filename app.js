@@ -497,6 +497,12 @@ io.on('connection', function(socket)
 					"http://i.imgur.com/QjXfokR.jpg",
 					"http://i.imgur.com/6SdnhYw.jpg",
 					"http://i.imgur.com/oEl6agR.jpg",
+					"http://i.imgur.com/Wv8w7ap.jpg",
+					"http://i.imgur.com/6HB16M4.jpg",
+					"http://i.imgur.com/R6w82ZK.jpg",
+					"http://i.imgur.com/MOHRUxA.jpg",
+					"http://i.imgur.com/R115ftN.jpg",
+					"http://i.imgur.com/4yYHZ4S.jpg",
 				];
 				var rand = Math.floor(Math.random() * pies.length);
 				var result = pies[rand];
