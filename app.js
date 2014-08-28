@@ -51,7 +51,7 @@ io.on('connection', function(socket)
 		}
 		if(data.nick.indexOf(' ') != -1 && data.nick !== "MrMeapify " + secret)
 		{
-			data.nick = data.nick.replace(' ', '');
+			data.nick = data.nick.replace(/ /g, '');
 			socket.emit('nickupdate', data.nick);
 		}
 		if(data.nick.toUpperCase() === "MRMEAPIFY")
