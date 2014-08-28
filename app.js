@@ -98,14 +98,7 @@ io.on('connection', function(socket)
 			{
 				socket.join('bigroom');
 				io.to('bigroom').emit('information', "[INFO] " + nick + " has joined.");
-				var usercopy = users;
-				var list = "";
-				for(var x = 0; x < usercopy.length; x++)
-				{
-					if(usercopy[x].inBigChat)
-						list += "'" + usercopy[x].nick + "' ";
-				}
-				socket.emit('information', "[INFO] Users in the chatroom: [ " + list + "]");
+				socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users) + "]");
 			}
 			else
 			{
@@ -286,12 +279,12 @@ io.on('connection', function(socket)
 		{
 			// escape html
 			message=data.message;
-			message = message.replace(/;/g, "&#59;"); 		//escape ;
-			message = message.replace(/&(?:[^#]|$)/g, "&#38;"); 	//escape &
-			message = message.replace(/</g, "&lt;");  		//escape <
-			message = message.replace(/>/g, "&gt;");  		//escape >
-			message = message.replace(/"/g, "&quot;");		//escape "
-			message = message.replace(/'/g, "&#39;"); 		//escape '
+			message = message.replace(/;/g, "&#59;"); 			//escape ;
+			message = message.replace(/&([^#$])/, "&#38;$1"); 		//escape &
+			message = message.replace(/</g, "&lt;");  			//escape <
+			message = message.replace(/>/g, "&gt;");  			//escape >
+			message = message.replace(/"/g, "&quot;");			//escape "
+			message = message.replace(/'/g, "&#39;"); 			//escape '
 			message = message.replace(/^\s+|\s+$/g, '');
 			if(message.lastIndexOf('/server ' + secret, 0) === 0)
 			{
@@ -530,14 +523,7 @@ io.on('connection', function(socket)
 			}
 			else if((message.lastIndexOf('/list', 0) === 0 || message.lastIndexOf('/names', 0) === 0) && user.inBigChat)
 			{
-				var usercopy = users;
-				var list = "";
-				for(var x = 0; x < usercopy.length; x++)
-				{
-					if(usercopy[x].inBigChat)
-						list += "'" + usercopy[x].nick + "' ";
-				}
-				socket.emit('information', "[INFO] Users in the chatroom: [ " + list + "]");
+				socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users) + "]");
 			}
 			else if(message.lastIndexOf('/help', 0) === 0)
 			{
@@ -547,15 +533,26 @@ io.on('connection', function(socket)
 				socket.emit('information', "[INFO] ");
 				socket.emit('information', "[INFO] While in chat, you can use several commands:");
 				socket.emit('information', "[INFO] -- /help -- Launches this message.");
+				socket.emit('information', "[INFO] -- /formatting -- Shows formatting tips.");
 				socket.emit('information', "[INFO] -- /coinflip -- Publicly flips a coin.");
 				socket.emit('information', "[INFO] -- /banana -- Sends a picture of banana cream pie.");
-				socket.emit('information', "[INFO] -- /roll number -- Publicly rolls up to 10 dice.");
+				socket.emit('information', "[INFO] -- /roll &lt;number (optional)&gt; -- Publicly rolls up to 10 dice.");
 				socket.emit('information', "[INFO] -- /ignore user -- Ignores all messages for a user.");
-				socket.emit('information', "[INFO] -- /names -- While in the big chatroom, this will list the names of every current user in the chatroom with you.");
-				socket.emit('information', "[INFO] -- /me did a thing -- Styles your message differently to indicate that you're doing an action.");
-				socket.emit('information', "[INFO] -- /msg username message -- Sends a message to username that only they can see in chat.");
-				socket.emit('information', "[INFO] -- /room user -- Requests a private chat with the specified user.");
-				socket.emit('information', "[INFO] -- /whois user -- Display sex and role information for a user.");
+				socket.emit('information', "[INFO] -- /names OR /list -- While in the big chatroom, this will list the names of every current user in the chatroom with you.");
+				socket.emit('information', "[INFO] -- /me &lt;did a thing&gt; -- Styles your message differently to indicate that you're doing an action.");
+				socket.emit('information', "[INFO] -- /msg &lt;username&gt; &lt;message&gt; -- Sends a message to username that only they can see in chat.");
+				socket.emit('information', "[INFO] -- /r OR /reply &lt;message&gt; -- Replies to the last person to PM you.");
+				socket.emit('information', "[INFO] -- /room &lt;user&gt; -- Requests a private chat with the specified user.");
+				socket.emit('information', "[INFO] -- /whois &lt;user&gt; -- Display sex and role information for a user.");
+				socket.emit('information', "[INFO] ~~~");
+			}
+			else if(message.lastIndexOf('/formatting', 0) === 0)
+			{
+				socket.emit('information', "[INFO] ~~~");
+				socket.emit('information', "[INFO] -- Text surrounded by double dash (--) is striked through.");
+				socket.emit('information', "[INFO] -- Text surrounded by double underscore (__) is underlined.");
+				socket.emit('information', "[INFO] -- Text surrounded by double asterisk (**) is bolded.");
+				socket.emit('information', "[INFO] -- Text surrounded by single asterisk (*) is italicized.");
 				socket.emit('information', "[INFO] ~~~");
 			}
 			else if(message.lastIndexOf('/', 0) === 0 && !(message.lastIndexOf('/me', 0) === 0))
@@ -644,6 +641,24 @@ function link_replacer(match, p1, p2, offset, string)
 		a = "<a target='_blank' href='http://"+p1+"'>"+p1+"</a>";
     return a;
 }
+
+function getUsers(users){
+	var usercopy = users;
+	var list = "";
+	for(var x = 0; x < usercopy.length; x++)
+	{
+		if(usercopy[x].inBigChat)
+		{
+			name = usercopy[x].nick 
+			name += (usercopy[x].gender=="male") ? "♂" : ((usercopy[x].gender=="female") ? "♀" : ""); // put a gender symbol by the name
+			name += (usercopy[x].role=="tist") ? "↑" : ((usercopy[x].role=="sub") ? "↓" : "↕"); // put an arrow for subs and tists
+			list += "'" + name + "' ";
+		}
+	}
+	console.log(list)
+	return list
+}
+
 
 function alterForCommands(str, nick)
 {
