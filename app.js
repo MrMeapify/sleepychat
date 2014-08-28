@@ -491,12 +491,12 @@ io.on('connection', function(socket)
 			else if(message.lastIndexOf('/banana', 0) === 0)
 			{
 				var pies = [
-					"http://hostedmedia.reimanpub.com/TOH/Images/Photos/37/300x300/exps1055_TH1601C25A.jpg",
-					"http://www.kraftrecipes.com/assets/recipe_images/Black-Bottom_Banana_Cream_Pie.jpg",
-					"http://hostedmedia.reimanpub.com/TOH/Images/Photos/37/300x300/exps26090_THAT2453289D12_14_5b.jpg",
-					"http://mormonmommyblogs.com/wp-content/uploads/2011/04/Banana-Pie.jpg",
-					"http://s3.amazonaws.com/cdn2/cocos_menu-cocos-premium-pies-desserts-banana-cream-slice_full_image.jpg",
-					"http://www.villageinn.com/i/pies/profile/bananacream_main1.jpg",
+					"http://i.imgur.com/Zb2ZnBF.jpg",
+					"http://i.imgur.com/LFdFyTy.jpg",
+					"http://i.imgur.com/EsS9Wj1.jpg",
+					"http://i.imgur.com/QjXfokR.jpg",
+					"http://i.imgur.com/6SdnhYw.jpg",
+					"http://i.imgur.com/oEl6agR.jpg",
 				];
 				var rand = Math.floor(Math.random() * pies.length);
 				var result = pies[rand];
