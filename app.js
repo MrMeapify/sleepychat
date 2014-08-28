@@ -90,8 +90,9 @@ io.on('connection', function(socket)
 			socket.emit('loggedIn');
 			if(data.inBigChat)
 			{
+				user = getUserByNick(nick)
 				socket.join('bigroom');
-				io.to('bigroom').emit('information', "[INFO] " + nick + " has joined.");
+				io.to('bigroom').emit('information', "[INFO] " + nameAppend(user.nick, user.gender, user.role) + " has joined.");
 				socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users) + "]");
 			}
 			else
@@ -633,14 +634,17 @@ io.on('connection', function(socket)
 
 
 
-function link_replacer(match, p1, p2, offset, string)
-{
-    if ((p2 == '.jpg') || (p2 == '.jpeg') || (p2 == '.gif') || (p2 == '.png'))
-		a = "<a target='_blank' href='http://"+p1+"'><img src='http://"+p1+"' class='embedded_image'/></a>";
-    else
-		a = "<a target='_blank' href='http://"+p1+"'>"+p1+"</a>";
-    return a;
+
+// ==================================
+// ==================================
+
+
+function nameAppend(name, gender, role){
+	name += (gender=="male") ? "♂" : ((gender=="female") ? "♀" : ""); // put a gender symbol by the name
+	name += (role=="tist") ? "↑" : ((role=="sub") ? "↓" : "↕"); // put an arrow for subs and tists
+	return name
 }
+
 
 function getUsers(users){
 	var usercopy = users;
@@ -649,13 +653,24 @@ function getUsers(users){
 	{
 		if(usercopy[x].inBigChat)
 		{
-			name = usercopy[x].nick;
-			name += (usercopy[x].gender=="male") ? "♂" : ((usercopy[x].gender=="female") ? "♀" : ""); // put a gender symbol by the name
-			name += (usercopy[x].role=="tist") ? "↑" : ((usercopy[x].role=="sub") ? "↓" : "↕"); // put an arrow for subs and tists
-			list += "'" + name + "' ";
+			
+			list += "'" + nameAppend(usercopy[x].nick, usercopy[x].gender, usercopy[x].role) + "' ";
 		}
 	}
 	return list;
+}
+
+
+// ==================================
+// ==================================
+
+function link_replacer(match, p1, p2, offset, string)
+{
+    if ((p2 == '.jpg') || (p2 == '.jpeg') || (p2 == '.gif') || (p2 == '.png'))
+		a = "<a target='_blank' href='http://"+p1+"'><img src='http://"+p1+"' class='embedded_image'/></a>";
+    else
+		a = "<a target='_blank' href='http://"+p1+"'>"+p1+"</a>";
+    return a;
 }
 
 
@@ -706,6 +721,11 @@ function alterForCommands(str, nick)
 	}
 		
 }
+
+
+// ==================================
+// ==================================
+
 
 function getUserByNick(nick)
 {
