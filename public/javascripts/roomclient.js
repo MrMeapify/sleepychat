@@ -47,24 +47,27 @@ $(document).ready(function()
 		
 		socket.on('chat message', function(msg, who)
 		{
-			if(notify)
+			if(msg)
 			{
-				if(sound)
-					snd.play();
-				clearInterval(interval);
-				interval = setInterval(changeTitle, 1000);
+				if(notify)
+				{
+					if(sound)
+						snd.play();
+					clearInterval(interval);
+					interval = setInterval(changeTitle, 1000);
+				}
+				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
+				if (who === "me")
+				{
+					$('#messages > li').filter(':last').addClass('self');
+				}
+				else if(who === "eval" && msg.lastIndexOf('<' + nick + '>', 0) === 0)
+				{
+					$('#messages > li').filter(':last').addClass('self');
+				}
+				
+				scrollDown();
 			}
-			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
-			if (who === "me")
-			{
-				$('#messages > li').filter(':last').addClass('self');
-			}
-			else if(who === "eval" && msg.lastIndexOf('<' + nick + '>', 0) === 0)
-			{
-				$('#messages > li').filter(':last').addClass('self');
-			}
-			
-			scrollDown();
 		});
 		
 		socket.on('nickupdate', function(newnick)
@@ -74,16 +77,19 @@ $(document).ready(function()
 
 		socket.on('information', function(msg)
 		{
-			if(notify)
+			if(msg)
 			{
-				if(sound)
-					snd.play();
-				newTitle = "*** New message! ***";
-				clearInterval(interval);
-				interval = setInterval(changeTitle, 1000);
+				if(notify)
+				{
+					if(sound)
+						snd.play();
+					newTitle = "*** New message! ***";
+					clearInterval(interval);
+					interval = setInterval(changeTitle, 1000);
+				}
+				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
+				scrollDown();
 			}
-			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
-			scrollDown();
 		});
 
 		socket.on('disconnect', function()

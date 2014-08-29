@@ -267,6 +267,7 @@ io.on('connection', function(socket)
 		}
 		catch(e)
 		{
+			console.log(e)
 			// This prevents us from crashing. 
 			// Everybody, I just want you to know, this was MrMeapify's idea
 		}
@@ -402,7 +403,10 @@ io.on('connection', function(socket)
 					privaterooms.remove(room);
 					io.to(room.token).emit('information', "[INFO] " + nick + " has closed the room.");
 				}
-				catch(e) {}
+				catch(e) 
+				{
+					console.log(e)
+				}
 			}
 			else if(message.lastIndexOf('/kick ' + secret, 0) === 0)
 			{
@@ -449,7 +453,10 @@ io.on('connection', function(socket)
 					{
 						num = parseInt(numString);
 					}
-					catch (e) { }
+					catch (e) 
+					{
+						console.log(e)
+					}
 				}
 				
 				if (num > 10)
@@ -510,6 +517,7 @@ io.on('connection', function(socket)
 				}
 				catch(e)
 				{
+					console.log(e)
 				}
 			}
 			else if(user.inBigChat)
@@ -520,6 +528,7 @@ io.on('connection', function(socket)
 				}
 				catch(e)
 				{
+					console.log(e)
 				}
 			}
 			else
@@ -533,6 +542,7 @@ io.on('connection', function(socket)
 				}
 				catch(e)
 				{
+					console.log(e)
 				}
 			}
 		}
@@ -615,7 +625,8 @@ function sendChatMessage(room, msg, who, user)
 		{
 			console.log(e);
 		}
-	}}
+	}
+}
 
 
 
@@ -704,7 +715,7 @@ function giveHelp(str, socket){
 	else if (str=="/formatting")
 	{
 		for (var x = 0; x < helpFormatting.length; x++)
-			socket.emit(helpCommands[0], helpCommands[1]);
+			socket.emit(helpCommands[x][0], helpCommands[x][1]);
 	}
 }
 
@@ -733,8 +744,6 @@ function alterForCommands(str, user, socket)
 
 	// commands
 	var me = /^\/me( .*)/g; // Matches "/me " followed by anything
-	var help = /^\/help$/g; // Matches "/me " followed by anything
-	var formatting = /^\/formatting( .*)$/g; // Matches "/me " followed by anything
 
 	// formatting
 	var bold = /\*\*(.+?)\*\*/g; // Matches stuff between ** **
@@ -777,6 +786,7 @@ function alterForCommands(str, user, socket)
 	}
 	if (ans == "/names" || ans == "/list")
 	{
+
 		socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users) + "]");
 		return null;
 	}

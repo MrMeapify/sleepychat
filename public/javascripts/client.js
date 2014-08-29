@@ -146,38 +146,39 @@ $(document).ready(function()
 		
 		socket.on('whisper', function(sender, msg)
 		{
-			if(notify)
-			{
-				newTitle = "*** " + sender + " messaged you! ***";
-				clearInterval(interval);
-				interval = setInterval(changeTitle, 1000);
-			}
-
+			if (msg){
+				if(notify)
+				{
+					newTitle = "*** " + sender + " messaged you! ***";
+					clearInterval(interval);
+					interval = setInterval(changeTitle, 1000);
+				}
+				
+				var scroll_down = false;
+				if ($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight)
+				{
+					scroll_down = true;
+				}
+				if(sender !== nick)
+				{
+					lastMessenger = sender;
 			
-			var scroll_down = false;
-			if ($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight)
-			{
-				scroll_down = true;
+					$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": *" + sender + " whispers: " + msg.substring(6 + msg.split(' ')[1].length) + "*"));
+					$('#messages > li').filter(':last').addClass('highlight');
+				}
+				else
+				{
+					$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": *You whisper: " + msg.substring(6 + msg.split(' ')[1].length) + "*"));
+					$('#messages > li').filter(':last').addClass('self');
+				}
+				
+				scrollDown(scroll_down);
 			}
-			if(sender !== nick)
-			{
-				lastMessenger = sender;
-		
-				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": *" + sender + " whispers: " + msg.substring(6 + msg.split(' ')[1].length) + "*"));
-				$('#messages > li').filter(':last').addClass('highlight');
-			}
-			else
-			{
-				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": *You whisper: " + msg.substring(6 + msg.split(' ')[1].length) + "*"));
-				$('#messages > li').filter(':last').addClass('self');
-			}
-			
-			scrollDown(scroll_down);
 		});
 
 		socket.on('chat message', function(msg, who)
 		{
-			if(msg !== null)
+			if(msg)
 			{
 				if(notify)
 				{
@@ -221,28 +222,28 @@ $(document).ready(function()
 				{
 					$('#messages > li').filter(':last').hide();
 				}
-
-				scrollDown(scroll_down);
 			}
 		});
 		socket.on('information', function(msg)
 		{
-
-			if(notify)
+			if (msg)
 			{
-				if(sound)
-					snd.play();
-				newTitle = "*** New message! ***";
-				clearInterval(interval);
-				interval = setInterval(changeTitle, 1000);
+				if(notify)
+				{
+					if(sound)
+						snd.play();
+					newTitle = "*** New message! ***";
+					clearInterval(interval);
+					interval = setInterval(changeTitle, 1000);
+				}
+				var scroll_down = false;
+				if ($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight)
+				{
+					scroll_down = true;
+				}
+				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
+				scrollDown(scroll_down);
 			}
-			var scroll_down = false;
-			if ($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight)
-			{
-				scroll_down = true;
-			}
-			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
-			scrollDown(scroll_down);
 		});
 
 		socket.on('ignore', function(user)
@@ -414,13 +415,11 @@ $(document).ready(function()
 			if ((!isAFK) && (timenow - timeSinceLastMessage > afkTime)) // If we're not AFK, but we haven't said anything in 2 seconds, then mark ourselves as afk
 		    {
 		    	socket.emit('AFK', {isAFK: true, nick: nick, time: timenow - timeSinceLastMessage})
-		    	console.log("AFK");
 		    	isAFK = true;
 		    }
 		    else if(isAFK && (timenow - timeSinceLastMessage <= afkTime)) // If we're AFK, but we have said something in the last 2 seconds, then mark ourselves as not afk
 		    {
 		    	socket.emit('AFK', {isAFK: false, nick: nick, time: timenow - timeSinceLastMessage})
-		    	console.log("Not AFK");
 		    	isAFK = false;
 		    }
 		}
@@ -429,8 +428,6 @@ $(document).ready(function()
 	socket.on('afk', function(nick)
 	{
 		timeSinceLastMessage = Date.now() - (afkTime+1000) // simulate the user not having types something for 8 seconds
-
-		console.log("got back around")
 	});
 });
 
