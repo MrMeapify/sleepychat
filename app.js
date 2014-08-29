@@ -649,7 +649,8 @@ io.on('connection', function(socket)
 		}
 		else
 		{
-			io.to('bigroom').emit('information', "[INFO] " + data.nick + " has returned!"); 
+			if (data.time > (40*60*1000)) // if they've been gone for 40 minutes
+				io.to('bigroom').emit('information', "[INFO] " + data.nick + " has returned!"); 
 		}
 
 	});
