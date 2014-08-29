@@ -335,7 +335,7 @@ io.on('connection', function(socket)
 			}
 			else if(message.lastIndexOf('/room ', 0) === 0)
 			{
-				socket.emit('chat message', alterForCommands(message, nick));
+				socket.emit('chat message', alterForCommands(message, user, socket));
 				var userWanted = getUserByNick(message.substring(6));
 				if(!userWanted)
 				{
@@ -417,18 +417,18 @@ io.on('connection', function(socket)
 				}
 				if(room)
 				{
-					io.to(room.token).emit('chat message', alterForCommands(message, nick), "eval");
+					io.to(room.token).emit('chat message', alterForCommands(message, user, socket), "eval");
 					io.to(room.token).emit('information', "[COINFLIP] " + result);
 				}
 				else if(user.inBigChat)
 				{
-					io.to('bigroom').emit('chat message', alterForCommands(message, nick), "eval");
+					io.to('bigroom').emit('chat message', alterForCommands(message, user, socket), "eval");
 					io.to('bigroom').emit('information', "[COINFLIP] " + result);
 				}
 				else
 				{
-					user.partner.socket.emit('chat message',  alterForCommands(message, nick), "them");
-					socket.emit('chat message', alterForCommands(message, nick), "me");
+					user.partner.socket.emit('chat message',  alterForCommands(message, user, socket), "them");
+					socket.emit('chat message', alterForCommands(message, user, socket), "me");
 					user.partner.socket.emit('information', "[COINFLIP] " + result);
 					socket.emit('information', "[COINFLIP] " + result);
 				}
@@ -474,18 +474,18 @@ io.on('connection', function(socket)
 				
 				if(room)
 				{
-					io.to(room.token).emit('chat message', alterForCommands(message, nick), "eval");
+					io.to(room.token).emit('chat message', alterForCommands(message, user, socket), "eval");
 					io.to(room.token).emit('information', "[DICE ROLL] " + result);
 				}
 				else if(user.inBigChat)
 				{
-					io.to('bigroom').emit('chat message', alterForCommands(message, nick), "eval");
+					io.to('bigroom').emit('chat message', alterForCommands(message, user, socket), "eval");
 					io.to('bigroom').emit('information', "[DICE ROLL] " + result);
 				}
 				else
 				{
-					user.partner.socket.emit('chat message',  alterForCommands(message, nick), "them");
-					socket.emit('chat message', alterForCommands(message, nick), "me");
+					user.partner.socket.emit('chat message',  alterForCommands(message, user, socket), "them");
+					socket.emit('chat message', alterForCommands(message, user, socket), "me");
 					user.partner.socket.emit('information', "[DICE ROLL] " + result);
 					socket.emit('information', "[DICE ROLL] " + result);
 				}
@@ -510,15 +510,15 @@ io.on('connection', function(socket)
 				var result = pies[rand];
 				if(room)
 				{
-					io.to(room.token).emit('chat message', alterForCommands(result, nick), "eval");
+					io.to(room.token).emit('chat message', alterForCommands(result, user), "eval");
 				}
 				else if(user.inBigChat)
 				{
-					io.to('bigroom').emit('chat message', alterForCommands(result, nick), "eval");
+					io.to('bigroom').emit('chat message', alterForCommands(result, user), "eval");
 				}
 				else
 				{
-					var toSend = alterForCommands(result, nick);
+					var toSend = alterForCommands(result, user);
 					user.partner.socket.emit('chat message', toSend, "them");
 					socket.emit('chat message', toSend, "me");
 				}
@@ -559,7 +559,7 @@ io.on('connection', function(socket)
 			}
 			else if(message.lastIndexOf('/', 0) === 0 && !(message.lastIndexOf('/me', 0) === 0))
 			{
-				socket.emit('chat message', alterForCommands(message, nick));
+				socket.emit('chat message', alterForCommands(message, user, socket));
 				socket.emit('information', "[INFO] Command not recognized. Try /help for a list of commands.");
 			}
 			else if(room)
@@ -567,7 +567,7 @@ io.on('connection', function(socket)
 				console.log('outputting message');
 				try
 				{
-					io.to(room.token).emit('chat message', alterForCommands(message, nick), "eval");
+					io.to(room.token).emit('chat message', alterForCommands(message, user, socket), "eval");
 					privaterooms.remove(room);
 					room.lastchat = new Date().getTime();
 					privaterooms.push(room);
@@ -581,7 +581,7 @@ io.on('connection', function(socket)
 			{
 				try
 				{
-					io.to('bigroom').emit('chat message', alterForCommands(message, nick), "eval");
+					io.to('bigroom').emit('chat message', alterForCommands(message, user, socket), "eval");
 				}
 				catch(e)
 				{
@@ -594,8 +594,8 @@ io.on('connection', function(socket)
 				{
 					//user.partner.socket.emit('chat message', '<' + nick + '> ' + message);
 					//socket.emit('chat message', '<' + nick + '> ' + message);
-					user.partner.socket.emit('chat message',  alterForCommands(message, nick), "them");
-					socket.emit('chat message', alterForCommands(message, nick), "me");
+					user.partner.socket.emit('chat message',  alterForCommands(message, user, socket), "them");
+					socket.emit('chat message', alterForCommands(message, user, socket), "me");
 				}
 				catch(e)
 				{
@@ -705,8 +705,9 @@ function link_replacer(match, p1, p2, offset, string)
 }
 
 
-function alterForCommands(str, nick)
+function alterForCommands(str, user, socket)
 {
+	console.log(str)
 	var ans = str; // Copies the variable so V8 can do it's optimizations.
 	var me = /\/me( .*)/g; // Matches "/me " followed by anything
 
@@ -735,15 +736,20 @@ function alterForCommands(str, nick)
 		ans = ans.replace(subreddit, "<a target='_blank' href='http://www.reddit.com$&'>$&</a>");
 
 	ans = ans.replace(emoticons, "<strong>$&</strong>");
-	if (me.test(ans))       // if the message starts with "/me "
+
+	if (ans == "/afk")
 	{
-		return "<span style='font-weight: 300'>*" + nick + (ans.replace(me, '$1')) + "*</span>";
+		socket.emit('afk');
+	}
+	else if (me.test(ans))       // if the message starts with "/me "
+	{
+		return "<span style='font-weight: 300'>*" + user.nick + (ans.replace(me, '$1')) + "*</span>";
 	}
 	else  // For some reason MrMeapify doesn't want /me in /msg
 	{
-		if(nick) // Empty string is falsey, so pass empty string to post a message without a nick.
+		if(user.nick) // Empty string is falsey, so pass empty string to post a message without a user.nick.
 		{
-			return '&lt;' + nick + '&gt; ' + ans;
+			return '&lt;' + user.nick + '&gt; ' + ans;
 		}
 		else
 		{

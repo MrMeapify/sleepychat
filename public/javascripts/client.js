@@ -177,50 +177,53 @@ $(document).ready(function()
 
 		socket.on('chat message', function(msg, who)
 		{
-			if(notify)
+			if(msg !== null)
 			{
-				if(sound)
-					snd.play();
-				if(bigchat)
-					newTitle = "*** People are talking! ***";
-				else
-					newTitle = "*** " + lastChat + " messaged you! ***";
-				clearInterval(interval);
-				interval = setInterval(changeTitle, 1000);
-			}
-
-			var scroll_down = false;
-			if ($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight)
-			{
-				scroll_down = true;
-			}
-
-			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
-			var user = msg.match(/&lt;(.+)&gt;/);
-			if(who === "me")
-			{
-				$('#messages > li').filter(':last').addClass('self');
-			}
-			else if(who === "eval" && msg.lastIndexOf('&lt;' + nick + '&gt;', 0) === 0)
-			{
-				$('#messages > li').filter(':last').addClass('self');
-			}
-			
-			try
-			{
-				if(bigchat && msg.split('&gt;')[1].substring(1).indexOf(nick) != -1)
+				if(notify)
 				{
-					$('#messages > li').filter(':last').addClass('highlight');
+					if(sound)
+						snd.play();
+					if(bigchat)
+						newTitle = "*** People are talking! ***";
+					else
+						newTitle = "*** " + lastChat + " messaged you! ***";
+					clearInterval(interval);
+					interval = setInterval(changeTitle, 1000);
 				}
-			}
-			catch(e) {}
-			
-			if (user && ignore_list.indexOf(user[1]) != -1)
-			{
-				$('#messages > li').filter(':last').hide();
-			}
 
-			scrollDown(scroll_down);
+				var scroll_down = false;
+				if ($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight)
+				{
+					scroll_down = true;
+				}
+
+				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
+				var user = msg.match(/&lt;(.+)&gt;/);
+				if(who === "me")
+				{
+					$('#messages > li').filter(':last').addClass('self');
+				}
+				else if(who === "eval" && msg.lastIndexOf('&lt;' + nick + '&gt;', 0) === 0)
+				{
+					$('#messages > li').filter(':last').addClass('self');
+				}
+				
+				try
+				{
+					if(bigchat && msg.split('&gt;')[1].substring(1).indexOf(nick) != -1)
+					{
+						$('#messages > li').filter(':last').addClass('highlight');
+					}
+				}
+				catch(e) {}
+				
+				if (user && ignore_list.indexOf(user[1]) != -1)
+				{
+					$('#messages > li').filter(':last').hide();
+				}
+
+				scrollDown(scroll_down);
+			}
 		});
 		socket.on('information', function(msg)
 		{
@@ -402,7 +405,8 @@ $(document).ready(function()
 		$("title").text(oldTitle);
 	});
 
-	var afkTime = 7*60*1000; // 7 minutes in milliseconds
+	// var afkTime = 7*60*1000; // 7 minutes in milliseconds
+	var afkTime = 7000
 
 	var afk = setInterval(function(){
 		if(bigchat)
@@ -423,6 +427,12 @@ $(document).ready(function()
 		}
 
 	}, 250);
+	socket.on('afk', function(nick)
+	{
+		timeSinceLastMessage = Date.now() - (afkTime+1000) // simulate the user not having types something for 8 seconds
+
+		console.log("got back around")
+	});
 });
 
 function scrollDown(scroll_down)
