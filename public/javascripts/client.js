@@ -405,8 +405,7 @@ $(document).ready(function()
 		$("title").text(oldTitle);
 	});
 
-	// var afkTime = 7*60*1000; // 7 minutes in milliseconds
-	var afkTime = 7000
+	var afkTime = 7*60*1000; // 7 minutes in milliseconds
 
 	var afk = setInterval(function(){
 		if(bigchat)
