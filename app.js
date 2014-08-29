@@ -33,7 +33,7 @@ var users = [];
 var privaterooms = [];
 
 
-
+commandsInAFC = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie'] // commands that alterForCommands handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
 
 
 io.on('connection', function(socket)
@@ -501,10 +501,21 @@ io.on('connection', function(socket)
 					socket.emit('information', "[DICE ROLL] " + result);
 				}
 			}
-			else if(message.lastIndexOf('/', 0) === 0 && !(message.lastIndexOf('/me', 0) === 0))
+			else if(message.lastIndexOf('/', 0) === 0)
 			{
-				socket.emit('chat message', alterForCommands(message, user, socket));
-				socket.emit('information', "[INFO] Command not recognized. Try /help for a list of commands.");
+				inAFC = false; // is it matched by alterForCommands?
+				for(var x = 0; x < commandsInAFC.length; x++)
+				{
+					if(message.lastIndexOf(commandsInAFC[x]) == 0)
+					{
+						inAFC = true
+					}
+				}
+					socket.emit('chat message', alterForCommands(message, user, socket));
+				if(!inAFC)
+				{
+					socket.emit('information', "[INFO] Command not recognized. Try /help for a list of commands.");
+				}
 			}
 			else if(room)
 			{
@@ -741,6 +752,8 @@ function link_replacer(match, p1, p2, offset, string)
 function alterForCommands(str, user, socket)
 {
 	var ans = str; // Copies the variable so V8 can do it's optimizations.
+	
+	console.log(user.nick + ": " + ans)
 
 	// commands
 	var me = /^\/me( .*)/g; // Matches "/me " followed by anything
@@ -779,7 +792,6 @@ function alterForCommands(str, user, socket)
 		ans = ans.replace(subreddit, "<a target='_blank' href='http://www.reddit.com$&'>$&</a>");
 
 	// commands
-	console.log(ans)
 	if (ans == "/banana" || ans == "/banana-cream-pie")
 	{
 		return giveBanana()
