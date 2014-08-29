@@ -33,7 +33,7 @@ var users = [];
 var privaterooms = [];
 
 
-commandsInAFC = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie'] // commands that alterForCommands handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
+commandsInAFC = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping'] // commands that alterForCommands handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
 
 
 io.on('connection', function(socket)
@@ -792,23 +792,30 @@ function alterForCommands(str, user, socket)
 		ans = ans.replace(subreddit, "<a target='_blank' href='http://www.reddit.com$&'>$&</a>");
 
 	// commands
-	if (ans == "/banana" || ans == "/banana-cream-pie")
+	if (ans == "/ping")
+	{
+		socket.emit('chat message', ans, "me");
+		socket.emit('information', '[INFO] Pong');
+	}
+	else if (ans == "/banana" || ans == "/banana-cream-pie")
 	{
 		return giveBanana()
 	}
-	if (ans == "/names" || ans == "/list")
+	else if (ans == "/names" || ans == "/list")
 	{
-
+		socket.emit('chat message', ans, "me");
 		socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users) + "]");
 		return null;
 	}
-	if (ans == "/help" || ans == "/formatting")
+	else if (ans == "/help" || ans == "/formatting")
 	{
+		socket.emit('chat message', ans, "me");
 		giveHelp(ans, socket)
 		return null;
 	}
 	else if (ans == "/afk")
 	{
+		socket.emit('chat message', ans, "me");
 		socket.emit('afk');
 		return null;
 	}
