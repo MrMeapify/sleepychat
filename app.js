@@ -512,13 +512,9 @@ io.on('connection', function(socket)
 				];
 				var rand = Math.floor(Math.random() * pies.length);
 				var result = pies[rand];
-				if(room)
+				if(user.inBigChat || room)
 				{
-					io.to(room.token).emit('chat message', alterForCommands(result, user), "eval");
-				}
-				else if(user.inBigChat)
-				{
-					io.to('bigroom').emit('chat message', alterForCommands(result, user), "eval");
+					sendChatMessage(room, alterForCommands(result, user), "eval", user)
 				}
 				else
 				{
@@ -526,13 +522,6 @@ io.on('connection', function(socket)
 					user.partner.socket.emit('chat message', toSend, "them");
 					socket.emit('chat message', toSend, "me");
 				}
-			}
-			else if((message.lastIndexOf('/list', 0) === 0 || message.lastIndexOf('/names', 0) === 0) && user.inBigChat)
-			{
-				socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users) + "]");
-			}
-			else if(message.lastIndexOf('/formatting', 0) === 0)
-			{
 			}
 			else if(message.lastIndexOf('/', 0) === 0 && !(message.lastIndexOf('/me', 0) === 0))
 			{
@@ -629,6 +618,34 @@ io.on('connection', function(socket)
 });
 
 
+// ==================================
+// ==================================
+
+function sendChatMessage(room, msg, who, user)
+{
+	if(room !== null)
+	{
+		try
+		{
+			io.to(room.token).emit('chat message', msg, who);
+		}
+		catch(e)
+		{
+			console.log(e);
+		}
+	}
+	else if (user.inBigChat)
+	{
+		try
+		{
+			io.to('bigroom').emit('chat message', msg, who);
+		}
+		catch(e)
+		{
+			console.log(e);
+		}
+	}}
+
 
 
 // ==================================
@@ -665,6 +682,19 @@ function getUsers(users){
 
 // ==================================
 // ==================================
+
+var pies = ["http://i.imgur.com/Zb2ZnBF.jpg",
+			"http://i.imgur.com/LFdFyTy.jpg",
+			"http://i.imgur.com/EsS9Wj1.jpg",
+			"http://i.imgur.com/QjXfokR.jpg",
+			"http://i.imgur.com/6SdnhYw.jpg",
+			"http://i.imgur.com/oEl6agR.jpg",
+			"http://i.imgur.com/Wv8w7ap.jpg",
+			"http://i.imgur.com/6HB16M4.jpg",
+			"http://i.imgur.com/R6w82ZK.jpg",
+			"http://i.imgur.com/MOHRUxA.jpg",
+			"http://i.imgur.com/R115ftN.jpg",
+			"http://i.imgur.com/4yYHZ4S.jpg"];
 
 var helpCommands = 	[['information', "[INFO] ~~~"],
 					['information', "[INFO] Welcome to Sleepychat!"],
@@ -705,6 +735,12 @@ function giveHelp(str, socket){
 		for (var x = 0; x < helpFormatting.length; x++)
 			socket.emit(helpCommands[0], helpCommands[1]);
 	}
+}
+
+function giveBanana()
+{
+	var rand = Math.floor(Math.random() * pies.length);
+	var result = pies[rand];
 }
 
 
@@ -761,9 +797,14 @@ function alterForCommands(str, user, socket)
 		ans = ans.replace(subreddit, "<a target='_blank' href='http://www.reddit.com$&'>$&</a>");
 
 	// commands
+	console.log(ans)
+	if (ans == "/names" || ans == "/list")
+	{
+		socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users) + "]");
+		return null;
+	}
 	if (ans == "/help" || ans == "/formatting")
 	{
-		console.log("inside if #1")
 		giveHelp(ans, socket)
 		return null;
 	}
