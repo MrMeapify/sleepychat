@@ -32,6 +32,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 var users = [];
 var privaterooms = [];
 
+
+
+
+
 io.on('connection', function(socket)
 {
 	var nick = "";
@@ -276,7 +280,7 @@ io.on('connection', function(socket)
 			// escape html
 			message=data.message;
 			message = message.replace(/;/g, "&#59;"); 			//escape ;
-			message = message.replace(/&([^#$])/, "&#38;$1"); 		//escape &
+			message = message.replace(/&([^#$])/, "&#38;$1");	//escape &
 			message = message.replace(/</g, "&lt;");  			//escape <
 			message = message.replace(/>/g, "&gt;");  			//escape >
 			message = message.replace(/"/g, "&quot;");			//escape "
@@ -527,35 +531,8 @@ io.on('connection', function(socket)
 			{
 				socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users) + "]");
 			}
-			else if(message.lastIndexOf('/help', 0) === 0)
-			{
-				socket.emit('information', "[INFO] ~~~");
-				socket.emit('information', "[INFO] Welcome to Sleepychat!");
-				socket.emit('information', "[INFO] Sleepychat was created by MrMeapify in an attempt to solve the problems that chat sites before it posed the hypnosis community.");
-				socket.emit('information', "[INFO] ");
-				socket.emit('information', "[INFO] While in chat, you can use several commands:");
-				socket.emit('information', "[INFO] -- /help -- Launches this message.");
-				socket.emit('information', "[INFO] -- /formatting -- Shows formatting tips.");
-				socket.emit('information', "[INFO] -- /coinflip -- Publicly flips a coin.");
-				socket.emit('information', "[INFO] -- /banana -- Sends a picture of banana cream pie.");
-				socket.emit('information', "[INFO] -- /roll &lt;number (optional)&gt; -- Publicly rolls up to 10 dice.");
-				socket.emit('information', "[INFO] -- /ignore user -- Ignores all messages for a user.");
-				socket.emit('information', "[INFO] -- /names OR /list -- While in the big chatroom, this will list the names of every current user in the chatroom with you.");
-				socket.emit('information', "[INFO] -- /me &lt;did a thing&gt; -- Styles your message differently to indicate that you're doing an action.");
-				socket.emit('information', "[INFO] -- /msg &lt;username&gt; &lt;message&gt; -- Sends a message to username that only they can see in chat.");
-				socket.emit('information', "[INFO] -- /r OR /reply &lt;message&gt; -- Replies to the last person to PM you.");
-				socket.emit('information', "[INFO] -- /room &lt;user&gt; -- Requests a private chat with the specified user.");
-				socket.emit('information', "[INFO] -- /whois &lt;user&gt; -- Display sex and role information for a user.");
-				socket.emit('information', "[INFO] ~~~");
-			}
 			else if(message.lastIndexOf('/formatting', 0) === 0)
 			{
-				socket.emit('information', "[INFO] ~~~");
-				socket.emit('information', "[INFO] -- Text surrounded by double dash (--) is striked through.");
-				socket.emit('information', "[INFO] -- Text surrounded by double underscore (__) is underlined.");
-				socket.emit('information', "[INFO] -- Text surrounded by double asterisk (**) is bolded.");
-				socket.emit('information', "[INFO] -- Text surrounded by single asterisk (*) is italicized.");
-				socket.emit('information', "[INFO] ~~~");
 			}
 			else if(message.lastIndexOf('/', 0) === 0 && !(message.lastIndexOf('/me', 0) === 0))
 			{
@@ -564,7 +541,6 @@ io.on('connection', function(socket)
 			}
 			else if(room)
 			{
-				console.log('outputting message');
 				try
 				{
 					io.to(room.token).emit('chat message', alterForCommands(message, user, socket), "eval");
@@ -574,7 +550,6 @@ io.on('connection', function(socket)
 				}
 				catch(e)
 				{
-					console.log('Bad message. ' + nick + ' ... ' + message + e);
 				}
 			}
 			else if(user.inBigChat)
@@ -585,7 +560,6 @@ io.on('connection', function(socket)
 				}
 				catch(e)
 				{
-					console.log('Bad message. ' + nick + ' ... ' + message + e);
 				}
 			}
 			else
@@ -599,7 +573,6 @@ io.on('connection', function(socket)
 				}
 				catch(e)
 				{
-					console.log('Bad message. ' + nick + ' ... ' + message);
 				}
 			}
 		}
@@ -633,7 +606,6 @@ io.on('connection', function(socket)
 	});
 	socket.on('AFK', function(data)
 	{
-		console.log(data);
 		user = getUserByNick(data.nick);
 
 		for(var x = 0; x < users.length; x++)
@@ -677,7 +649,6 @@ function getUsers(users){
 	{
 		if(usercopy[x].inBigChat)
 		{
-			console.log(usercopy[x].AFK)
 			if (usercopy[x].AFK)
 			{
 				list += "'" + "<span  style='color: #777777;'>" + nameAppend(usercopy[x].nick, usercopy[x].gender, usercopy[x].role) + "</span>" + "' ";
@@ -688,13 +659,54 @@ function getUsers(users){
 			}
 		}
 	}
-	console.log(list)
 	return list;
 }
 
 
 // ==================================
 // ==================================
+
+var helpCommands = 	[['information', "[INFO] ~~~"],
+					['information', "[INFO] Welcome to Sleepychat!"],
+					['information', "[INFO] Sleepychat was created by MrMeapify in an attempt to solve the problems that chat sites before it posed the hypnosis community."],
+					['information', "[INFO] "],
+					['information', "[INFO] While in chat, you can use several commands:"],
+					['information', "[INFO] -- /help -- Launches this message. Duh"],
+					['information', "[INFO] -- /formatting -- Shows formatting tips."],
+					['information', "[INFO] -- /coinflip -- Publicly flips a coin."],
+					['information', "[INFO] -- /banana -- Sends a picture of banana cream pie."],
+					['information', "[INFO] -- /roll &lt;number (optional)&gt; -- Publicly rolls up to 10 dice."],
+					['information', "[INFO] -- /ignore user -- Ignores all messages for a user."],
+					['information', "[INFO] -- /names OR /list -- While in the big chatroom, this will list the names of every current user in the chatroom with you."],
+					['information', "[INFO] -- /me &lt;did a thing&gt; -- Styles your message differently to indicate that you're doing an action."],
+					['information', "[INFO] -- /msg &lt;username&gt; &lt;message&gt; -- Sends a message to username that only they can see in chat."],
+					['information', "[INFO] -- /r OR /reply &lt;message&gt; -- Replies to the last person to PM you."],
+					['information', "[INFO] -- /room &lt;user&gt; -- Requests a private chat with the specified user."],
+					['information', "[INFO] -- /whois &lt;user&gt; -- Display sex and role information for a user."],
+					['information', "[INFO] ~~~"]];
+
+var helpFormatting = [['information', "[INFO] ~~~"],
+					['information', "[INFO] -- Text surrounded by double dash (--) is striked through."],
+					['information', "[INFO] -- Text surrounded by double underscore (__) is underlined."],
+					['information', "[INFO] -- Text surrounded by double asterisk (**) is bolded."],
+					['information', "[INFO] -- Text surrounded by single asterisk (*) is italicized."],
+					['information', "[INFO] -- There's a couple more, but you might have to ask around..."],
+					['information', "[INFO] ~~~"]];
+
+
+function giveHelp(str, socket){
+	if (str=="/help")
+	{
+		for(var x = 0; x < helpCommands.length; x++)
+			socket.emit(helpCommands[x][0], helpCommands[x][1]);		// for example, socket.emit(['information', "[INFO] ~~~"][0], ['information', "[INFO] ~~~"][1])
+	}
+	else if (str=="/formatting")
+	{
+		for (var x = 0; x < helpFormatting.length; x++)
+			socket.emit(helpCommands[0], helpCommands[1]);
+	}
+}
+
 
 function link_replacer(match, p1, p2, offset, string)
 {
@@ -708,10 +720,14 @@ function link_replacer(match, p1, p2, offset, string)
 
 function alterForCommands(str, user, socket)
 {
-	console.log(str)
 	var ans = str; // Copies the variable so V8 can do it's optimizations.
-	var me = /\/me( .*)/g; // Matches "/me " followed by anything
 
+	// commands
+	var me = /^\/me( .*)/g; // Matches "/me " followed by anything
+	var help = /^\/help$/g; // Matches "/me " followed by anything
+	var formatting = /^\/formatting( .*)$/g; // Matches "/me " followed by anything
+
+	// formatting
 	var bold = /\*\*(.+?)\*\*/g; // Matches stuff between ** **
 	var italics = /\*(.+?)\*/g; // Matches stuff between * *
 	var underline = /__(.+?)__/g; // Matches stuff between __ __
@@ -719,32 +735,42 @@ function alterForCommands(str, user, socket)
 	var monospace = /\`(.+?)\`/g; // Matches stuff between ` `
 	var serif = /\`\`(.+?)\`\`/g; // Matches stuff between `` ``
 
+
 	var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/]*(\.[\w\-_()]+)?(?:[\-\+=&;%@\.\w?#\/]*))/gi; //matches "google.com/" and "blog.google.com/" and but not P.H.D. For details, see http://pastebin.com/8zQJmt9N
 	var subreddit = /\/r\/[A-Za-z0-9][A-Za-z0-9_]{2,20}[^ ]*/g; //matches /r/Hello
 
 	var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:[oO]\.[oO])|(?:\>\:\))|(?:\>\:\()|(?:\:O)|(?:&#59\;\))|(?:&#59\;\())/g;
 
+
+
+	// implementations
+
+	// formatting
 	ans = ans.replace(bold, "<strong>$1</strong>"); 
 	ans = ans.replace(italics, "<i>$1</i>"); 
 	ans = ans.replace(underline, "<span style='text-decoration: underline;'>$1</span>"); 
 	ans = ans.replace(strikethrough, "<span style='text-decoration: line-through;'>$1</span>"); 
 	ans = ans.replace(serif, "<span style='font-family: Georgia, serif'>$1</span>"); 
 	ans = ans.replace(monospace, "<span style='font-family: monospace'>$1</span>"); 
+	ans = ans.replace(emoticons, "<strong>$&</strong>");
+	ans = ans.replace(me, "<span style='font-weight: 300'>*" + user.nick + " $1*</span>"); // "/me" is really formatting-y, so this is where I'm putting it
 	
 	var prevans = ans;
 	ans = ans.replace(link, link_replacer);
 	if(ans === prevans) // Only if the link replacer hasn't done anything yet.
 		ans = ans.replace(subreddit, "<a target='_blank' href='http://www.reddit.com$&'>$&</a>");
 
-	ans = ans.replace(emoticons, "<strong>$&</strong>");
-
-	if (ans == "/afk")
+	// commands
+	if (ans == "/help" || ans == "/formatting")
+	{
+		console.log("inside if #1")
+		giveHelp(ans, socket)
+		return null;
+	}
+	else if (ans == "/afk")
 	{
 		socket.emit('afk');
-	}
-	else if (me.test(ans))       // if the message starts with "/me "
-	{
-		return "<span style='font-weight: 300'>*" + user.nick + (ans.replace(me, '$1')) + "*</span>";
+		return null;
 	}
 	else  // For some reason MrMeapify doesn't want /me in /msg
 	{
@@ -757,6 +783,7 @@ function alterForCommands(str, user, socket)
 			return ans; // Used for /msg command.
 		}
 	}
+	return null;
 		
 }
 
