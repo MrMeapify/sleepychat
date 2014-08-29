@@ -155,7 +155,7 @@ $(document).ready(function()
 				}
 				
 				var scroll_down = false;
-				if ($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight)
+				if ($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight)
 				{
 					scroll_down = true;
 				}
@@ -193,7 +193,7 @@ $(document).ready(function()
 				}
 
 				var scroll_down = false;
-				if ($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight)
+				if ($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight)
 				{
 					scroll_down = true;
 				}
@@ -237,7 +237,7 @@ $(document).ready(function()
 					interval = setInterval(changeTitle, 1000);
 				}
 				var scroll_down = false;
-				if ($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight)
+				if ($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight)
 				{
 					scroll_down = true;
 				}
@@ -257,7 +257,7 @@ $(document).ready(function()
 			$('#sendbutton').attr('disabled', true);
 			var themsg = '[INFO] ' + nick + ' has disconnected from you.';
 			var scroll_down = false;
-			if ($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight)
+			if ($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight)
 			{
 				scroll_down = true;
 			}
@@ -276,7 +276,7 @@ $(document).ready(function()
 				interval = setInterval(changeTitle, 1000);
 			}
 			var scroll_down = false;
-			if ($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight)
+			if ($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight)
 			{
 				scroll_down = true;
 			}
@@ -308,7 +308,7 @@ $(document).ready(function()
 				socket.emit('chat message', { message: msgInBox });
 				timeSinceLastMessage = Date.now();
 				$('#m').val('');
-				scrollDown(($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight));
+				scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
 				return false;
 			});
 		}
@@ -343,7 +343,7 @@ $(document).ready(function()
 				{
 					var msg = "[INFO] You have disconnected from " + lastChat + ".";
 					var scroll_down = false;
-					if ($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight)
+					if ($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight)
 					{
 						scroll_down = true;
 					}
@@ -378,7 +378,7 @@ $(document).ready(function()
 			socket.emit('chat message', { message: msgInBox });
 			timeSinceLastMessage = Date.now();
 			$('#m').val('');
-			scrollDown(($(window).scrollTop() + $(window).height() + 50 >= $('body,html')[0].scrollHeight));
+			scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
 			return false;
 		});
 	});
