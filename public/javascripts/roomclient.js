@@ -127,31 +127,6 @@ $(document).ready(function()
     	$("title").text(oldTitle);
 	});
 
-
-	//var afkTime = 7*60*1000; // 7 minutes in milliseconds
-	var afkTime = 3000
-
-	var afk = setInterval(function(){
-		timenow = Date.now()
-		if ((!isAFK) && (timenow - timeSinceLastMessage > afkTime)) // If we're not AFK, but we haven't said anything in 2 seconds, then mark ourselves as afk
-	    {
-	    	socket.emit('AFK', {isAFK: true, nick: nick, time: timenow - timeSinceLastMessage, inPrivate: true})
-	    	isAFK = true;
-	    	console.log("afk")
-	    }
-	    else if(isAFK && (timenow - timeSinceLastMessage <= afkTime)) // If we're AFK, but we have said something in the last 2 seconds, then mark ourselves as not afk
-	    {
-	    	socket.emit('AFK', {isAFK: false, nick: nick, time: timenow - timeSinceLastMessage, inPrivate: true})
-	    	console.log("not afk")
-	    	isAFK = false;
-	    }
-
-	}, 250);
-	socket.on('afk', function(nick)
-	{
-		timeSinceLastMessage = Date.now() - (afkTime+1000) // simulate the user not having types something for 8 seconds
-	    console.log("You spin me right round...")
-	});
 });
 
 function scrollDown()

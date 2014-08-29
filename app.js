@@ -511,7 +511,11 @@ io.on('connection', function(socket)
 						inAFC = true
 					}
 				}
-					socket.emit('chat message', alterForCommands(message, user, socket));
+
+				if(room)
+					socket.emit('chat message', alterForCommands(message, user, socket, room));
+				else
+					socket.emit('chat message', alterForCommands(message, user, socket, room));
 				if(!inAFC)
 				{
 					socket.emit('information', "[INFO] Command not recognized. Try /help for a list of commands.");
@@ -521,7 +525,7 @@ io.on('connection', function(socket)
 			{
 				try
 				{
-					io.to(room.token).emit('chat message', alterForCommands(message, user, socket), "eval");
+					io.to(room.token).emit('chat message', alterForCommands(message, user, socket, room), "eval");
 					privaterooms.remove(room);
 					room.lastchat = new Date().getTime();
 					privaterooms.push(room);
@@ -589,56 +593,28 @@ io.on('connection', function(socket)
 	{
 		user = getUserByNick(data.nick);
 
-		for(var x = 0; x < users.length; x++)
+		if (user.inBigChat)
 		{
-			if(users[x] === user)
+			for(var x = 0; x < users.length; x++)
 			{
-				users[x].AFK = data.isAFK
+				if(users[x] === user)
+				{
+					users[x].AFK = data.isAFK
+				}
 			}
-		}
-		if (data.isAFK)
-		{
-			io.to('bigroom').emit('information', "[INFO] " + data.nick + " is AFK."); 
-		}
-		else
-		{
-			if (data.time > (40*60*1000)) // if they've been gone for 40 minutes
-				io.to('bigroom').emit('information', "[INFO] " + data.nick + " has returned!"); 
+			if (data.isAFK)
+			{
+				io.to('bigroom').emit('information', "[INFO] " + data.nick + " is AFK."); 
+			}
+			else
+			{
+				if (data.time > (40*60*1000)) // if they've been gone for 40 minutes
+					io.to('bigroom').emit('information', "[INFO] " + data.nick + " has returned!"); 
+			}
 		}
 
 	});
 });
-
-
-// ==================================
-// ==================================
-
-function sendChatMessage(room, msg, who, user)
-{
-	if(room !== null)
-	{
-		try
-		{
-			io.to(room.token).emit('chat message', msg, who);
-		}
-		catch(e)
-		{
-			console.log(e);
-		}
-	}
-	else if (user.inBigChat)
-	{
-		try
-		{
-			io.to('bigroom').emit('chat message', msg, who);
-		}
-		catch(e)
-		{
-			console.log(e);
-		}
-	}
-}
-
 
 
 // ==================================
@@ -749,7 +725,7 @@ function link_replacer(match, p1, p2, offset, string)
 }
 
 
-function alterForCommands(str, user, socket)
+function alterForCommands(str, user, socket, room)
 {
 	var ans = str; // Copies the variable so V8 can do it's optimizations.
 	
@@ -792,10 +768,10 @@ function alterForCommands(str, user, socket)
 		ans = ans.replace(subreddit, "<a target='_blank' href='http://www.reddit.com$&'>$&</a>");
 
 	// commands
-	if (ans == "/ping")
+	if (ans == "/ping")	// It's a joke
 	{
 		socket.emit('chat message', ans, "me");
-		socket.emit('information', '[INFO] Pong');
+		socket.emit('information', '[INFO] Pong!');
 	}
 	else if (ans == "/banana" || ans == "/banana-cream-pie")
 	{
@@ -816,7 +792,12 @@ function alterForCommands(str, user, socket)
 	else if (ans == "/afk")
 	{
 		socket.emit('chat message', ans, "me");
-		socket.emit('afk');
+		if (room)
+			socket.emit('information', "[INFO] You can only do /afk in the public chat");
+		else if (user.inBigChat)
+			socket.emit('afk');
+		else
+			socket.emit('information', "[INFO] You can only do /afk in the public chat");
 		return null;
 	}
 	else  // For some reason MrMeapify doesn't want /me in /msg

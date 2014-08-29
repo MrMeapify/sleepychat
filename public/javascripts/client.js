@@ -427,7 +427,8 @@ $(document).ready(function()
 	}, 250);
 	socket.on('afk', function(nick)
 	{
-		timeSinceLastMessage = Date.now() - (afkTime+1000) // simulate the user not having types something for 8 seconds
+		if(bigchat)
+			timeSinceLastMessage = Date.now() - (afkTime+1000) // simulate the user not having types something for 8 seconds
 	});
 });
 
