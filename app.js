@@ -494,35 +494,6 @@ io.on('connection', function(socket)
 					socket.emit('information', "[DICE ROLL] " + result);
 				}
 			}
-			else if(message.lastIndexOf('/banana', 0) === 0)
-			{
-				var pies = [
-					"http://i.imgur.com/Zb2ZnBF.jpg",
-					"http://i.imgur.com/LFdFyTy.jpg",
-					"http://i.imgur.com/EsS9Wj1.jpg",
-					"http://i.imgur.com/QjXfokR.jpg",
-					"http://i.imgur.com/6SdnhYw.jpg",
-					"http://i.imgur.com/oEl6agR.jpg",
-					"http://i.imgur.com/Wv8w7ap.jpg",
-					"http://i.imgur.com/6HB16M4.jpg",
-					"http://i.imgur.com/R6w82ZK.jpg",
-					"http://i.imgur.com/MOHRUxA.jpg",
-					"http://i.imgur.com/R115ftN.jpg",
-					"http://i.imgur.com/4yYHZ4S.jpg",
-				];
-				var rand = Math.floor(Math.random() * pies.length);
-				var result = pies[rand];
-				if(user.inBigChat || room)
-				{
-					sendChatMessage(room, alterForCommands(result, user), "eval", user)
-				}
-				else
-				{
-					var toSend = alterForCommands(result, user);
-					user.partner.socket.emit('chat message', toSend, "them");
-					socket.emit('chat message', toSend, "me");
-				}
-			}
 			else if(message.lastIndexOf('/', 0) === 0 && !(message.lastIndexOf('/me', 0) === 0))
 			{
 				socket.emit('chat message', alterForCommands(message, user, socket));
@@ -741,6 +712,8 @@ function giveBanana()
 {
 	var rand = Math.floor(Math.random() * pies.length);
 	var result = pies[rand];
+	return "<img src='" + result + "' class='embedded_image' />"
+
 }
 
 
@@ -798,6 +771,10 @@ function alterForCommands(str, user, socket)
 
 	// commands
 	console.log(ans)
+	if (ans == "/banana" || ans == "/banana-cream-pie")
+	{
+		return giveBanana()
+	}
 	if (ans == "/names" || ans == "/list")
 	{
 		socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users) + "]");
