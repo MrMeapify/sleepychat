@@ -418,27 +418,16 @@ io.on('connection', function(socket)
 			}
 			else if(message.lastIndexOf('/coinflip', 0) === 0)
 			{
-				var result = "Heads";
-				if(Math.random()>0.5)
+				var result = Math.random()>0.5 ? "Heads" : "Tails";
+				if (room) // We need to know if we're in a room to actually transmit the message
 				{
-					result = "Tails";
-				}
-				if(room)
-				{
-					io.to(room.token).emit('chat message', alterForCommands(message, user, socket), "eval");
-					io.to(room.token).emit('information', "[COINFLIP] " + result);
-				}
-				else if(user.inBigChat)
-				{
-					io.to('bigroom').emit('chat message', alterForCommands(message, user, socket), "eval");
-					io.to('bigroom').emit('information', "[COINFLIP] " + result);
+					sendMessage(false, alterForCommands(message, user, socket), user, room, socket)
+					sendMessage(true, "[COINFLIP] " + result, user, room, socket);
 				}
 				else
 				{
-					user.partner.socket.emit('chat message',  alterForCommands(message, user, socket), "them");
-					socket.emit('chat message', alterForCommands(message, user, socket), "me");
-					user.partner.socket.emit('information', "[COINFLIP] " + result);
-					socket.emit('information', "[COINFLIP] " + result);
+					sendMessage(false, alterForCommands(message, user, socket), user, null, socket)
+					sendMessage(true, "[COINFLIP] " + result, user, null, socket);
 				}
 			}
 			else if(message.lastIndexOf('/', 0) === 0)
