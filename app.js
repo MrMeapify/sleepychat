@@ -33,7 +33,7 @@ var users = [];
 var privaterooms = [];
 
 
-commandsInAFC = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping'] // commands that alterForCommands handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
+commandsInAFC = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll'] // commands that alterForCommands handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
 
 
 io.on('connection', function(socket)
@@ -441,66 +441,6 @@ io.on('connection', function(socket)
 					socket.emit('information', "[COINFLIP] " + result);
 				}
 			}
-			else if(message.lastIndexOf('/roll', 0) === 0)
-			{
-				var num = 1;
-                               
-				if (message.length > 6)
-				{
-					var numString = message.substring(6);
-                                       
-					try
-					{
-						num = parseInt(numString);
-					}
-					catch (e) 
-					{
-						console.log(e)
-					}
-				}
-				
-				if (num > 10)
-				{
-					num = 10;
-				}
- 
-				var result = "Rolled " + num.toString();
-				if (num > 1)
-				{
-				       result += " dice: ";
-				}
-				else
-				{
-				        result += " die: ";
-				}
-				                              
-				for (var i = 0; i < num; i++)
-				{
-					var rand = Math.floor(Math.random() * (7 - 1)) + 1;
-
-					result += "<img src='http://www.random.org/dice/dice" + rand.toString() + ".png'/>";
-					//result += rand.toString(); // If you don't want images...
-				}
-
-				
-				if(room)
-				{
-					io.to(room.token).emit('chat message', alterForCommands(message, user, socket), "eval");
-					io.to(room.token).emit('information', "[DICE ROLL] " + result);
-				}
-				else if(user.inBigChat)
-				{
-					io.to('bigroom').emit('chat message', alterForCommands(message, user, socket), "eval");
-					io.to('bigroom').emit('information', "[DICE ROLL] " + result);
-				}
-				else
-				{
-					user.partner.socket.emit('chat message',  alterForCommands(message, user, socket), "them");
-					socket.emit('chat message', alterForCommands(message, user, socket), "me");
-					user.partner.socket.emit('information', "[DICE ROLL] " + result);
-					socket.emit('information', "[DICE ROLL] " + result);
-				}
-			}
 			else if(message.lastIndexOf('/', 0) === 0)
 			{
 				inAFC = false; // is it matched by alterForCommands?
@@ -620,6 +560,46 @@ io.on('connection', function(socket)
 // ==================================
 // ==================================
 
+function sendMessage(information, message, user, room, socket)
+{
+	if (!information)
+	{
+		if(room)
+		{
+			io.to(room.token).emit('chat message', message, "eval");
+		}
+		else if(user.inBigChat)
+		{
+			io.to('bigroom').emit('chat message', message, "eval");
+		}
+		else
+		{
+			user.partner.socket.emit('chat message',  message, "them");
+			socket.emit('chat message', message, "me");
+		}	
+	}
+	else
+	{
+		if(room)
+		{
+			io.to(room.token).emit('information', message);
+		}
+		else if(user.inBigChat)
+		{
+			io.to('bigroom').emit('information', message);
+		}
+		else
+		{
+			user.partner.socket.emit('information', message);
+			socket.emit('information', message);
+		}
+	}
+
+}
+
+// ==================================
+// ==================================
+
 
 function nameAppend(name, gender, role){
 	name += (gender=="male") ? "♂" : ((gender=="female") ? "♀" : ""); // put a gender symbol by the name
@@ -714,6 +694,31 @@ function giveBanana()
 
 }
 
+// for dice rolling
+
+function roll(){
+	num = (Math.floor(Math.random() * (7 - 1)) + 1).toString()
+    return "<img src='http://www.random.org/dice/dice" + num + ".png'/>";;
+}
+
+function rollx(times){
+    ans = roll();
+    for(var i = 1; i < times;) {
+        ans = ans + " " + roll();
+        i = i + 1
+    }
+    return ans;
+}
+
+function dice_replacer(match, p1, p2, offset, string){
+    if (p1) {
+    	if (p1 > 10)
+    		return "ROLLS: " + rollx(10);
+    	else
+    		return "ROLLS: " + rollx(p1)}
+    else {return "ROLL: " + roll();}
+}
+
 
 function link_replacer(match, p1, p2, offset, string)
 {
@@ -732,7 +737,8 @@ function alterForCommands(str, user, socket, room)
 	console.log(user.nick + ": " + ans)
 
 	// commands
-	var me = /^\/me( .*)/g; // Matches "/me " followed by anything
+	var me = /^\/me( .)/g; // Matches "/me " followed by anything
+	var roll = /^\/roll ?([0-9]*)$/
 
 	// formatting
 	var bold = /\*\*(.+?)\*\*/g; // Matches stuff between ** **
@@ -768,6 +774,12 @@ function alterForCommands(str, user, socket, room)
 		ans = ans.replace(subreddit, "<a target='_blank' href='http://www.reddit.com$&'>$&</a>");
 
 	// commands
+	if(roll.test(ans))
+	{
+		sendMessage(false, ans, user, room, socket)
+		sendMessage(true, ans.replace(roll, dice_replacer), user, room, socket)
+		return null
+	}
 	if (ans == "/ping")	// It's a joke
 	{
 		socket.emit('chat message', ans, "me");
