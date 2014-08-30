@@ -33,7 +33,7 @@ var users = [];
 var privaterooms = [];
 
 
-commandsInAFC = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll'] // commands that alterForCommands handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
+commandsInAM = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/m-msg', '/f-msg'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
 
 
 io.on('connection', function(socket)
@@ -305,8 +305,8 @@ io.on('connection', function(socket)
 				}
 				else
 				{
-					userWanted.socket.emit('whisper', nick, alterForCommands(message, ""));
-					socket.emit('whisper', nick, alterForCommands(message, ""));
+					userWanted.socket.emit('whisper', nick, alterMessage(message, ""));
+					socket.emit('whisper', nick, alterMessage(message, ""));
 				}
 			}
 			else if(message.lastIndexOf('/ignore ', 0) === 0)
@@ -340,7 +340,7 @@ io.on('connection', function(socket)
 			}
 			else if(message.lastIndexOf('/room ', 0) === 0)
 			{
-				socket.emit('chat message', alterForCommands(message, user, socket));
+				socket.emit('chat message', alterMessage(message, user, socket));
 				var userWanted = getUserByNick(message.substring(6));
 				if(!userWanted)
 				{
@@ -421,30 +421,30 @@ io.on('connection', function(socket)
 				var result = Math.random()>0.5 ? "Heads" : "Tails";
 				if (room) // We need to know if we're in a room to actually transmit the message
 				{
-					sendMessage(false, alterForCommands(message, user, socket), user, room, socket)
+					sendMessage(false, alterMessage(message, user, socket), user, room, socket)
 					sendMessage(true, "[COINFLIP] " + result, user, room, socket);
 				}
 				else
 				{
-					sendMessage(false, alterForCommands(message, user, socket), user, null, socket)
+					sendMessage(false, alterMessage(message, user, socket), user, null, socket)
 					sendMessage(true, "[COINFLIP] " + result, user, null, socket);
 				}
 			}
 			else if(message.lastIndexOf('/', 0) === 0)
 			{
-				inAFC = false; // is it matched by alterForCommands?
-				for(var x = 0; x < commandsInAFC.length; x++)
+				inAFC = false; // is it matched by alterMessage?
+				for(var x = 0; x < commandsInAM.length; x++)
 				{
-					if(message.lastIndexOf(commandsInAFC[x]) == 0)
+					if(message.lastIndexOf(commandsInAM[x]) == 0)
 					{
 						inAFC = true
 					}
 				}
 
 				if(room)
-					socket.emit('chat message', alterForCommands(message, user, socket, room));
+					socket.emit('chat message', alterMessage(message, user, socket, room));
 				else
-					socket.emit('chat message', alterForCommands(message, user, socket, room));
+					socket.emit('chat message', alterMessage(message, user, socket, room));
 				if(!inAFC)
 				{
 					socket.emit('information', "[INFO] Command not recognized. Try /help for a list of commands.");
@@ -454,7 +454,7 @@ io.on('connection', function(socket)
 			{
 				try
 				{
-					io.to(room.token).emit('chat message', alterForCommands(message, user, socket, room), "eval");
+					io.to(room.token).emit('chat message', alterMessage(message, user, socket, room), "eval");
 					privaterooms.remove(room);
 					room.lastchat = new Date().getTime();
 					privaterooms.push(room);
@@ -468,7 +468,7 @@ io.on('connection', function(socket)
 			{
 				try
 				{
-					io.to('bigroom').emit('chat message', alterForCommands(message, user, socket), "eval");
+					io.to('bigroom').emit('chat message', alterMessage(message, user, socket), "eval");
 				}
 				catch(e)
 				{
@@ -481,8 +481,8 @@ io.on('connection', function(socket)
 				{
 					//user.partner.socket.emit('chat message', '<' + nick + '> ' + message);
 					//socket.emit('chat message', '<' + nick + '> ' + message);
-					user.partner.socket.emit('chat message',  alterForCommands(message, user, socket), "them");
-					socket.emit('chat message', alterForCommands(message, user, socket), "me");
+					user.partner.socket.emit('chat message',  alterMessage(message, user, socket), "them");
+					socket.emit('chat message', alterMessage(message, user, socket), "me");
 				}
 				catch(e)
 				{
@@ -584,6 +584,12 @@ function sendMessage(information, message, user, room, socket)
 		}
 	}
 
+}
+
+function sendPrivateMessage(type, message, userTo)
+{
+	if (userTo && userTo.inBigchat)
+		user.socket.emit(type, message)
 }
 
 // ==================================
@@ -719,17 +725,12 @@ function link_replacer(match, p1, p2, offset, string)
 }
 
 
-function alterForCommands(str, user, socket, room)
+function alterForFormatting(str)
 {
 	var ans = str; // Copies the variable so V8 can do it's optimizations.
-	
-	console.log(user.nick + ": " + ans)
 
-	// commands
-	var me = /^\/me( .)/g; // Matches "/me " followed by anything
-	var roll = /^\/roll ?([0-9]*)$/
-
-	// formatting
+	// regex's
+	var me = /^\/me( .*)/g; // Matches "/me " followed by anything
 	var bold = /\*\*(.+?)\*\*/g; // Matches stuff between ** **
 	var italics = /\*(.+?)\*/g; // Matches stuff between * *
 	var underline = /__(.+?)__/g; // Matches stuff between __ __
@@ -743,11 +744,7 @@ function alterForCommands(str, user, socket, room)
 
 	var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:[oO]\.[oO])|(?:\>\:\))|(?:\>\:\()|(?:\:O)|(?:&#59\;\))|(?:&#59\;\())/g;
 
-
-
-	// implementations
-
-	// formatting
+	//implementations
 	ans = ans.replace(bold, "<strong>$1</strong>"); 
 	ans = ans.replace(italics, "<i>$1</i>"); 
 	ans = ans.replace(underline, "<span style='text-decoration: underline;'>$1</span>"); 
@@ -762,7 +759,21 @@ function alterForCommands(str, user, socket, room)
 	if(ans === prevans) // Only if the link replacer hasn't done anything yet.
 		ans = ans.replace(subreddit, "<a target='_blank' href='http://www.reddit.com$&'>$&</a>");
 
-	// commands
+	return ans
+}
+
+
+function alterForCommands(str, user, socket, room)
+{
+	var ans = str; // Copies the variable so V8 can do it's optimizations.
+	
+
+	// regex's
+	var m_msg = /^\/m-msg( .)/g; // Matches "/m-msg " followed by anything
+	var f_msg = /^\/f-msg( .)/g; // Matches "/f-msg " followed by anything
+	var roll = /^\/roll ?([0-9]*)$/
+
+	// implementations
 	if(roll.test(ans))
 	{
 		sendMessage(false, ans, user, room, socket)
@@ -812,8 +823,18 @@ function alterForCommands(str, user, socket, room)
 			return ans; // Used for /msg command.
 		}
 	}
-	return null;
+	return ans;
 		
+}
+
+
+function alterMessage(str, user, socket, room)
+{
+	var ans = str; // Copies the variable so V8 can do it's optimizations.
+	console.log(user.nick + ": " + ans);
+	var formatted = alterForFormatting(str);
+	var commanded = alterForCommands(formatted, user, socket, room);
+	return commanded;
 }
 
 
