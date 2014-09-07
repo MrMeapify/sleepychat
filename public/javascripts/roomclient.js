@@ -127,7 +127,66 @@ $(document).ready(function()
     	$("title").text(oldTitle);
 	});
 
+	//binaural beat setup
+	var BBeat = 7;
+	var frequency = 65;
+
+	var leftear = (BBeat / 2) + frequency;
+	var rightear = frequency - (BBeat / 2);
+	var playing = false;
+	SetupBeat(leftear,rightear);
+
+	socket.on('binaural', function()
+	{
+		if (playing)
+		{
+			stop();
+			playing = false;
+		}
+		else
+		{
+			PlayBeat(BBeat,frequency);
+			playing = true;
+		}
+	});
+
 });
+
+var audiolet = new Audiolet();
+var out = audiolet.output;
+var sine1,sine2,pan1,pan2,gain;
+
+var SetupBeat = function(leftear,rightear){
+	sine1 = new Sine(audiolet, leftear);
+	sine2 = new Sine(audiolet, rightear);
+	pan1 = new Pan(audiolet, 1);
+	pan2 = new Pan(audiolet, 2); 
+	gain = new Gain(audiolet, 0.5)
+	sine1.connect(pan1);
+	sine2.connect(pan2);
+}
+
+var PlayBeat = function(beat,frequency){
+	beat = parseFloat(beat);
+	frequency = parseFloat(frequency);
+	var beat = beat / 2;
+	var leftear = beat + frequency;
+	var rightear = frequency - beat;
+	stop();
+	SetupBeat(leftear,rightear);
+	start();
+}
+
+var start = function(){
+	pan1.connect(gain);
+	pan2.connect(gain);
+	gain.connect(out);
+}
+
+var stop = function(){
+	gain.disconnect(out);
+}
+
 
 function scrollDown()
 {

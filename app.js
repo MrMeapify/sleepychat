@@ -33,7 +33,7 @@ var users = [];
 var privaterooms = [];
 
 
-commandsInAM = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mmsg', '/fmsg'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
+commandsInAM = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mmsg', '/fmsg', '/binaural'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
 
 
 io.on('connection', function(socket)
@@ -770,7 +770,8 @@ function alterForCommands(str, user, socket, room, users)
 	// regex's
 	var m_msg = /^\/mmsg (.+)/g; // Matches "/m-msg " followed by anything
 	var f_msg = /^\/fmsg (.+)/g; // Matches "/f-msg " followed by anything
-	var roll = /^\/roll ?([0-9]*)$/
+	var roll = /^\/roll ?([0-9]*)$/; // Matches "roll' or "roll " followed by a number 
+	var binaural = /^\/binaural$/;
 
 	// implementations
 
@@ -781,6 +782,11 @@ function alterForCommands(str, user, socket, room, users)
 	male_message = m_msg.test(ans);
 	console.log("Message: " + ans)
 	console.log(ans.replace(m_msg, user.nick + " sent a male-only message: $1"))
+	if (binaural.test(ans))
+	{
+		//socket.emit('chat message', ans, 'me'); // All "me" does is highlight the message, so we just use that
+		socket.emit('binaural'); // All "me" does is highlight the message, so we just use that
+	}
 	if(male_message || female_message)
 	{
 		if (user.inBigChat)
@@ -789,18 +795,13 @@ function alterForCommands(str, user, socket, room, users)
 			var userscopy = users;
 			for(var x = 0; x < userscopy.length; x++)
 			{
-				console.log("scanning " + userscopy[x].nick)
-				console.log(userscopy[x].nick + " in big chat: " + userscopy[x].inBigChat);
-				console.log(userscopy[x].nick + "'s gender == " + gender + ": " + (userscopy[x].gender == gender));
 				if(userscopy[x].gender === gender && userscopy[x].inBigChat)
 				{
 					if (gender == "male")
 						var message = ans.replace(m_msg, user.nick + alterForFormatting(" sent a male-only message: $1"));
 					else if (gender == "female")	// I know I don't need "if (gender == "female")" but it makes it easier to read
 						var message = ans.replace(f_msg, user.nick + alterForFormatting(" sent a female-only message: $1"));
-					console.log(message);
 					userscopy[x].socket.emit('chat message', message, 'me'); // All "me" does is highlight the message, so we just use that
-					console.log("sent message")
 				}
 			}
 		}
