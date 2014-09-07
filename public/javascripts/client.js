@@ -428,30 +428,34 @@ $(document).ready(function()
 	socket.on('afk', function(nick)
 	{
 		if(bigchat)
-			timeSinceLastMessage = Date.now() - (afkTime+1000) // simulate the user not having types something for 8 seconds
+			timeSinceLastMessage = Date.now() - (afkTime+1000) // simulate the user not having typed something for 8 seconds
 	});
 
-
-
 	//binaural beat setup
-	var BBeat = 7;
-	var frequency = 65;
-
-	var leftear = (BBeat / 2) + frequency;
-	var rightear = frequency - (BBeat / 2);
 	var playing = false;
-	SetupBeat(leftear,rightear);
+	var prevBeat = null;
 
-	socket.on('binaural', function()
+	socket.on('binaural', function(BBeat)
 	{
-		if (playing)
+		if(!BBeat)
+			var BBeat = 7;
+			var prevBeat = 7; // If they just did /binaural we want to stop the binaurals if they're playing
+		console.log(BBeat)
+		var frequency = 65;
+
+		var leftear = (BBeat / 2) + frequency;
+		var rightear = frequency - (BBeat / 2);
+		if (playing && (prevBeat == BBeat))
 		{
 			stop();
 			playing = false;
 		}
 		else
 		{
+			stop();
+			SetupBeat(leftear,rightear);
 			PlayBeat(BBeat,frequency);
+			prevBeat = BBeat
 			playing = true;
 		}
 	});
@@ -489,7 +493,10 @@ var start = function(){
 }
 
 var stop = function(){
-	gain.disconnect(out);
+	try
+	{
+		gain.disconnect(out);
+	} catch (e) {}
 }
 
 

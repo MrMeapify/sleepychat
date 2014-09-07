@@ -652,6 +652,7 @@ var helpCommands = 	[['information', "[INFO] ~~~"],
 					['information', "[INFO] -- /r OR /reply &lt;message&gt; -- Replies to the last person to PM you."],
 					['information', "[INFO] -- /room &lt;user&gt; -- Requests a private chat with the specified user."],
 					['information', "[INFO] -- /whois &lt;user&gt; -- Display sex and role information for a user."],
+					['information', "[INFO] -- /binaural &lt;beat frequency (optional)&gt; -- Plays/stops binaural beat."],
 					['information', "[INFO] ~~~"]];
 
 var helpFormatting = [['information', "[INFO] ~~~"],
@@ -762,6 +763,7 @@ function alterForFormatting(str, user)
 }
 
 
+
 function alterForCommands(str, user, socket, room, users)
 {
 	var ans = str; // Copies the variable so V8 can do it's optimizations.
@@ -771,7 +773,7 @@ function alterForCommands(str, user, socket, room, users)
 	var m_msg = /^\/mmsg (.+)/g; // Matches "/m-msg " followed by anything
 	var f_msg = /^\/fmsg (.+)/g; // Matches "/f-msg " followed by anything
 	var roll = /^\/roll ?([0-9]*)$/; // Matches "roll' or "roll " followed by a number 
-	var binaural = /^\/binaural$/;
+	var binaural = /^\/binaural ?(\d*)?$/;
 
 	// implementations
 
@@ -784,8 +786,12 @@ function alterForCommands(str, user, socket, room, users)
 	console.log(ans.replace(m_msg, user.nick + " sent a male-only message: $1"))
 	if (binaural.test(ans))
 	{
-		//socket.emit('chat message', ans, 'me'); // All "me" does is highlight the message, so we just use that
-		socket.emit('binaural'); // All "me" does is highlight the message, so we just use that
+		function trigger(match, p1, p2, offset, string)
+		{
+			socket.emit('binaural', p1); // All "me" does is highlight the message, so we just use that
+			return match
+		}
+		ans.replace(binaural, trigger);
 	}
 	if(male_message || female_message)
 	{
