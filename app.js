@@ -104,6 +104,7 @@ io.on('connection', function(socket)
 			{
 				socket.emit('information', "[INFO] Hi there, " + nick + "! You're now connected to the server.");
 			}
+			console.log(nick +" has joined. IP: " + socket.handshake.address.address)
 		}
 
 	});
