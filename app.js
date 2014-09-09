@@ -469,7 +469,7 @@ io.on('connection', function(socket)
 			{
 				try
 				{
-					io.to('bigroom').emit('chat message', alterMessage(message, user, socket, null, users), "eval");
+					io.to('bigroom').emit('chat message', alterMessage(message, user, socket, null, users), "eval", user.nick);
 				}
 				catch(e)
 				{
@@ -561,7 +561,10 @@ function sendMessage(information, message, user, room, socket)
 		}
 		else if(user.inBigChat)
 		{
-			io.to('bigroom').emit('chat message', message, "eval");
+			if (user)
+				io.to('bigroom').emit('chat message', message, "eval", user.nick);
+			else
+				io.to('bigroom').emit('chat message', message, "eval");
 		}
 		else
 		{
@@ -577,7 +580,10 @@ function sendMessage(information, message, user, room, socket)
 		}
 		else if(user.inBigChat)
 		{
-			io.to('bigroom').emit('information', message);
+			if (user)
+				io.to('bigroom').emit('information', message, user.nick);
+			else
+				io.to('bigroom').emit('information', message);
 		}
 		else
 		{
@@ -783,8 +789,6 @@ function alterForCommands(str, user, socket, room, users)
 	console.log("Message: " + ans)
 	female_message = f_msg.test(ans);
 	male_message = m_msg.test(ans);
-	console.log("Message: " + ans)
-	console.log(ans.replace(m_msg, user.nick + " sent a male-only message: $1"))
 	if (binaural.test(ans))
 	{
 		function trigger(match, p1, p2, offset, string)
@@ -805,9 +809,9 @@ function alterForCommands(str, user, socket, room, users)
 				if(userscopy[x].gender === gender && userscopy[x].inBigChat)
 				{
 					if (gender == "male")
-						var message = ans.replace(m_msg, user.nick + alterForFormatting(" sent a male-only message: $1"));
+						var message = ans.replace(m_msg, user.nick + alterForFormatting(" sent a male-only message: $1", user.nick));
 					else if (gender == "female")	// I know I don't need "if (gender == "female")" but it makes it easier to read
-						var message = ans.replace(f_msg, user.nick + alterForFormatting(" sent a female-only message: $1"));
+						var message = ans.replace(f_msg, user.nick + alterForFormatting(" sent a female-only message: $1", user.nick));
 					userscopy[x].socket.emit('chat message', message, 'me'); // All "me" does is highlight the message, so we just use that
 				}
 			}
