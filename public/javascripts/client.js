@@ -176,7 +176,7 @@ $(document).ready(function()
 			}
 		});
 
-		socket.on('chat message', function(msg, who)
+		socket.on('chat message', function(msg, who, userFrom)
 		{
 			if(msg)
 			{
@@ -218,13 +218,13 @@ $(document).ready(function()
 				}
 				catch(e) {}
 				
-				if (user && ignore_list.indexOf(user[1]) != -1)
+				if (userFrom && ignore_list.indexOf(userFrom) != -1)
 				{
 					$('#messages > li').filter(':last').hide();
 				}
 			}
 		});
-		socket.on('information', function(msg)
+		socket.on('information', function(msg, userFrom)
 		{
 			if (msg)
 			{
@@ -241,8 +241,12 @@ $(document).ready(function()
 				{
 					scroll_down = true;
 				}
-				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
-				scrollDown(scroll_down);
+				if (!(userFrom && ignore_list.indexOf(userFrom) != -1))
+				{
+					$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
+					scrollDown(scroll_down);
+				}
+
 			}
 		});
 
