@@ -323,7 +323,7 @@ io.on('connection', function(socket)
 				}
 				else
 				{
-					socket.emit('information', "[INFO] User " + userWanted.nick + "added to ignore list.");
+					socket.emit('information', "[INFO] User " + userWanted.nick + " added to ignore list.");
 					socket.emit('ignore', userWanted.nick);
 				}
 			}
