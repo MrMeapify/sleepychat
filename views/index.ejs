@@ -120,4 +120,15 @@
 	<script src="/javascripts/bootstrap.min.js"></script>
 	<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.7.0/moment.min.js"></script>
 	<script src="/javascripts/client.js"></script>
+	<script>
+		function loadGif(id, url) {
+			document.getElementById("hiddenInd" + id.toString()).setAttribute("src", "/images/ldg.png"); 
+			document.getElementById("hiddenImg" + id.toString()).setAttribute("src", url);
+		}
+
+		function onGifLoaded(id) {
+			document.getElementById("hiddenInd" + id.toString()).style.display = "none";
+			document.getElementById("hiddenImg" + id.toString()).style.display = "";
+		}
+	</script>
 </html>

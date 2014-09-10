@@ -32,6 +32,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 var users = [];
 var privaterooms = [];
 
+var uniqueHiddenId = 0;
+
 
 commandsInAM = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mmsg', '/fmsg', '/binaural'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
 
@@ -720,10 +722,16 @@ function dice_replacer(match, p1, p2, offset, string){
 
 function link_replacer(match, p1, p2, offset, string)
 {
-    if ((p2 == '.jpg') || (p2 == '.jpeg') || (p2 == '.gif') || (p2 == '.png'))
+    if ((p2 == '.jpg') || (p2 == '.jpeg') || (p2 == '.png')) {
 		a = "<a target='_blank' href='http://"+p1+"'><img src='http://"+p1+"' class='embedded_image'/></a>";
-    else
+	}
+	else if ((p2 == '.gif')) {
+		uniqueHiddenId++;
+		a = "<img id=\"hiddenInd"+uniqueHiddenId.toString()+"\" src=\"/images/gif.png\" onclick=\"loadGif("+uniqueHiddenId.toString()+", 'http://"+p1+"')\" class='embedded_image'/>\n<img id=\"hiddenImg"+uniqueHiddenId.toString()+"\" src=\"\" onload=\"onGifLoaded("+uniqueHiddenId.toString()+")\" style=\"display:none\" class='embedded_image'/>";
+	}
+    else {
 		a = "<a target='_blank' href='http://"+p1+"'>"+p1+"</a>";
+	}
     return a;
 }
 
