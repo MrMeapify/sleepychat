@@ -122,13 +122,15 @@
 	<script src="/javascripts/client.js"></script>
 	<script>
 		function loadGif(id, url) {
-			document.getElementById("hiddenInd" + id.toString()).setAttribute("src", "/images/ldg.png"); 
+			document.getElementById("hiddenInd" + id.toString()).setAttribute("src", "/images/ldg.png");
+			document.getElementById("hiddenInd" + id.toString()).setAttribute("onclick", "");
 			document.getElementById("hiddenImg" + id.toString()).setAttribute("src", url);
+			document.getElementById("hiddenLnk" + id.toString()).setAttribute("href", url);
 		}
 
 		function onGifLoaded(id) {
 			document.getElementById("hiddenInd" + id.toString()).style.display = "none";
-			document.getElementById("hiddenImg" + id.toString()).style.display = "";
+			document.getElementById("hiddenLnk" + id.toString()).style.display = "";
 		}
 	</script>
 </html>
