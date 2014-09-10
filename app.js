@@ -727,7 +727,7 @@ function link_replacer(match, p1, p2, offset, string)
 	}
 	else if ((p2 == '.gif')) {
 		uniqueHiddenId++;
-		a = "<img id=\"hiddenInd"+uniqueHiddenId.toString()+"\" src=\"/images/gif.png\" onclick=\"loadGif("+uniqueHiddenId.toString()+", 'http://"+p1+"')\" class='embedded_image'/>\n<img id=\"hiddenImg"+uniqueHiddenId.toString()+"\" src=\"\" onload=\"onGifLoaded("+uniqueHiddenId.toString()+")\" style=\"display:none\" class='embedded_image'/>";
+		a = "<a href='"+match+"'><img id=\"hiddenInd"+uniqueHiddenId.toString()+"\" src=\"/images/gif.png\" onclick=\"loadGif("+uniqueHiddenId.toString()+", 'http://"+p1+"')\" class='embedded_image'/>\n<img id=\"hiddenImg"+uniqueHiddenId.toString()+"\" src=\"\" onload=\"onGifLoaded("+uniqueHiddenId.toString()+")\" style=\"display:none\" class='embedded_image'/></a>";
 	}
     else {
 		a = "<a target='_blank' href='http://"+p1+"'>"+p1+"</a>";
