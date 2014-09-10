@@ -100,6 +100,12 @@ io.on('connection', function(socket)
 				user = getUserByNick(nick)
 				socket.join('bigroom');
 				io.to('bigroom').emit('information', "[INFO] " + nameAppend(user.nick, user.gender, user.role) + " has joined.");
+				var nicks = new Array(users.length);
+				for (var i = 0; i < nicks.length; i++)
+				{
+					nicks[i] = users[i].nick;
+				}
+				io.to('bigroom').emit('rosterupdate', nicks);
 				socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users) + " ]");
 			}
 			else

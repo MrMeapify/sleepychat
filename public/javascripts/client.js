@@ -18,7 +18,11 @@ var date = new Date();
 var timeSinceLastMessage = Date.now();
 var isAFK = false;
 
-$(document).ready(function()
+//For Autocomplete
+var users = [];
+
+
+$.getScript('/javascripts/tabcomplete.js', function()
 {
 	$('#login-modal').modal({keyboard: false, backdrop: 'static'});
 	$('#randomnick').click();
@@ -130,6 +134,12 @@ $(document).ready(function()
 
 			$('#login-modal').modal('hide');
 			return false;
+		});
+		
+		socket.on('rosterupdate', function(newList)
+		{
+			users = newList;
+			$('#m').tabcomplete(users);
 		});
 		
 		socket.on('nickupdate', function(newnick)
@@ -312,6 +322,7 @@ $(document).ready(function()
 				socket.emit('chat message', { message: msgInBox });
 				timeSinceLastMessage = Date.now();
 				$('#m').val('');
+				$('#mhint').val('');
 				scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
 				return false;
 			});
@@ -382,6 +393,7 @@ $(document).ready(function()
 			socket.emit('chat message', { message: msgInBox });
 			timeSinceLastMessage = Date.now();
 			$('#m').val('');
+			$('#mhint').val('');
 			scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
 			return false;
 		});
