@@ -11,7 +11,19 @@ var io = require('socket.io')(server);
 require('array.prototype.find');
 
 // This here is the admin password. For obvious reasons, set the ADMINPASS variable in production.
-var secret = String(process.env.ADMINPASS || "testpassword");
+var amdinP = String(process.env.ADMINPASS || "testpassword");
+var moderatorP = String(process.env.ADMINPASS || "testpassword");
+
+// Get lists of mods and stuff
+var moderators = ['ScottB', 'ElysianTail']
+var moderatorsCaps = moderators.reduce(function(previousValue, currentValue, index, array) 
+{
+	return previousValue.concat([currentValue.toUpperCase()])
+}, []) // get a list of all the mod's names, in uppercase
+var moderatorsWithPass = moderators.reduce(function(previousValue, currentValue, index, array) 
+{
+	return previousValue.concat([currentValue + moderatorP])
+}, []) // get a list of all the mod's names, plus the mod password
 
 server.listen(Number(process.env.PORT || 5000));
 
@@ -55,14 +67,14 @@ io.on('connection', function(socket)
 			socket.emit('information', "[INFO] Please choose a nickname.");
 			socket.conn.close();
 		}
-		if(data.nick.indexOf(' ') != -1 && data.nick !== "MrMeapify " + secret)
+		if(data.nick.indexOf(' ') != -1 && data.nick !== "MrMeapify " + amdinP && moderatorsWithPass.indexOf(data.nick.toUpperCase()) >= 0)
 		{
 			data.nick = data.nick.replace(/ /g, '');
 			socket.emit('nickupdate', data.nick);
 		}
-		if(data.nick.toUpperCase() === "MRMEAPIFY")
+		if(data.nick.toUpperCase() === "MRMEAPIFY" || moderators.indexOf(data.nick) >= 0)
 		{
-			socket.emit('information', "[INFO] You DARE try to impersonate MrMeapify? Shame. Shame on you.");
+			socket.emit('information', "[INFO] You DARE try to impersonate " + data.nick + "? Shame. Shame on you.");
 			socket.conn.close();
 		}
 		else if(getUserByNick(data.nick))
@@ -73,9 +85,14 @@ io.on('connection', function(socket)
 		else
 		{
 			data.socket = socket;
-			if(data.nick === "MrMeapify " + secret)
+			if(data.nick === "MrMeapify " + amdinP)
 			{
 				nick = "MrMeapify";
+				socket.emit('nickupdate', nick);
+			}
+			else if(moderatorsWithPass.indexOf(data.nick) >= 0)
+			{
+				nick = moderators[moderatorsWithPass.indexOf(data.nick)];
 				socket.emit('nickupdate', nick);
 			}
 			else
@@ -89,15 +106,33 @@ io.on('connection', function(socket)
 			nick = nick.replace(/'/g, "&#39;"); 	//escape '
 			data.nick = nick;
 			var hasher = crypto.createHash('sha1');
-			hasher.update(nick + new Date().getTime() + "IAmA Salt AMA" + secret);
+			hasher.update(nick + new Date().getTime() + "IAmA Salt AMA" + amdinP);
 			data.token = hasher.digest('hex');
 			console.log(nick + ' ' + data.token);
 			data.AFK = false
 			users.push(data);
 			socket.emit('loggedIn');
+
+			user = getUserByNick(nick)
+			if (data.nick === "MrMeapify") // Let's set the admin and mod variables
+			{
+				user.admin = true;
+				user.mod = true;
+			}
+			else if (moderators.indexOf(data.nick) >= 0)
+			{
+				socket.emit('information', "You're a moderator!");
+				user.admin = false;
+				user.mod = true;
+			}
+			else
+			{
+				user.admin = false;
+				user.mod = false;
+			}
+
 			if(data.inBigChat)
 			{
-				user = getUserByNick(nick)
 				socket.join('bigroom');
 				io.to('bigroom').emit('information', "[INFO] " + nameAppend(user.nick, user.gender, user.role) + " has joined.");
 				var nicks = new Array(users.length);
@@ -296,9 +331,9 @@ io.on('connection', function(socket)
 			message = message.replace(/"/g, "&quot;");			//escape "
 			message = message.replace(/'/g, "&#39;"); 			//escape '
 			message = message.replace(/^\s+|\s+$/g, '');
-			if(message.lastIndexOf('/server ' + secret, 0) === 0)
+			if(message.lastIndexOf('/server ' + amdinP, 0) === 0)
 			{
-				var command = '/server ' + secret + ' ';
+				var command = '/server ' + amdinP + ' ';
 				io.sockets.emit('information', "[ADMIN] " + message.substring(command.length));
 			}
 			else if(message.lastIndexOf('/msg ', 0) === 0)
@@ -390,7 +425,7 @@ io.on('connection', function(socket)
 					else
 					{
 						var hasher = crypto.createHash('sha1');
-						hasher.update(user.nick + userWanted.nick + new Date().getTime() + "IAmA Pepper AMA" + secret);
+						hasher.update(user.nick + userWanted.nick + new Date().getTime() + "IAmA Pepper AMA" + amdinP);
 						var newroom =
 						{
 							users: [user, userWanted],
@@ -417,9 +452,9 @@ io.on('connection', function(socket)
 					console.log(e)
 				}
 			}
-			else if(message.lastIndexOf('/kick ' + secret, 0) === 0)
+			else if(message.lastIndexOf('/kick ' + amdinP, 0) === 0)
 			{
-				var command = '/kick ' + secret + ' ';
+				var command = '/kick ' + amdinP + ' ';
 				var tokick = getUserByNick(message.substring(command.length));
 				io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been kicked by the admin.");
 				tokick.socket.leave('bigroom');
@@ -983,7 +1018,7 @@ app.use(function(req,res,next)
 });
 
 app.use('/', index);
-app.use('/' + secret, stats);
+app.use('/' + amdinP, stats);
 app.use('/room', privateroom);
 app.use('/legal', function(req, res)
 {
