@@ -69,7 +69,7 @@ io.on('connection', function(socket)
 		}
 		if(data.nick.indexOf(' ') != -1 && data.nick !== "MrMeapify " + amdinP && moderatorsWithPass.indexOf(data.nick.toUpperCase()) >= 0)
 		{
-			data.nick = data.nick.replace(/ /g, '');
+			data.nick = data.nick.replace(/[.():] /g, '');
 			socket.emit('nickupdate', data.nick);
 		}
 		if(data.nick.toUpperCase() === "MRMEAPIFY" || moderators.indexOf(data.nick) >= 0)
