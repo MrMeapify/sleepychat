@@ -456,7 +456,6 @@ $.getScript('/javascripts/tabcomplete.js', function()
 		if(!BBeat)
 			var BBeat = 7;
 			var prevBeat = 7; // If they just did /binaural we want to stop the binaurals if they're playing
-		console.log(BBeat)
 		var frequency = 65;
 
 		var leftear = (BBeat / 2) + frequency;

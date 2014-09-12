@@ -782,7 +782,6 @@ function alterForFormatting(str, user)
 	var ans = str; // Copies the variable so V8 can do it's optimizations.
 
 	// regex's
-	var me = /^\/me( .*)/g; // Matches "/me " followed by anything
 	var banana = /^\/(?:(?:banana)|(?:banana-cream-pie))$/g; // Matches "/me " followed by anything
 	var bold = /\*\*(.+?)\*\*/g; // Matches stuff between ** **
 	var italics = /\*(.+?)\*/g; // Matches stuff between * *
@@ -805,7 +804,6 @@ function alterForFormatting(str, user)
 	ans = ans.replace(serif, "<span style='font-family: Georgia, serif'>$1</span>"); 
 	ans = ans.replace(monospace, "<span style='font-family: monospace'>$1</span>"); 
 	ans = ans.replace(emoticons, "<strong>$&</strong>");
-	if (user) ans = ans.replace(me, "<span style='font-weight: 300'>*" + user.nick + " $1*</span>"); // "/me" is really formatting-y, so this is where I'm putting it
 	
 	var prevans = ans;
 	ans = ans.replace(link, link_replacer);
@@ -813,7 +811,7 @@ function alterForFormatting(str, user)
 		ans = ans.replace(subreddit, "<a target='_blank' href='http://www.reddit.com$&'>$&</a>");
 
 
-	ans = ans.replace(banana, giveBanana()); // Same deal as /me. Also, we have to do this *after* the link replacer
+	ans = ans.replace(banana, giveBanana()); // We have to do this *after* the link replacer
 
 	return ans
 }
@@ -830,6 +828,7 @@ function alterForCommands(str, user, socket, room, users)
 	var f_msg = /^\/fmsg (.+)/g; // Matches "/f-msg " followed by anything
 	var roll = /^\/roll ?([0-9]*)$/; // Matches "roll' or "roll " followed by a number 
 	var binaural = /^\/binaural ?(\d*)?$/;
+	var me = /^\/me( .*)/g; // Matches "/me " followed by anything
 
 	// implementations
 
@@ -907,9 +906,14 @@ function alterForCommands(str, user, socket, room, users)
 			socket.emit('information', "[INFO] You can only do /afk in the public chat");
 		return null;
 	}
+	else if (me.test(ans))
+	{
+		sendMessage(false, ans.replace(me, "<span style='font-weight: 300'>*" + user.nick + " $1*</span>"), user, room, socket)
+		return null
+	}
 	else  // For some reason MrMeapify doesn't want /me in /msg
 	{
-		if(user.nick) // Empty string is falsey, so pass empty string to post a message without a user.nick.
+		if(user.nick && !me.test(ans)) // Empty string is falsey, so pass empty string to post a message without a user.nick.
 		{
 			return '&lt;' + user.nick + '&gt; ' + ans;
 		}
