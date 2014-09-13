@@ -405,13 +405,13 @@ $.getScript('/javascripts/tabcomplete.js', function()
 		{
 			var rotates = toRotate.split(", ");
 			var current = rotates[Math.floor(Math.random()*rotates.length)]
-			$('#messages').append($('<li id="'+ hash +'"">').html(moment().format('h:mm:ss a') + ": &lt;" + userFrom + '&gt; ' + current));
+			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": &lt;" + userFrom + '&gt; <span  id="'+ hash +'">' + current + "</span>"));
 
 			var TimeBetweenMsgs = Math.max((rotates.reduce(function(previousValue, currentValue, index, array) 
 			{
 				return previousValue+(currentValue.length)
 			}, 0)/rotates.length)*60, 300); // get the average string length, multiply it by 50, and if it's more than 300 return that, otherwise return 300
-			(function(rotates, userFrom, hash, origintime, current) {
+			(function(rotates, userFrom, hash, current) {
 				var prev = current;
 				var current = null;
 				setInterval(function(){
@@ -420,10 +420,10 @@ $.getScript('/javascripts/tabcomplete.js', function()
 					}); // create a variable called rotemp, wich is the same as rotates, but without the previous value
 					rotemp = rotemp.length ? rotemp : rotates; // if rotemp is empty (because it only contained one variable) then just use rotates
 					current = rotemp[Math.floor(Math.random()*rotemp.length)];
-					$('#'+hash).html(origintime + ": &lt;" + userFrom + '&gt; ' + current);
+					$('#'+hash).html(current);
 					prev = current;
 				}, TimeBetweenMsgs);
-		    })(rotates, userFrom, hash, moment().format('h:mm:ss a'), current); // We do this to create a new scope, so setInterval doesn't forget the vars
+		    })(rotates, userFrom, hash, current); // We do this to create a new scope, so setInterval doesn't forget the vars
 			console.log(toRotate.split(", "));
 			console.log(toRotate);
 		}
