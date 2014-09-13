@@ -840,7 +840,20 @@ function alterForCommands(str, user, socket, room, users)
 		var rotates = results[1];
 		var hash = crypto.createHash('md5').update(rotates + new Date().getTime() + "Scott was here" + amdinP).digest('hex');
 		console.log(hash);
-		socket.emit('rotate', rotates, user.nick, hash);
+		if(room)
+		{
+			io.to(room.token).emit('rotate', rotates, user.nick, hash);
+		}
+		else if(user.inBigChat)
+		{
+			console.log("x")
+			io.to('bigroom').emit('rotate', rotates, user.nick, hash);
+		}
+		else
+		{
+			user.partner.socket.emit('rotate', rotates, user.nick, hash);
+			socket.emit('rotate', rotates, user.nick, hash);
+		}	
 		return null
 	}
 	else if (binaural.test(ans))
