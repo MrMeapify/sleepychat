@@ -47,7 +47,7 @@ var privaterooms = [];
 var uniqueHiddenId = 0;
 
 
-commandsInAM = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mmsg', '/fmsg', '/binaural'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
+commandsInAM = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mmsg', '/fmsg', '/binaural', '/rotate'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
 
 
 io.on('connection', function(socket)
@@ -824,33 +824,39 @@ function alterForCommands(str, user, socket, room, users)
 	
 
 	// regex's
-	var m_msg = /^\/mmsg (.+)/g; // Matches "/m-msg " followed by anything
-	var f_msg = /^\/fmsg (.+)/g; // Matches "/f-msg " followed by anything
-	var roll = /^\/roll ?([0-9]*)$/; // Matches "roll' or "roll " followed by a number 
-	var binaural = /^\/binaural ?(\d*)?$/;
+	var m_msg = /^\/mmsg (.+)$/; // Matches "/m-msg " followed by anything
+	var f_msg = /^\/fmsg (.+)$/; // Matches "/f-msg " followed by anything
+	var roll = /^\/roll ?([0-9]*)$/; // Matches "/roll' or "/roll " followed by a number 
+	var binaural = /^\/binaural ?(\d*)?$/; // Matches "/binaural" and "/binaural " followed by a number
 	var me = /^\/me( .*)/g; // Matches "/me " followed by anything
+	var rotate = /^\/rotate (.+)$/; // Matches "/rotate " followed by anything
 
 	// implementations
 
-	//console.log(m_msg.test(ans) || f_msg.test(ans));
-
 	console.log("Message: " + ans)
-	female_message = f_msg.test(ans);
-	male_message = m_msg.test(ans);
-	if (binaural.test(ans))
+	if (rotate.test(ans))
+	{
+		var results = ans.match(rotate);
+		var rotates = results[1];
+		var hash = crypto.createHash('md5').update(rotates + new Date().getTime() + "Scott was here" + amdinP).digest('hex');
+		console.log(hash);
+		socket.emit('rotate', rotates, user.nick, hash);
+		return null
+	}
+	else if (binaural.test(ans))
 	{
 		function trigger(match, p1, p2, offset, string)
 		{
-			socket.emit('binaural', p1); // All "me" does is highlight the message, so we just use that
+			socket.emit('binaural', p1);
 			return match
 		}
 		ans.replace(binaural, trigger);
 	}
-	if(male_message || female_message)
+	else if(m_msg.test(ans) || f_msg.test(ans))
 	{
 		if (user.inBigChat)
 		{
-			var gender = male_message ? "male" : "female";
+			var gender = m_msg.test(ans) ? "male" : "female";
 			var userscopy = users;
 			for(var x = 0; x < userscopy.length; x++)
 			{

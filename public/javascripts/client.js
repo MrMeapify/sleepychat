@@ -21,6 +21,7 @@ var isAFK = false;
 //For Autocomplete
 var users = [];
 
+var ignore_list = [];
 
 $.getScript('/javascripts/tabcomplete.js', function()
 {
@@ -49,7 +50,6 @@ $.getScript('/javascripts/tabcomplete.js', function()
 
 	socket.on('connect', function()
 	{
-		var ignore_list = new Array()
 		$('#loginsubmit').prop('disabled', false).removeClass('btn-default').addClass('btn-success').text('Start Matchmaking!');
 		$('#bigchatsubmit').prop('disabled', false).removeClass('btn-default').addClass('btn-primary').text('Or join the big group chat!');
 		$('#loginform').submit(function()
@@ -397,6 +397,37 @@ $.getScript('/javascripts/tabcomplete.js', function()
 			scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
 			return false;
 		});
+	});
+
+	socket.on('rotate', function(toRotate, userFrom, hash, origintime)
+	{
+		if (userFrom && !ignore_list.indexOf(userFrom) != -1)
+		{
+			var rotates = toRotate.split(", ");
+			var current = rotates[Math.floor(Math.random()*rotates.length)]
+			$('#messages').append($('<li id="'+ hash +'"">').html(moment().format('h:mm:ss a') + ": &lt;" + userFrom + '&gt; ' + current));
+
+			var TimeBetweenMsgs = Math.max((rotates.reduce(function(previousValue, currentValue, index, array) 
+			{
+				return previousValue+(currentValue.length)
+			}, 0)/rotates.length)*60, 300); // get the average string length, multiply it by 50, and if it's more than 300 return that, otherwise return 300
+			(function(rotates, userFrom, hash, origintime, current) {
+				var prev = current;
+				var current = null;
+				setInterval(function(){
+					var rotemp = rotates.filter(function(i) {
+						return i != prev
+					}); // create a variable called rotemp, wich is the same as rotates, but without the previous value
+					rotemp = rotemp.length ? rotemp : rotates; // if rotemp is empty (because it only contained one variable) then just use rotates
+					current = rotemp[Math.floor(Math.random()*rotemp.length)];
+					$('#'+hash).html(origintime + ": &lt;" + userFrom + '&gt; ' + current);
+					prev = current;
+				}, TimeBetweenMsgs);
+		    })(rotates, userFrom, hash, moment().format('h:mm:ss a'), current); // We do this to create a new scope, so setInterval doesn't forget the vars
+			console.log(toRotate.split(", "));
+			console.log(toRotate);
+		}
+			
 	});
 
 	socket.on('stats', function(stats)
