@@ -1042,6 +1042,7 @@ app.use(function(req,res,next)
 
 app.use('/', index);
 app.use('/' + amdinP, stats);
+app.use('/' + moderatorP, stats);
 app.use('/room', privateroom);
 app.use('/legal', function(req, res)
 {
