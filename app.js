@@ -846,7 +846,6 @@ function alterForCommands(str, user, socket, room, users)
 		}
 		else if(user.inBigChat)
 		{
-			console.log("x")
 			io.to('bigroom').emit('rotate', rotates, user.nick, hash);
 		}
 		else
@@ -1047,6 +1046,10 @@ app.use('/room', privateroom);
 app.use('/legal', function(req, res)
 {
 	res.render('legal');
+});
+app.use('/curious', function(req, res)
+{
+	res.render('curious');
 });
 
 /// catch 404 and forward to error handler
