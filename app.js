@@ -828,7 +828,7 @@ function alterForCommands(str, user, socket, room, users)
 	var f_msg = /^\/fmsg (.+)$/; // Matches "/f-msg " followed by anything
 	var roll = /^\/roll ?([0-9]*)$/; // Matches "/roll' or "/roll " followed by a number 
 	var binaural = /^\/binaural ?(\d*)?$/; // Matches "/binaural" and "/binaural " followed by a number
-	var me = /^\/me( .*)/g; // Matches "/me " followed by anything
+	var me = /^\/me((:?&#39;s)? .*)/g; // Matches "/me " followed by anything
 	var rotate = /^\/rotate (.+)$/; // Matches "/rotate " followed by anything
 
 	// implementations
@@ -926,7 +926,7 @@ function alterForCommands(str, user, socket, room, users)
 	}
 	else if (me.test(ans))
 	{
-		sendMessage(false, ans.replace(me, "<span style='font-weight: 300'>*" + user.nick + " $1*</span>"), user, room, socket)
+		sendMessage(false, ans.replace(me, "<span style='font-weight: 300'>*" + user.nick + "$1*</span>"), user, room, socket)
 		return null
 	}
 	else  // For some reason MrMeapify doesn't want /me in /msg
