@@ -393,6 +393,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 			socket.emit('chat message', { message: msgInBox });
 			timeSinceLastMessage = Date.now();
 			$('#m').val('');
+			$('#mhint').val('');
 			scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
 			return false;
 		});
