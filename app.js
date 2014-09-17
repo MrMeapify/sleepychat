@@ -916,7 +916,7 @@ function alterForCommands(str, user, socket, room, users)
 	}
 	else if (ans == "/afk")
 	{
-		socket.emit('chat message', ans, "me");
+		socket.emit('chat message', '&lt;' + user.nick + '&gt; ' + ans, "me");
 		if (room)
 			socket.emit('information', "[INFO] You can only do /afk in the public chat");
 		else if (user.inBigChat)
