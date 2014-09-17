@@ -897,7 +897,7 @@ function alterForCommands(str, user, socket, room, users)
 		return null
 	}
 	else if (ans == "/ping")	// It's a joke
-	{	{
+	{	
 		socket.emit('chat message', '&lt;' + user.nick + '&gt; ' + ans, "me");
 		socket.emit('information', '[INFO] Pong!');
 		return null;
