@@ -563,7 +563,7 @@ io.on('connection', function(socket)
 		}
 	});
 
-	socket.on('afk', function()
+	socket.on('afk', function(data)
 	{
 		user = getUserByNick(data.nick);
 
