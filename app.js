@@ -563,11 +563,11 @@ io.on('connection', function(socket)
 		}
 	});
 
-	socket.on('afk', function(data)
+	socket.on('AFK', function(data)
 	{
 		user = getUserByNick(data.nick);
 
-		if (user && user.inBigChat)
+		if (user.inBigChat)
 		{
 			for(var x = 0; x < users.length; x++)
 			{
@@ -589,6 +589,7 @@ io.on('connection', function(socket)
 
 	});
 });
+
 
 
 // ==================================
