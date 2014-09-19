@@ -57,137 +57,150 @@ io.on('connection', function(socket)
 	
 	socket.on('login', function(data)
 	{
-		if(data.nick.length > 64)
-		{
-			data.nick = data.nick.substring(0,63);
-			socket.emit('nickupdate', data.nick);
-		}
-		else if(data.nick.length < 1)
-		{
-			socket.emit('information', "[INFO] Please choose a nickname.");
-			socket.conn.close();
-		}
-		if(data.nick.indexOf(' ') != -1 && data.nick !== "MrMeapify " + amdinP && moderatorsWithPass.indexOf(data.nick.toUpperCase()) >= 0)
-		{
-			data.nick = data.nick.replace(/[.():] /g, '');
-			socket.emit('nickupdate', data.nick);
-		}
-		if(data.nick.toUpperCase() === "MRMEAPIFY" || moderators.indexOf(data.nick) >= 0)
-		{
-			socket.emit('information', "[INFO] You DARE try to impersonate " + data.nick + "? Shame. Shame on you.");
-			socket.conn.close();
-		}
-		else if(getUserByNick(data.nick))
-		{
-			socket.emit('information', "[INFO] The nickname you chose was in use. Please reload the page and choose another.");
-			socket.conn.close();
-		}
-		else
-		{
-			data.socket = socket;
-			if(data.nick === "MrMeapify " + amdinP)
-			{
-				nick = "MrMeapify";
-				socket.emit('nickupdate', nick);
-			}
-			else if(moderatorsWithPass.indexOf(data.nick) >= 0)
-			{
-				nick = moderators[moderatorsWithPass.indexOf(data.nick)];
-				socket.emit('nickupdate', nick);
-			}
-			else
-			{
-				nick = data.nick;
-			}
-			nick = nick.replace(/&/g, "&#38;"); 	//escape &
-			nick = nick.replace(/</g, "&lt;");  	//escape <
-			nick = nick.replace(/>/g, "&gt;");  	//escape >
-			nick = nick.replace(/"/g, "&quot;");	//escape "
-			nick = nick.replace(/'/g, "&#39;"); 	//escape '
-			data.nick = nick;
-			var hasher = crypto.createHash('sha1');
-			hasher.update(nick + new Date().getTime() + "IAmA Salt AMA" + amdinP);
-			data.token = hasher.digest('hex');
-			console.log(nick + ' ' + data.token);
-			data.AFK = false
-			users.push(data);
-			socket.emit('loggedIn');
-
-			user = getUserByNick(nick)
-			if (data.nick === "MrMeapify") // Let's set the admin and mod variables
-			{
-				user.admin = true;
-				user.mod = true;
-			}
-			else if (moderators.indexOf(data.nick) >= 0)
-			{
-				socket.emit('information', "You're a moderator!");
-				user.admin = false;
-				user.mod = true;
-			}
-			else
-			{
-				user.admin = false;
-				user.mod = false;
-			}
-
-			if(data.inBigChat)
-			{
-				socket.join('bigroom');
-				io.to('bigroom').emit('information', "[INFO] " + nameAppend(user.nick, user.gender, user.role) + " has joined.");
-				var nicks = new Array(users.length);
-				for (var i = 0; i < nicks.length; i++)
-				{
-					nicks[i] = users[i].nick;
-				}
-				io.to('bigroom').emit('rosterupdate', nicks);
-				socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users) + " ]");
-			}
-			else
-			{
-				socket.emit('information', "[INFO] Hi there, " + nick + "! You're now connected to the server.");
-			}
-			console.log(nick +" has joined. IP: " + socket.handshake.address.address)
-		}
-
-	});
-	
-	socket.on('joinroom', function(roomtoken, usertoken)
-	{
-		for(var x = 0; x < privaterooms.length; x++)
-		{
-			if(privaterooms[x].token === roomtoken)
-			{
-				room = privaterooms[x];
-			}
-		}
 		try
 		{
-			console.log('Lookup user by ' + usertoken + "...");
-			var finduser = getUserByToken(usertoken);
-			console.log(finduser.nick);
-			nick = finduser.nick;
-			if(room)
+			if(data.nick.length > 64)
 			{
-				socket.join(room.token);
-				io.to(room.token).emit('information', "[INFO] " + nick + " has joined.");
+				data.nick = data.nick.substring(0,63);
+				socket.emit('nickupdate', data.nick);
+			}
+			else if(data.nick.length < 1)
+			{
+				socket.emit('information', "[INFO] Please choose a nickname.");
+				socket.conn.close();
+			}
+			if(data.nick.indexOf(' ') != -1 && data.nick !== "MrMeapify " + amdinP && moderatorsWithPass.indexOf(data.nick.toUpperCase()) >= 0)
+			{
+				data.nick = data.nick.replace(/[.():] /g, '');
+				socket.emit('nickupdate', data.nick);
+			}
+			if(data.nick.toUpperCase() === "MRMEAPIFY" || moderators.indexOf(data.nick) >= 0)
+			{
+				socket.emit('information', "[INFO] You DARE try to impersonate " + data.nick + "? Shame. Shame on you.");
+				socket.conn.close();
+			}
+			else if(getUserByNick(data.nick))
+			{
+				socket.emit('information', "[INFO] The nickname you chose was in use. Please reload the page and choose another.");
+				socket.conn.close();
 			}
 			else
 			{
-				console.log('bad room');
+				data.socket = socket;
+				if(data.nick === "MrMeapify " + amdinP)
+				{
+					nick = "MrMeapify";
+					socket.emit('nickupdate', nick);
+				}
+				else if(moderatorsWithPass.indexOf(data.nick) >= 0)
+				{
+					nick = moderators[moderatorsWithPass.indexOf(data.nick)];
+					socket.emit('nickupdate', nick);
+				}
+				else
+				{
+					nick = data.nick;
+				}
+				nick = nick.replace(/&/g, "&#38;"); 	//escape &
+				nick = nick.replace(/</g, "&lt;");  	//escape <
+				nick = nick.replace(/>/g, "&gt;");  	//escape >
+				nick = nick.replace(/"/g, "&quot;");	//escape "
+				nick = nick.replace(/'/g, "&#39;"); 	//escape '
+				data.nick = nick;
+				var hasher = crypto.createHash('sha1');
+				hasher.update(nick + new Date().getTime() + "IAmA Salt AMA" + amdinP);
+				data.token = hasher.digest('hex');
+				console.log(nick + ' ' + data.token);
+				data.AFK = false
+				users.push(data);
+				socket.emit('loggedIn');
+
+				user = getUserByNick(nick)
+				if (data.nick === "MrMeapify") // Let's set the admin and mod variables
+				{
+					user.admin = true;
+					user.mod = true;
+				}
+				else if (moderators.indexOf(data.nick) >= 0)
+				{
+					socket.emit('information', "You're a moderator!");
+					user.admin = false;
+					user.mod = true;
+				}
+				else
+				{
+					user.admin = false;
+					user.mod = false;
+				}
+
+				if(data.inBigChat)
+				{
+					socket.join('bigroom');
+					io.to('bigroom').emit('information', "[INFO] " + nameAppend(user.nick, user.gender, user.role) + " has joined.");
+					var nicks = new Array(users.length);
+					for (var i = 0; i < nicks.length; i++)
+					{
+						nicks[i] = users[i].nick;
+					}
+					io.to('bigroom').emit('rosterupdate', nicks);
+					socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users) + " ]");
+				}
+				else
+				{
+					socket.emit('information', "[INFO] Hi there, " + nick + "! You're now connected to the server.");
+				}
+				console.log(nick +" has joined. IP: " + socket.handshake.address.address);
 			}
 		}
 		catch(e)
 		{
-			console.log('Problems joining a private room. ' + e);
+			console.log(e);
+		}
+	});
+	
+	socket.on('joinroom', function(roomtoken, usertoken)
+	{
+		try
+		{
+			for(var x = 0; x < privaterooms.length; x++)
+			{
+				if(privaterooms[x].token === roomtoken)
+				{
+					room = privaterooms[x];
+				}
+			}
+			try
+			{
+				console.log('Lookup user by ' + usertoken + "...");
+				var finduser = getUserByToken(usertoken);
+				console.log(finduser.nick);
+				nick = finduser.nick;
+				if(room)
+				{
+					socket.join(room.token);
+					io.to(room.token).emit('information', "[INFO] " + nick + " has joined.");
+				}
+				else
+				{
+					console.log('bad room');
+				}
+			}
+			catch(e)
+			{
+				console.log('Problems joining a private room. ' + e);
+			}
+		}
+		catch(e)
+		{
+			console.log(e);
 		}
 	});
 
 	socket.on('getNewChat', function(data)
 	{
-		var user = getUserByNick(nick);
 		try
 		{
+			var user = getUserByNick(nick);
 			users.remove(user);
 			if(user.partner)
 			{
@@ -312,279 +325,298 @@ io.on('connection', function(socket)
 		catch(e)
 		{
 			console.log(e)
-			// This prevents us from crashing. 
-			// Everybody, I just want you to know, this was MrMeapify's idea
 		}
 	});
 
 	socket.on('chat message', function(data)
 	{
-		var user = getUserByNick(nick);
-		if(data.message != "" && user)
+		try
 		{
-			// escape html
-			message=data.message;
-			message = message.replace(/;/g, "&#59;"); 			//escape ;
-			message = message.replace(/&([^#$])/, "&#38;$1");	//escape &
-			message = message.replace(/</g, "&lt;");  			//escape <
-			message = message.replace(/>/g, "&gt;");  			//escape >
-			message = message.replace(/"/g, "&quot;");			//escape "
-			message = message.replace(/'/g, "&#39;"); 			//escape '
-			message = message.replace(/^\s+|\s+$/g, '');
-			if(message.lastIndexOf('/server ' + amdinP, 0) === 0)
+			var user = getUserByNick(nick);
+			if(data.message != "" && user)
 			{
-				var command = '/server ' + amdinP + ' ';
-				io.sockets.emit('information', "[ADMIN] " + message.substring(command.length));
-			}
-			else if(message.lastIndexOf('/msg ', 0) === 0)
-			{
-				var userWanted = getUserByNick(message.substring(5, 5+message.substring(5).indexOf(' ')));
-				if(!userWanted)
+				// escape html
+				message=data.message;
+				message = message.replace(/;/g, "&#59;"); 			//escape ;
+				message = message.replace(/&([^#$])/, "&#38;$1");	//escape &
+				message = message.replace(/</g, "&lt;");  			//escape <
+				message = message.replace(/>/g, "&gt;");  			//escape >
+				message = message.replace(/"/g, "&quot;");			//escape "
+				message = message.replace(/'/g, "&#39;"); 			//escape '
+				message = message.replace(/^\s+|\s+$/g, '');
+				if(message.lastIndexOf('/server ' + amdinP, 0) === 0)
 				{
-					socket.emit('information', "[INFO] User " + message.substring(5, 5+message.substring(5).indexOf(' ')) + " was not found.");
+					var command = '/server ' + amdinP + ' ';
+					io.sockets.emit('information', "[ADMIN] " + message.substring(command.length));
 				}
-				else if(userWanted === user)
+				else if(message.lastIndexOf('/msg ', 0) === 0)
 				{
-					socket.emit('information', "[INFO] You can't message yourself!");
-				}
-				else
-				{
-					userWanted.socket.emit('whisper', nick, alterForFormatting(message, userWanted));
-					socket.emit('whisper', nick, alterForFormatting(message, userWanted));
-				}
-			}
-			else if(message.lastIndexOf('/ignore ', 0) === 0)
-			{
-				var userWanted = getUserByNick(message.substring(8));
-				if(!userWanted)
-				{
-					socket.emit('information', "[INFO] User " + message.substring(8) + " was not found.");
-				}
-				else if(userWanted === user)
-				{
-					socket.emit('information', "[INFO] You can't ignore yourself!");
-				}
-				else
-				{
-					socket.emit('information', "[INFO] User " + userWanted.nick + " added to ignore list.");
-					socket.emit('ignore', userWanted.nick);
-				}
-			}
-			else if(message.lastIndexOf('/whois ', 0) === 0)
-			{
-				var userWanted = getUserByNick(message.substring(7));
-				if(!userWanted)
-				{
-					socket.emit('information', "[INFO] User " + message.substring(7) + " was not found.");
-				}
-				else
-				{
-					socket.emit('information', "[INFO] User " + userWanted.nick + " is a " + userWanted.gender + " " + userWanted.role);
-				}
-			}
-			else if(message.lastIndexOf('/room ', 0) === 0)
-			{
-				socket.emit('chat message', alterMessage(message, user, socket, null, users));
-				var userWanted = getUserByNick(message.substring(6));
-				if(!userWanted)
-				{
-					socket.emit('information', "[INFO] That user was not found.");
-				}
-				else if(userWanted === user)
-				{
-					socket.emit('information', "[INFO] You can't start a chat with yourself!");
-				}
-				else
-				{
-					var roomfound = null;
-					for(var x = 0; x < privaterooms.length; x++)
+					var userWanted = getUserByNick(message.substring(5, 5+message.substring(5).indexOf(' ')));
+					if(!userWanted)
 					{
-						var person1 = false;
-						var person2 = false;
-						for(var y = 0; y < privaterooms[x].users.length; y++)
-						{
-							if(privaterooms[x].users[y].nick === nick)
-							{
-								person1 = true;
-							}
-							if(privaterooms[x].users[y].token === userWanted.token)
-							{
-								person2 = true;
-							}
-						}
-						if(person1 && person2)
-						{
-							roomfound = privaterooms[x];
-						}
+						socket.emit('information', "[INFO] User " + message.substring(5, 5+message.substring(5).indexOf(' ')) + " was not found.");
 					}
-					if(roomfound)
+					else if(userWanted === user)
 					{
-						socket.emit('information', "[INFO] Joining " + userWanted.nick + "'s room...");
-						socket.emit('openroom', { roomtoken: roomfound.token, usertoken: user.token });
+						socket.emit('information', "[INFO] You can't message yourself!");
 					}
 					else
 					{
-						var hasher = crypto.createHash('sha1');
-						hasher.update(user.nick + userWanted.nick + new Date().getTime() + "IAmA Pepper AMA" + amdinP);
-						var newroom =
-						{
-							users: [user, userWanted],
-							token: hasher.digest('hex'),
-							lastchat: new Date().getTime()
-						};
-						privaterooms.push(newroom);
-						userWanted.socket.emit('information', "[INFO] " + nick + " would like to chat with you privately!");
-						userWanted.socket.emit('openroom', { roomtoken: newroom.token, usertoken: userWanted.token });
-						socket.emit('information', "[INFO] Request sent to " + userWanted.nick + ".");
-						socket.emit('openroom', { roomtoken: newroom.token, usertoken: user.token });
+						userWanted.socket.emit('whisper', nick, alterForFormatting(message, userWanted));
+						socket.emit('whisper', nick, alterForFormatting(message, userWanted));
 					}
 				}
-			}
-			else if(message.lastIndexOf('/close', 0) === 0 && room)
-			{
-				try
+				else if(message.lastIndexOf('/ignore ', 0) === 0)
 				{
-					privaterooms.remove(room);
-					io.to(room.token).emit('information', "[INFO] " + nick + " has closed the room.");
-				}
-				catch(e) 
-				{
-					console.log(e)
-				}
-			}
-			else if(message.lastIndexOf('/kick ' + amdinP, 0) === 0)
-			{
-				var command = '/kick ' + amdinP + ' ';
-				var tokick = getUserByNick(message.substring(command.length));
-				io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been kicked by the admin.");
-				tokick.socket.leave('bigroom');
-				tokick.socket.conn.close();
-			}
-			else if(message.lastIndexOf('/coinflip', 0) === 0)
-			{
-				var result = Math.random()>0.5 ? "Heads" : "Tails";
-				if (room) // We need to know if we're in a room to actually transmit the message
-				{
-					sendMessage(false, alterMessage(message, user, socket, room, users), user, room, socket)
-					sendMessage(true, "[COINFLIP] " + result, user, room, socket);
-				}
-				else
-				{
-					sendMessage(false, alterMessage(message, user, socket, null, users), user, null, socket)
-					sendMessage(true, "[COINFLIP] " + result, user, null, socket);
-				}
-			}
-			else if(message.lastIndexOf('/', 0) === 0)
-			{
-				inAFC = false; // is it matched by alterMessage?
-				for(var x = 0; x < commandsInAM.length; x++)
-				{
-					if(message.lastIndexOf(commandsInAM[x]) == 0)
+					var userWanted = getUserByNick(message.substring(8));
+					if(!userWanted)
 					{
-						inAFC = true
+						socket.emit('information', "[INFO] User " + message.substring(8) + " was not found.");
+					}
+					else if(userWanted === user)
+					{
+						socket.emit('information', "[INFO] You can't ignore yourself!");
+					}
+					else
+					{
+						socket.emit('information', "[INFO] User " + userWanted.nick + " added to ignore list.");
+						socket.emit('ignore', userWanted.nick);
 					}
 				}
-
-				if(room)
-					socket.emit('chat message', alterMessage(message, user, socket, room, users));
-				else
+				else if(message.lastIndexOf('/whois ', 0) === 0)
+				{
+					var userWanted = getUserByNick(message.substring(7));
+					if(!userWanted)
+					{
+						socket.emit('information', "[INFO] User " + message.substring(7) + " was not found.");
+					}
+					else
+					{
+						socket.emit('information', "[INFO] User " + userWanted.nick + " is a " + userWanted.gender + " " + userWanted.role);
+					}
+				}
+				else if(message.lastIndexOf('/room ', 0) === 0)
+				{
 					socket.emit('chat message', alterMessage(message, user, socket, null, users));
-				if(!inAFC)
+					var userWanted = getUserByNick(message.substring(6));
+					if(!userWanted)
+					{
+						socket.emit('information', "[INFO] That user was not found.");
+					}
+					else if(userWanted === user)
+					{
+						socket.emit('information', "[INFO] You can't start a chat with yourself!");
+					}
+					else
+					{
+						var roomfound = null;
+						for(var x = 0; x < privaterooms.length; x++)
+						{
+							var person1 = false;
+							var person2 = false;
+							for(var y = 0; y < privaterooms[x].users.length; y++)
+							{
+								if(privaterooms[x].users[y].nick === nick)
+								{
+									person1 = true;
+								}
+								if(privaterooms[x].users[y].token === userWanted.token)
+								{
+									person2 = true;
+								}
+							}
+							if(person1 && person2)
+							{
+								roomfound = privaterooms[x];
+							}
+						}
+						if(roomfound)
+						{
+							socket.emit('information', "[INFO] Joining " + userWanted.nick + "'s room...");
+							socket.emit('openroom', { roomtoken: roomfound.token, usertoken: user.token });
+						}
+						else
+						{
+							var hasher = crypto.createHash('sha1');
+							hasher.update(user.nick + userWanted.nick + new Date().getTime() + "IAmA Pepper AMA" + amdinP);
+							var newroom =
+							{
+								users: [user, userWanted],
+								token: hasher.digest('hex'),
+								lastchat: new Date().getTime()
+							};
+							privaterooms.push(newroom);
+							userWanted.socket.emit('information', "[INFO] " + nick + " would like to chat with you privately!");
+							userWanted.socket.emit('openroom', { roomtoken: newroom.token, usertoken: userWanted.token });
+							socket.emit('information', "[INFO] Request sent to " + userWanted.nick + ".");
+							socket.emit('openroom', { roomtoken: newroom.token, usertoken: user.token });
+						}
+					}
+				}
+				else if(message.lastIndexOf('/close', 0) === 0 && room)
 				{
-					socket.emit('information', "[INFO] Command not recognized. Try /help for a list of commands.");
+					try
+					{
+						privaterooms.remove(room);
+						io.to(room.token).emit('information', "[INFO] " + nick + " has closed the room.");
+					}
+					catch(e) 
+					{
+						console.log(e)
+					}
+				}
+				else if(message.lastIndexOf('/kick ' + amdinP, 0) === 0)
+				{
+					var command = '/kick ' + amdinP + ' ';
+					var tokick = getUserByNick(message.substring(command.length));
+					io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been kicked by the admin.");
+					tokick.socket.leave('bigroom');
+					tokick.socket.conn.close();
+				}
+				else if(message.lastIndexOf('/coinflip', 0) === 0)
+				{
+					var result = Math.random()>0.5 ? "Heads" : "Tails";
+					if (room) // We need to know if we're in a room to actually transmit the message
+					{
+						sendMessage(false, alterMessage(message, user, socket, room, users), user, room, socket)
+						sendMessage(true, "[COINFLIP] " + result, user, room, socket);
+					}
+					else
+					{
+						sendMessage(false, alterMessage(message, user, socket, null, users), user, null, socket)
+						sendMessage(true, "[COINFLIP] " + result, user, null, socket);
+					}
+				}
+				else if(message.lastIndexOf('/', 0) === 0)
+				{
+					inAFC = false; // is it matched by alterMessage?
+					for(var x = 0; x < commandsInAM.length; x++)
+					{
+						if(message.lastIndexOf(commandsInAM[x]) == 0)
+						{
+							inAFC = true
+						}
+					}
+
+					if(room)
+						socket.emit('chat message', alterMessage(message, user, socket, room, users));
+					else
+						socket.emit('chat message', alterMessage(message, user, socket, null, users));
+					if(!inAFC)
+					{
+						socket.emit('information', "[INFO] Command not recognized. Try /help for a list of commands.");
+					}
+				}
+				else if(room)
+				{
+					try
+					{
+						io.to(room.token).emit('chat message', alterMessage(message, user, socket, room, users), "eval");
+						privaterooms.remove(room);
+						room.lastchat = new Date().getTime();
+						privaterooms.push(room);
+					}
+					catch(e)
+					{
+						console.log(e)
+					}
+				}
+				else if(user.inBigChat)
+				{
+					try
+					{
+						io.to('bigroom').emit('chat message', alterMessage(message, user, socket, null, users), "eval", user.nick);
+					}
+					catch(e)
+					{
+						console.log(e)
+					}
+				}
+				else
+				{
+					try
+					{
+						//user.partner.socket.emit('chat message', '<' + nick + '> ' + message);
+						//socket.emit('chat message', '<' + nick + '> ' + message);
+						user.partner.socket.emit('chat message',  alterMessage(message, user, socket, null, users), "them");
+						socket.emit('chat message', alterMessage(message, user, socket, null, users), "me");
+					}
+					catch(e)
+					{
+						console.log(e)
+					}
 				}
 			}
-			else if(room)
-			{
-				try
-				{
-					io.to(room.token).emit('chat message', alterMessage(message, user, socket, room, users), "eval");
-					privaterooms.remove(room);
-					room.lastchat = new Date().getTime();
-					privaterooms.push(room);
-				}
-				catch(e)
-				{
-					console.log(e)
-				}
-			}
-			else if(user.inBigChat)
-			{
-				try
-				{
-					io.to('bigroom').emit('chat message', alterMessage(message, user, socket, null, users), "eval", user.nick);
-				}
-				catch(e)
-				{
-					console.log(e)
-				}
-			}
-			else
-			{
-				try
-				{
-					//user.partner.socket.emit('chat message', '<' + nick + '> ' + message);
-					//socket.emit('chat message', '<' + nick + '> ' + message);
-					user.partner.socket.emit('chat message',  alterMessage(message, user, socket, null, users), "them");
-					socket.emit('chat message', alterMessage(message, user, socket, null, users), "me");
-				}
-				catch(e)
-				{
-					console.log(e)
-				}
-			}
+		}
+		catch(e)
+		{
+			console.log(e)
 		}
 	});
 
 	socket.on('disconnect', function()
 	{
-		if(room)
+		try
 		{
-			io.to(room.token).emit('information', "[INFO] " + nick + " has left.");
-		}
-		else
-		{
-			var user = getUserByNick(nick);
-			if(user)
+			if(room)
 			{
-				if(user.partner)
-				{
-					users.remove(user.partner);
-					delete user.partner.partner;
-					users.push(user.partner);
-					user.partner.socket.emit('partnerDC', user.nick);
-				}
-				if(user.inBigChat)
-				{
-					io.to('bigroom').emit('information', "[INFO] " + nick + " has left.");
-				}
-				users.remove(user);
+				io.to(room.token).emit('information', "[INFO] " + nick + " has left.");
 			}
+			else
+			{
+				var user = getUserByNick(nick);
+				if(user)
+				{
+					if(user.partner)
+					{
+						users.remove(user.partner);
+						delete user.partner.partner;
+						users.push(user.partner);
+						user.partner.socket.emit('partnerDC', user.nick);
+					}
+					if(user.inBigChat)
+					{
+						io.to('bigroom').emit('information', "[INFO] " + nick + " has left.");
+					}
+					users.remove(user);
+				}
+			}
+		}
+		catch(e)
+		{
+			console.log(e)
 		}
 	});
 
 	socket.on('AFK', function(data)
 	{
-		user = getUserByNick(data.nick);
-
-		if (user.inBigChat)
+		try
 		{
-			for(var x = 0; x < users.length; x++)
+			user = getUserByNick(data.nick);
+
+			if (user.inBigChat)
 			{
-				if(users[x] === user)
+				for(var x = 0; x < users.length; x++)
 				{
-					users[x].AFK = data.isAFK
+					if(users[x] === user)
+					{
+						users[x].AFK = data.isAFK
+					}
+				}
+				if (data.isAFK)
+				{
+					io.to('bigroom').emit('information', "[INFO] " + data.nick + " is AFK."); 
+				}
+				else
+				{
+					if (data.time > (40*60*1000)) // if they've been gone for 40 minutes
+						io.to('bigroom').emit('information', "[INFO] " + data.nick + " has returned!"); 
 				}
 			}
-			if (data.isAFK)
-			{
-				io.to('bigroom').emit('information', "[INFO] " + data.nick + " is AFK."); 
-			}
-			else
-			{
-				if (data.time > (40*60*1000)) // if they've been gone for 40 minutes
-					io.to('bigroom').emit('information', "[INFO] " + data.nick + " has returned!"); 
-			}
+		}
+		catch(e)
+		{
+			console.log(e)
 		}
 
 	});
