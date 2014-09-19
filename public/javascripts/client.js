@@ -455,18 +455,18 @@ $.getScript('/javascripts/tabcomplete.js', function()
 		$("title").text(oldTitle);
 	});
 
-	var afkTime = 7*60*1000; // 7 minutes in milliseconds
+	var afkTime = 15*60*1000; // 15 minutes in milliseconds
 
 	var afk = setInterval(function(){
 		if(bigchat)
 		{
 			timenow = Date.now()
-			if ((!isAFK) && (timenow - timeSinceLastMessage > afkTime)) // If we're not AFK, but we haven't said anything in 2 seconds, then mark ourselves as afk
+			if ((!isAFK) && (timenow - timeSinceLastMessage > afkTime)) // If we're not AFK, but we haven't said anything in afkTime, then mark ourselves as afk
 		    {
 		    	socket.emit('AFK', {isAFK: true, nick: nick, time: timenow - timeSinceLastMessage, inPrivate: false})
 		    	isAFK = true;
 		    }
-		    else if(isAFK && (timenow - timeSinceLastMessage <= afkTime)) // If we're AFK, but we have said something in the last 2 seconds, then mark ourselves as not afk
+		    else if(isAFK && (timenow - timeSinceLastMessage <= afkTime)) // If we're AFK, but we have said something in the last afkTime, then mark ourselves as not afk
 		    {
 		    	socket.emit('AFK', {isAFK: false, nick: nick, time: timenow - timeSinceLastMessage, inPrivate: false})
 		    	isAFK = false;
