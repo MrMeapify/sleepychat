@@ -896,6 +896,8 @@ function alterForCommands(str, user, socket, room, users)
 			return match
 		}
 		ans.replace(binaural, trigger);
+		socket.emit('chat message', '&lt;' + user.nick + '&gt; ' + ans);
+		return null;
 	}
 	else if(m_msg.test(ans) || f_msg.test(ans))
 	{
