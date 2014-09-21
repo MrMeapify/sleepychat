@@ -47,7 +47,7 @@ var privaterooms = [];
 var uniqueHiddenId = 0;
 
 
-commandsInAM = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mmsg', '/fmsg', '/binaural', '/rotate'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
+commandsInAM = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mmsg', '/fmsg', '/binaural', '/rotate', '/opinion'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
 
 
 io.on('connection', function(socket)
@@ -863,10 +863,17 @@ function alterForCommands(str, user, socket, room, users)
 	var binaural = /^\/binaural ?(\d*)?$/; // Matches "/binaural" and "/binaural " followed by a number
 	var me = /^\/me((:?&#39;s)? .*)/g; // Matches "/me " followed by anything
 	var rotate = /^\/rotate (.+)$/; // Matches "/rotate " followed by anything
+	var opinion = /^\/opinion$/; // Matches "/opinion"
 
 	// implementations
 
 	console.log("Message: " + ans)
+	if (opinion.test(ans))
+	{
+		var embed = '<iframe width="420" height="315" src="//www.youtube.com/embed/XVCtkzIXYzQ" frameborder="0" allowfullscreen></iframe>'
+		sendMessage(false, '&lt;' + user.nick + '&gt; ' + embed, user, room, socket)
+		return null;
+	}
 	if (rotate.test(ans))
 	{
 		var results = ans.match(rotate);
