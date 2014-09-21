@@ -413,7 +413,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 			var TimeBetweenMsgs = Math.max((rotates.reduce(function(previousValue, currentValue, index, array) 
 			{
 				return previousValue+(currentValue.length)
-			}, 0)/rotates.length)*60, 300); // get the average string length, multiply it by 50, and if it's more than 300 return that, otherwise return 300
+			}, 0)/rotates.length)*25, 300); // get the average string length, multiply it by 25, and if it's more than 300 return that, otherwise return 300
 			(function(rotates, userFrom, hash, current) {
 				var prev = current;
 				var current = null;
