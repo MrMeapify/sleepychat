@@ -870,7 +870,7 @@ function alterForCommands(str, user, socket, room, users)
 	console.log("Message: " + ans)
 	if (opinion.test(ans))
 	{
-		var embed = '<iframe width="420" height="315" src="//www.youtube.com/embed/XVCtkzIXYzQ" frameborder="0" allowfullscreen></iframe>'
+		var embed = '<iframe width="250" height="188" src="//www.youtube.com/embed/XVCtkzIXYzQ" frameborder="0" allowfullscreen></iframe>'
 		sendMessage(false, '&lt;' + user.nick + '&gt; ' + embed, user, room, socket)
 		return null;
 	}
