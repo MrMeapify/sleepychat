@@ -52,6 +52,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 	{
 		$('#loginsubmit').prop('disabled', false).removeClass('btn-default').addClass('btn-success').text('Start Matchmaking!');
 		$('#bigchatsubmit').prop('disabled', false).removeClass('btn-default').addClass('btn-primary').text('Or join the big group chat!');
+		$('#Splash').html(randomAKA());
 		$('#loginform').submit(function()
 		{
 			var nick = $('<div/>').text(($('#nickname').val())).html();
@@ -572,6 +573,15 @@ function changeTitle()
 function randomAdjective(){
 	var adjs = ['adaptable', 'adventurous', 'affable', 'affectionate', 'agreeable', 'ambitious', 'amiable', 'amicable', 'amusing', 'brave', 'bright', 'broad-minded', 'calm', 'charming', 'communicative', 'compassionate ', 'conscientious', 'considerate', 'convivial', 'courageous', 'courteous', 'creative', 'decisive', 'determined', 'diligent', 'diplomatic', 'discreet', 'dynamic', 'easygoing', 'emotional', 'energetic', 'enthusiastic', 'exuberant', 'fair-minded', 'faithful', 'fearless', 'forceful', 'frank', 'friendly', 'funny', 'generous', 'gentle', 'good', 'gregarious', 'hard-working', 'helpful', 'honest', 'humorous', 'imaginative', 'impartial', 'independent', 'intellectual', 'intelligent', 'intuitive', 'inventive', 'kind', 'loving', 'loyal', 'modest', 'neat', 'nice', 'optimistic', 'passionate', 'patient', 'persistent ', 'pioneering', 'philosophical', 'placid', 'plucky', 'polite', 'powerful', 'practical', 'pro-active', 'quick-witted', 'quiet', 'rational', 'reliable', 'reserved', 'resourceful', 'romantic', 'self-confident', 'sensible', 'sensitive', 'sociable', 'straightforward', 'thoughtful', 'unassuming', 'understanding', 'versatile', 'warmhearted', 'willing', 'witty', 'mysterious', 'incredible', 'amazing', 'stupefying', 'unbelieveable', 'mind-blowing'];
 	return adjs[Math.floor(Math.random()*adjs.length)]
+}
+
+function randomAKA(){
+	var akas = ['AKA MadSciencechat', 'For some reason nobody remembers it...', "Will you tell me what I'm doing in this silly coustume, and all wet?", "You're getting very sleepy...", 
+	'It puts you to sleep, in a good way', "It's off topic most of the time...", 'I hypnotized a man... <i>with this thumb</i>', "It's turing complete", "It doesn't know anything about a Snake named Kaa", 
+	"It's your new favorite site", "It has a pineal gland", "It sometimes reads your mind", 'You may have been here before...', "It's not constained by the laws of physics", "It's infamous throughout the galaxy", 
+	'It has three seats on the US senate, indirectly', 'It accounts for 140% of voters in Russia', "It's a loose cannon site that doesn't play by the rules", "It's incrementally better than Omegle", 
+	'The best hypnosis website since sliced bread', "It's open source!"]
+	return akas[Math.floor(Math.random()*akas.length)]
 }
 
 $("#bugsandfeatures").click(function()
