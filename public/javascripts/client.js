@@ -578,10 +578,10 @@ function randomAdjective(){
 
 function randomAKA(){
 	var akas = ['AKA MadSciencechat', 'For some reason nobody remembers it...', "Will you tell me what I'm doing in this silly coustume, and all wet?", "You're getting very sleepy...", 
-	'It puts you to sleep, in a good way', "It's off topic most of the time...", 'I hypnotized a man... <i>with this thumb</i>', "It's turing complete", "It doesn't know anything about a Snake named Kaa", 
-	"It's your new favorite site", "It has a pineal gland", "It sometimes reads your mind", 'You may have been here before...', "It's not constained by the laws of physics", "It's infamous throughout the galaxy", 
-	'It has three seats on the US senate, indirectly', 'It accounts for 140% of voters in Russia', "It's a loose cannon site that doesn't play by the rules", "It's incrementally better than Omegle", 
-	'The best hypnosis website since sliced bread', "It's open source!"]
+	'Puts you to sleep, in a good way!', "Off topic most of the time...", 'I hypnotized a man... <i>with this thumb</i>', "Turing complete", "Doesn't know anything about a Snake named Kaa", 
+	"Your new favorite site", "It has a pineal gland", "It sometimes reads your mind", 'You may have been here before...', "It's not constained by the laws of physics", "infamous throughout the galaxy", 
+	'Has three seats on the US senate, indirectly', 'Hypnotized 40% of Russia to vote twice!', "A loose cannon site that doesn't play by the rules", "Incrementally better than Omegle!", 
+	'The best hypnosis website since sliced bread', "Open source!", 'The best hypnosis site with banana cream pie', 'So many commands!', 'Frequently updated!', '40% safe for work!', 'Not IRC!']
 	return akas[Math.floor(Math.random()*akas.length)]
 }
 
