@@ -69,7 +69,7 @@ io.on('connection', function(socket)
 				socket.emit('information', "[INFO] Please choose a nickname.");
 				socket.conn.close();
 			}
-			if(data.nick.indexOf(' ') != -1 && data.nick !== "MrMeapify " + amdinP && moderatorsWithPass.indexOf(data.nick.toUpperCase()) >= 0)
+			if(data.nick.indexOf(' ') != -1 && data.nick !== "MrMeapify " + amdinP && moderatorsWithPass.indexOf(data.nick) == -1)
 			{
 				data.nick = data.nick.replace(/[.(): ]/g, '');
 				socket.emit('nickupdate', data.nick);
