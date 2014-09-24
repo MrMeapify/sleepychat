@@ -457,7 +457,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 		$("title").text(oldTitle);
 	});
 
-	var afkTime = 15*60*1000; // 15 minutes in milliseconds
+	var afkTime = 30*60*1000; // 15 minutes in milliseconds
 
 	var afk = setInterval(function(){
 		if(bigchat)
