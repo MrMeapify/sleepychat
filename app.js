@@ -13,7 +13,7 @@ require('array.prototype.find');
 
 // This here is the admin password. For obvious reasons, set the ADMINPASS variable in production.
 var amdinP = String(process.env.ADMINPASS || "testpassword");
-var moderatorP = String(process.env.ADMINPASS || "testpassword");
+var moderatorP = String(process.env.MODPASS || "testpassword");
 
 var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "2"));
 
@@ -659,6 +659,12 @@ io.on('connection', function(socket)
 				if(user.inBigChat)
 				{
 					io.to('bigroom').emit('information', "[INFO] " + nick + " has left.");
+					var nicks = new Array(users.length);
+					for (var i = 0; i < nicks.length; i++)
+					{
+						nicks[i] = users[i].nick;
+					}
+					io.to('bigroom').emit('rosterupdate', nicks);
 				}
 				users.remove(user);
 			}
