@@ -145,6 +145,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 		{
 			users = newList;
 			$('#m').tabcomplete(users);
+			$('#m').focus();
 		});
 		
 		socket.on('nickupdate', function(newnick)
