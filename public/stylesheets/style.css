@@ -1,0 +1,23 @@
+.body { margin: 0; padding: 0; box-sizing: border-box; font: 1.11em Roboto, Helvetica, Arial; }
+
+.body form { background: #afafaf; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+
+.body .form-group { margin-bottom: 0; }
+
+.body #messages { list-style-type: none; margin: 0; padding: 0; padding-bottom: 40px;}
+
+.body #messages li { padding: 5px 10px; font-size: 1.4rem;}
+
+.body #messages .information { font-style: italic; font-weight: 700; font: 1.11em Roboto, Helvetica, Arial;}
+
+/*.afk { font-style: italic; font-weight: 700; font: 1.11em Roboto, Helvetica, Arial; color: #111111}*/
+
+.modal-body .input-group { margin-bottom: 20px; }
+
+li.self { background: #eee; }
+
+li.highlight { background: #f7ff6a!important; }
+
+.login-modal { font-family: Roboto, Helvetica, Arial; }
+
+.embedded_image { max-height: 250px; }

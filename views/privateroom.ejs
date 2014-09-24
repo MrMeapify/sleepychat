@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title><%= title %></title>
+		<link rel='stylesheet' href='/stylesheets/bootstrap.min.css' />
+		<link rel='stylesheet' href='/stylesheets/bootstrap-theme.min.css' />
+		<link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css' />
+		<link rel='stylesheet' href='/stylesheets/style.css' />
+		<link href='http://fonts.googleapis.com/css?family=Roboto:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+		<script src="https://rawgithub.com/oampo/Audiolet/master/src/audiolet/Audiolet.js"></script>
+	</head>
+	<body>
+		<div class="body">
+			<ul id="messages"></ul>
+	  		<form id="chatbar" action="">
+				<div class="form-group">
+					<div class="input-group">
+						<input id="m" type="text" autocomplete="off" class="form-control">
+						<span class="input-group-btn">
+							<button id="sendbutton" class="btn btn-default" type="submit">Send</button>
+							<button id="mutebutton" class="btn btn-default" type="button"><i class="fa fa-volume-up"></i></button>
+						</span>
+					</div>
+				</div>
+	  		</form>
+		</div>
+	</body>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+	<script src="/javascripts/bootstrap.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.7.0/moment.min.js"></script>
+	<script>
+		var nick = '<%= nick %>';
+	</script>
+	<script src="/javascripts/roomclient.js"></script>
+</html>
