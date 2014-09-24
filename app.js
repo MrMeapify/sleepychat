@@ -92,7 +92,7 @@ io.on('connection', function(socket)
 	
 	for (var i = 0; i < users.length; i++)
 	{
-		if (socket.handshake.address.address == users[i].socket.handshake.address.address)
+		if (socket.handshake.address == users[i].socket.handshake.address)
 		{
 			numberOfSimilarIps++;
 		}
@@ -205,7 +205,7 @@ io.on('connection', function(socket)
 			{
 				socket.emit('information', "[INFO] Hi there, " + nick + "! You're now connected to the server.");
 			}
-			console.log(nick +" has joined. IP: " + socket.handshake.address.address)
+			console.log(nick +" has joined. IP: " + socket.handshake.address)
 		}
 
 	});
@@ -535,7 +535,7 @@ io.on('connection', function(socket)
 				var rightNow = new Date();
 				var nameIpPair = {
 					name: tokick.nick,
-					ip: tokick.socket.handshake.address.address,
+					ip: tokick.socket.handshake.address,
 					days: days,
 					date: rightNow.getTime()
 				};
@@ -788,8 +788,8 @@ var pies = ["http://i.imgur.com/Zb2ZnBF.jpg",
 			"http://i.imgur.com/4yYHZ4S.jpg"];
 
 var helpCommands = 	[['information', "[INFO] ~~~"],
-					['information', "[INFO] Welcome to Sleepychat!"],
-					['information', "[INFO] Sleepychat was created by MrMeapify in an attempt to solve the problems that chat sites before it posed the hypnosis community."],
+					['information', "[INFO] Welcome to Hypnochat!"],
+					['information', "[INFO] Hypnochat was created by ElysianTail because MrMeapify, the owner of Sleepychat, disappeared."],
 					['information', "[INFO] "],
 					['information', "[INFO] While in chat, you can use several commands:"],
 					['information', "[INFO] -- /help -- Launches this message. Duh"],
@@ -1075,7 +1075,7 @@ function checkForBans(user, socket)
 	
 	for (var i = 0; i < banList.length; i++)
 	{
-		if (user.nick === banList[i].name || socket.handshake.address.address === banList[i].ip)
+		if (user.nick === banList[i].name || socket.handshake.address === banList[i].ip)
 		{
 			var rightNow = new Date();
 			var dayUnbanned = new Date(banList[i].date + (MILSEC_PER_DAY * banList[i].days));
