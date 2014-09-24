@@ -26,7 +26,7 @@ var users = [];
 $.getScript('/javascripts/tabcomplete.js', function()
 {
 	$('#randomnick').click();
-	var socket = io("/", { reconnection: false });
+	var socket = io("/", { reconnection: false, transport: ['websocket'] });
 
 	$('#loginform').submit(function()
 	{
