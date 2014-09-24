@@ -77,8 +77,12 @@
 			words = [];
 			
 			// Check for matches if the current word is the last word.
-			if (self[0].selectionStart == input.length
-				&& word.length) {
+			//if (self[0].selectionStart == input.length
+			//	&& word.length) {
+			console.log(self)
+			console.log(self[0].selectionStart)
+			console.log(input)
+			if ( /[^ ][^ ][^ ]+$/.test(input) ) {
 				if (typeof args === "function") {
 					// If the user supplies a function, invoke it
 					// and keep the result.
