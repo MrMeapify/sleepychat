@@ -533,7 +533,7 @@ io.on('connection', function(socket)
 					days = 1;
 				}
 				var rightNow = new Date();
-				var nameIpPairs = {
+				var nameIpPair = {
 					name: tokick.nick,
 					ip: tokick.socket.handshake.address.address,
 					days: days,
