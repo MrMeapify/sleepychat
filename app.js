@@ -89,9 +89,12 @@ io.on('connection', function(socket)
 	
 	var numberOfSimilarIps = 0;
 	
+	var forwardedFor = socket.request.headers['x-forwarded-for'].split(' ');
+	var ip = forwardedFor[forwardedFor.length - 1];
+	
 	for (var i = 0; i < users.length; i++)
 	{
-		if (socket.request.connection._peername.address == users[i].socket.request.connection._peername.address)
+		if (ip == users[i].realIp)
 		{
 			numberOfSimilarIps++;
 		}
@@ -132,7 +135,7 @@ io.on('connection', function(socket)
 			socket.emit('information', "[INFO] The nickname you chose was in use. Please reload the page and choose another.");
 			socket.conn.close();
 		}
-		else if (checkForBans(data, socket) != null)
+		else if (checkForBans(data, socket, ip) != null)
 		{
 			var banned = checkForBans(data, socket);
 			var rightNow = new Date();
@@ -167,6 +170,7 @@ io.on('connection', function(socket)
 			data.token = hasher.digest('hex');
 			console.log(nick + ' ' + data.token);
 			data.AFK = false
+			data.realIp = ip;
 			users.push(data);
 			socket.emit('loggedIn');
 
@@ -204,7 +208,7 @@ io.on('connection', function(socket)
 			{
 				socket.emit('information', "[INFO] Hi there, " + nick + "! You're now connected to the server.");
 			}
-			console.log(nick +" has joined. IP: " + socket.request.connection._peername.address)
+			console.log(nick +" has joined. IP: " + ip)
 		}
 
 	});
@@ -534,7 +538,7 @@ io.on('connection', function(socket)
 				var rightNow = new Date();
 				var nameIpPair = {
 					name: tokick.nick,
-					ip: tokick.socket.request.connection._peername.address,
+					ip: tokick.realIp,
 					days: days,
 					date: rightNow.getTime()
 				};
@@ -1074,13 +1078,13 @@ function getUserByToken(token)
 	return null;
 }
 
-function checkForBans(user, socket)
+function checkForBans(user, socket, ip)
 {
 	var splice = -1;
 	
 	for (var i = 0; i < banList.length; i++)
 	{
-		if (user.nick === banList[i].name || socket.request.connection._peername.address === banList[i].ip)
+		if (user.nick === banList[i].name || ip === banList[i].ip)
 		{
 			var rightNow = new Date();
 			var dayUnbanned = new Date(banList[i].date + (MILSEC_PER_DAY * banList[i].days));
