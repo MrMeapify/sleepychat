@@ -18,7 +18,7 @@ var moderatorP = String(process.env.MODPASS || "testpassword");
 var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "2"));
 
 // Get lists of mods and stuff
-var moderators = ['ScottB', 'ElysianTail']
+var moderators = ['ScottB', 'ElysianTail-Senpai']
 var moderatorsCaps = moderators.reduce(function(previousValue, currentValue, index, array) 
 {
 	return previousValue.concat([currentValue.toUpperCase()])
@@ -82,7 +82,6 @@ var MILSEC_PER_DAY = 86400000;
 
 commandsInAM = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mmsg', '/fmsg', '/binaural'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
 
-
 io.on('connection', function(socket)
 {
 	var nick = "";
@@ -92,7 +91,7 @@ io.on('connection', function(socket)
 	
 	for (var i = 0; i < users.length; i++)
 	{
-		if (socket.handshake.address == users[i].socket.handshake.address)
+		if (socket.request.conection.remoteAddress == users[i].socket.request.conection.remoteAddress)
 		{
 			numberOfSimilarIps++;
 		}
@@ -205,7 +204,7 @@ io.on('connection', function(socket)
 			{
 				socket.emit('information', "[INFO] Hi there, " + nick + "! You're now connected to the server.");
 			}
-			console.log(nick +" has joined. IP: " + socket.handshake.address)
+			console.log(nick +" has joined. IP: " + socket.request.conection.remoteAddress)
 		}
 
 	});
@@ -535,7 +534,7 @@ io.on('connection', function(socket)
 				var rightNow = new Date();
 				var nameIpPair = {
 					name: tokick.nick,
-					ip: tokick.socket.handshake.address,
+					ip: tokick.socket.request.conection.remoteAddress,
 					days: days,
 					date: rightNow.getTime()
 				};
@@ -1081,7 +1080,7 @@ function checkForBans(user, socket)
 	
 	for (var i = 0; i < banList.length; i++)
 	{
-		if (user.nick === banList[i].name || socket.handshake.address === banList[i].ip)
+		if (user.nick === banList[i].name || socket.request.conection.remoteAddress === banList[i].ip)
 		{
 			var rightNow = new Date();
 			var dayUnbanned = new Date(banList[i].date + (MILSEC_PER_DAY * banList[i].days));
