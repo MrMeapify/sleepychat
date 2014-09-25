@@ -238,6 +238,8 @@ $.getScript('/javascripts/tabcomplete.js', function()
 				{
 					$('#messages > li').filter(':last').hide();
 				}
+
+				scrollDown(scroll_down);
 			}
 		});
 		socket.on('information', function(msg, userFrom)

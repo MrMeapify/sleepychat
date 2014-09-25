@@ -89,7 +89,17 @@ io.on('connection', function(socket)
 	
 	var numberOfSimilarIps = 0;
 	
-	var forwardedFor = socket.request.headers['x-forwarded-for'].split(' ');
+	var forwardedFor = null;
+	
+	if (process.env.ISHEROKU == "1")
+	{
+		forwardedFor = socket.request.headers['x-forwarded-for'].split(' ');
+	}
+	else
+	{
+		forwardedFor = [ socket.request.connection.remoteAddress ];
+	}
+	
 	var ip = forwardedFor[forwardedFor.length - 1];
 	
 	for (var i = 0; i < users.length; i++)
@@ -879,7 +889,7 @@ function link_replacer(match, p1, p2, offset, string)
 	}
 	else if ((p2 == '.gif')) {
 		uniqueHiddenId++;
-		a = "<img id=\"hiddenInd"+uniqueHiddenId.toString()+"\" src=\"/images/gif.png\" onclick=\"loadGif("+uniqueHiddenId.toString()+", 'http://"+p1+"')\" />\n<a id=\"hiddenLnk1\" target='_blank' href=\"\" style=\"display:none\"><img id=\"hiddenImg"+uniqueHiddenId.toString()+"\" src=\"\" onload=\"onGifLoaded("+uniqueHiddenId.toString()+")\" /></a>";
+		a = "<img id=\"hiddenInd"+uniqueHiddenId.toString()+"\" class=\"image_loader_link\" src=\"/images/gif.png\" onclick=\"loadGif("+uniqueHiddenId.toString()+", 'http://"+p1+"')\" />\n<a id=\"hiddenLnk1\" target='_blank' href=\"\" style=\"display:none\"><img id=\"hiddenImg"+uniqueHiddenId.toString()+"\" src=\"\" onload=\"onGifLoaded("+uniqueHiddenId.toString()+")\" /></a>";
 	}
     else {
 		a = "<a target='_blank' href='http://"+p1+"'>"+p1+"</a>";
@@ -945,7 +955,6 @@ function alterForCommands(str, user, socket, room, users)
 
 	//console.log(m_msg.test(ans) || f_msg.test(ans));
 
-	console.log("Message: " + ans)
 	female_message = f_msg.test(ans);
 	male_message = m_msg.test(ans);
 	if (binaural.test(ans))
