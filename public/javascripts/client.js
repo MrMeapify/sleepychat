@@ -54,12 +54,27 @@ $.getScript('/javascripts/tabcomplete.js', function()
 			$('#login-modal').modal({keyboard: false, backdrop: 'static'});
 		});
 		
+		var errorLabel = document.getElementById('error-label');
+		
 		var ignore_list = new Array()
 		$('#loginsubmit').prop('disabled', false).removeClass('btn-default').addClass('btn-success').text('Start Matchmaking!');
 		$('#bigchatsubmit').prop('disabled', false).removeClass('btn-default').addClass('btn-primary').text('Or join the big group chat!');
+		$('#nickname').on('input', function()
+		{
+			var inputNick = $('<div/>').text(($('#nickname').val())).html();
+			
+			var result = testNick(inputNick);
+			errorLabel.innerHTML = result;
+		});
 		$('#loginform').submit(function()
 		{
 			var nick = $('<div/>').text(($('#nickname').val())).html();
+			
+			if (testNick(nick) != "")
+			{
+				console.log("Error: '" + nick + "' is not accepted!");
+				return false;
+			}
 
 			if($('#iammale').parent().hasClass('active'))
 				var gender = 'male';
@@ -101,6 +116,12 @@ $.getScript('/javascripts/tabcomplete.js', function()
 			bigchat = true;
 
 			var nick2 = $('<div/>').text(($('#nickname').val())).html();
+			
+			if (testNick(nick) != "")
+			{
+				console.log("Error: '" + nick + "' is not accepted!");
+				return false;
+			}
 
 			if($('#iammale').parent().hasClass('active'))
 				var gender = 'male';
@@ -531,6 +552,31 @@ var stop = function(){
 	} catch (e) {}
 }
 
+function testNick(nickToTest)
+{
+	var regex = /^[a-z0-9-_~]+$/i;
+	
+	if (typeof nickToTest == 'undefined' || nickToTest == null)
+	{
+		return "Undefined nickname!";
+	}
+	else if (nickToTest.length < 1)
+	{
+		return "Please type a nickname!";
+	}
+	else if (nickToTest.length > 64)
+	{
+		return "Nickname too long!";
+	}
+	else if (!regex.test(nickToTest))
+	{
+		return "Only letters and numbers!";
+	}
+	else
+	{
+		return "";
+	}
+}
 
 function scrollDown(scroll_down)
 {
