@@ -117,7 +117,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 
 			var nick2 = $('<div/>').text(($('#nickname').val())).html();
 			
-			if (testNick(nick) != "")
+			if (testNick(nick2) != "")
 			{
 				console.log("Error: '" + nick + "' is not accepted!");
 				return false;
