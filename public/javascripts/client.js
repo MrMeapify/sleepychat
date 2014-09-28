@@ -336,7 +336,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 						msgInBox = msgInBox.replace("/r", "/msg " + lastMessenger);
 					}
 				}
-				socket.emit('chat message', { message: msgInBox });
+				socket.emit('chat message', 'undefined');
 				timeSinceLastMessage = Date.now();
 				$('#m').val('');
 				$('#mhint').val('');
