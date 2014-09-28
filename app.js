@@ -756,7 +756,7 @@ function giveHelp(str, socket){
 	else if (str=="/formatting")
 	{
 		for (var x = 0; x < helpFormatting.length; x++)
-			socket.emit(helpCommands[x][0], helpCommands[x][1]);
+			socket.emit(helpFormatting[x][0], helpFormatting[x][1]);
 	}
 }
 
