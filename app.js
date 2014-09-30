@@ -93,7 +93,7 @@ io.on('connection', function(socket)
 	var nick = "";
 	var room = null;
 	
-	loggedIn = false;
+	var loggedIn = false;
 	
 	var numberOfSimilarIps = 0;
 	
