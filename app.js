@@ -78,6 +78,7 @@ app.use(bodyParser.urlencoded());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+var connections = [];
 var users = [];
 var privaterooms = [];
 
@@ -107,9 +108,9 @@ io.on('connection', function(socket)
 	
 	var ip = forwardedFor[forwardedFor.length - 1];
 	
-	for (var i = 0; i < users.length; i++)
+	for (var i = 0; i < connections.length; i++)
 	{
-		if (ip == users[i].realIp)
+		if (ip == connections[i].realIp)
 		{
 			numberOfSimilarIps++;
 		}
@@ -122,6 +123,8 @@ io.on('connection', function(socket)
 	}
 	
 	socket.emit('allow');
+	var connection = { realIp: ip };
+	connections.push(connection);
 	
 	socket.on('login', function(data)
 	{
@@ -695,6 +698,8 @@ io.on('connection', function(socket)
 				users.remove(user);
 			}
 		}
+		
+		connections.remove(connection);
 	});
 
 	socket.on('afk', function()
