@@ -177,7 +177,11 @@ io.on('connection', function(socket)
 			{
 				nick = data.nick;
 			}
-			nick = nick.replace(/&/g, "&#38;"); 	//escape &
+			
+			var testResult = testNick(nick);
+			if (testResult == "")
+			{
+				nick = nick.replace(/&/g, "&#38;"); 	//escape &
 			nick = nick.replace(/</g, "&lt;");  	//escape <
 			nick = nick.replace(/>/g, "&gt;");  	//escape >
 			nick = nick.replace(/"/g, "&quot;");	//escape "
@@ -226,7 +230,14 @@ io.on('connection', function(socket)
 			{
 				socket.emit('information', "[INFO] Hi there, " + nick + "! You're now connected to the server.");
 			}
-			console.log(nick +" has joined. IP: " + ip)
+			console.log(nick +" has joined. IP: " + ip);
+			}
+			else
+			{
+				socket.emit('information', "[INFO] Your username was not accepted.");
+				socket.conn.close();
+			}
+			
 		}
 
 	});
@@ -1078,6 +1089,31 @@ function alterMessage(str, user, socket, room, users)
 // ==================================
 // ==================================
 
+function testNick(nickToTest)
+{
+	var regex = /^[a-z0-9-_~]+$/i;
+	
+	if (typeof nickToTest == 'undefined' || nickToTest == null)
+	{
+		return "Undefined nickname!";
+	}
+	else if (nickToTest.length < 1)
+	{
+		return "Please type a nickname!";
+	}
+	else if (nickToTest.length > 64)
+	{
+		return "Nickname too long!";
+	}
+	else if (!regex.test(nickToTest))
+	{
+		return "Only letters, numbers, dash, underscore, and \"~\"!";
+	}
+	else
+	{
+		return "";
+	}
+}
 
 function getUserByNick(nick)
 {
