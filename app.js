@@ -18,7 +18,7 @@ var moderatorP = String(process.env.MODPASS || "testpassword");
 var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "2"));
 
 // Get lists of mods and stuff
-var moderators = ['ScottB', 'ElysianTail-Senpai']
+var moderators = ['ScottB', 'ElysianTail-Senpai', 'Anonymoususer2']
 var moderatorsCaps = moderators.reduce(function(previousValue, currentValue, index, array) 
 {
 	return previousValue.concat([currentValue.toUpperCase()])
