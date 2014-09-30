@@ -93,6 +93,8 @@ io.on('connection', function(socket)
 	var nick = "";
 	var room = null;
 	
+	loggedIn = false;
+	
 	var numberOfSimilarIps = 0;
 	
 	var forwardedFor = null;
@@ -128,6 +130,14 @@ io.on('connection', function(socket)
 	
 	socket.on('login', function(data)
 	{
+		if (loggedIn)
+		{
+			socket.conn.close();
+			return;
+		}
+		
+		loggedIn = true;
+	
 		if(data.nick.length > 64)
 		{
 			data.nick = data.nick.substring(0,63);
