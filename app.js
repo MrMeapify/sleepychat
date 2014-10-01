@@ -433,9 +433,9 @@ io.on('connection', function(socket)
 				message = message.replace(/"/g, "&quot;");			//escape "
 				message = message.replace(/'/g, "&#39;"); 			//escape '
 				message = message.replace(/^\s+|\s+$/g, '');
-				if(message.lastIndexOf('/server ' + amdinP, 0) === 0)
+				if(message.lastIndexOf('/server ', 0) === 0 && (user.admin || user.mod))
 				{
-					var command = '/server ' + amdinP + ' ';
+					var command = '/server ';
 					io.sockets.emit('information', "[ADMIN] " + message.substring(command.length));
 				}
 				else if(message.lastIndexOf('/msg ', 0) === 0)
