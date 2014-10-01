@@ -141,7 +141,7 @@ io.on('connection', function(socket)
 			return;
 		}
 		
-		if (data.nick == null ||} typeof data.nick != 'undefined')
+		if (data.nick == null || typeof data.nick != 'undefined')
 		{
 			console.log("@ " + ip + ": Attempted crash using invalid data.");
 			socket.conn.close();
