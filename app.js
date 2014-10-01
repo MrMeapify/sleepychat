@@ -94,7 +94,14 @@ io.on('connection', function(socket)
 {
 	try
 	{
-		var nick = "";
+		
+	}
+	catch (e)
+	{
+		console.log(e);
+		socket.conn.close();
+	}
+	var nick = "";
 	var room = null;
 	
 	var loggedIn = false;
@@ -141,7 +148,7 @@ io.on('connection', function(socket)
 			return;
 		}
 		
-		if (data.nick == null || typeof data.nick != 'undefined')
+		if (data.nick == null || typeof data.nick == 'undefined')
 		{
 			console.log("@ " + ip + ": Attempted crash using invalid data.");
 			socket.conn.close();
@@ -756,13 +763,6 @@ io.on('connection', function(socket)
 		}
 
 	});
-	}
-	catch (e)
-	{
-		console.log(e);
-		socket.conn.close();
-	}
-	
 });
 
 
