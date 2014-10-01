@@ -92,7 +92,9 @@ commandsInAM = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/bana
 
 io.on('connection', function(socket)
 {
-	var nick = "";
+	try
+	{
+		var nick = "";
 	var room = null;
 	
 	var loggedIn = false;
@@ -133,6 +135,13 @@ io.on('connection', function(socket)
 	socket.on('login', function(data)
 	{
 		if (data == null || typeof data == 'undefined')
+		{
+			console.log("@ " + ip + ": Attempted crash using invalid data.");
+			socket.conn.close();
+			return;
+		}
+		
+		if (data.nick == null ||} typeof data.nick != 'undefined')
 		{
 			console.log("@ " + ip + ": Attempted crash using invalid data.");
 			socket.conn.close();
@@ -245,7 +254,6 @@ io.on('connection', function(socket)
 				socket.conn.close();
 			}
 		}
-
 	});
 	
 	socket.on('joinroom', function(roomtoken, usertoken)
@@ -748,6 +756,13 @@ io.on('connection', function(socket)
 		}
 
 	});
+	}
+	catch (e)
+	{
+		console.log(e);
+		socket.conn.close();
+	}
+	
 });
 
 
