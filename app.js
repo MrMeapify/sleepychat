@@ -451,8 +451,8 @@ io.on('connection', function(socket)
 					}
 					else
 					{
-						userWanted.socket.emit('whisper', nick, alterForFormatting(message, userWanted));
-						socket.emit('whisper', nick, alterForFormatting(message, userWanted));
+						userWanted.socket.emit('whisper', nick, userWanted.nick, alterForFormatting(message, userWanted));
+						socket.emit('whisper', nick, userWanted.nick, alterForFormatting(message, userWanted));
 					}
 				}
 				else if(message.lastIndexOf('/ignore ', 0) === 0)
@@ -928,7 +928,7 @@ function link_replacer(match, p1, p2, offset, string)
 	}
 	else if ((p2 == '.gif')) {
 		uniqueHiddenId++;
-		a = "<img id=\"hiddenInd"+uniqueHiddenId.toString()+"\" class=\"image_loader_link\" src=\"/images/gif.png\" onclick=\"loadGif("+uniqueHiddenId.toString()+", 'http://"+p1+"')\" />\n<a id=\"hiddenLnk1\" target='_blank' href=\"\" style=\"display:none\"><img id=\"hiddenImg"+uniqueHiddenId.toString()+"\" src=\"\" onload=\"onGifLoaded("+uniqueHiddenId.toString()+")\" /></a>";
+		a = "<img id=\"hiddenInd"+uniqueHiddenId.toString()+"\" class=\"image_loader_link\" src=\"/images/gif.png\" onclick=\"loadGif("+uniqueHiddenId.toString()+", 'http://"+p1+"')\" />\n<a id=\"hiddenLnk"+uniqueHiddenId.toString()+"\" target='_blank' href=\"\" style=\"display:none\"><img id=\"hiddenImg"+uniqueHiddenId.toString()+"\" src=\"\" onload=\"onGifLoaded("+uniqueHiddenId.toString()+")\" /></a>";
 	}
     else {
 		a = "<a target='_blank' href='http://"+p1+"'>"+p1+"</a>";
