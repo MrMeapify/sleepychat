@@ -181,7 +181,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 			setTimeout(function() { $('#toclick').click(); $('#toclick').attr("id","clicked"); }, 500);
 		});
 		
-		socket.on('whisper', function(sender, msg)
+		socket.on('whisper', function(sender, receiver, msg)
 		{
 			if (msg){
 				if(notify)
@@ -205,7 +205,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 				}
 				else
 				{
-					$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": *You whisper: " + msg.substring(6 + msg.split(' ')[1].length) + "*"));
+					$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": *You whisper to " + receiver + ": " + msg.substring(6 + msg.split(' ')[1].length) + "*"));
 					$('#messages > li').filter(':last').addClass('self');
 				}
 				
@@ -348,21 +348,26 @@ $.getScript('/javascripts/tabcomplete.js', function()
 			$('#chatbar').unbind('submit');
 			$('#chatbar').submit(function()
 			{
-				var msgInBox = $('#m').val();
-				if (msgInBox.lastIndexOf("/r ", 0) === 0 || msgInBox.lastIndexOf("/reply ", 0) === 0)
-				{
-					if (lastMessenger !== "")
-					{
-						msgInBox = msgInBox.replace("/reply", "/msg " + lastMessenger);
-						msgInBox = msgInBox.replace("/r", "/msg " + lastMessenger);
-					}
-				}
-				socket.emit('chat message', { message: msgInBox });
+				socket.emit('chat message', { message: $('#m').val() });
 				timeSinceLastMessage = Date.now();
 				$('#m').val('');
 				$('#mhint').val('');
 				scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
 				return false;
+			});
+			
+			$('#m').on('input', function()
+			{
+				var msgInBox = $('#m').val();
+				if (msgInBox.lastIndexOf("/reply ", 0) === 0 && lastMessenger !== "")
+				{
+					$('#m').val(msgInBox.replace("/reply ", "/msg " + lastMessenger + " "));
+				}
+				
+				if (msgInBox.lastIndexOf("/r ", 0) === 0 && lastMessenger !== "")
+				{
+					$('#m').val(msgInBox.replace("/r ", "/msg " + lastMessenger + " "));
+				}
 			});
 		}
 		else
@@ -419,21 +424,26 @@ $.getScript('/javascripts/tabcomplete.js', function()
 		$('#chatbar').unbind('submit');
 		$('#chatbar').submit(function()
 		{
-			var msgInBox = $('#m').val();
-			if (msgInBox.lastIndexOf("/r ", 0) === 0 || msgInBox.lastIndexOf("/reply ", 0) === 0)
-			{
-				if (lastMessenger !== "")
-				{
-					msgInBox = msgInBox.replace("/reply", "/msg " + lastMessenger);
-					msgInBox = msgInBox.replace("/r", "/msg " + lastMessenger);
-				}
-			}
-			socket.emit('chat message', { message: msgInBox });
+			socket.emit('chat message', { message: $('#m').val() });
 			timeSinceLastMessage = Date.now();
 			$('#m').val('');
 			$('#mhint').val('');
 			scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
 			return false;
+		});
+		
+		$('#m').on('input', function()
+		{
+			var msgInBox = $('#m').val();
+			if (msgInBox.lastIndexOf("/reply ", 0) === 0 && lastMessenger !== "")
+			{
+				$('#m').val(msgInBox.replace("/reply ", "/msg " + lastMessenger + " "));
+			}
+			
+			if (msgInBox.lastIndexOf("/r ", 0) === 0 && lastMessenger !== "")
+			{
+				$('#m').val(msgInBox.replace("/r ", "/msg " + lastMessenger + " "));
+			}
 		});
 	});
 
@@ -570,7 +580,7 @@ function testNick(nickToTest)
 	}
 	else if (!regex.test(nickToTest))
 	{
-		return "Only letters and numbers!";
+		return "Only letters, numbers, dash, underscore, and \"~\"!";
 	}
 	else
 	{
