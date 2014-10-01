@@ -2,10 +2,10 @@
 <html>
 	<head>
 		<title><%= title %></title>
-		<link rel='stylesheet' href='/stylesheets/bootstrap.min.css' id='stylesheet' />
-		<link rel='stylesheet' href='/stylesheets/bootstrap-theme.css' />
+		<link rel='stylesheet' href='/stylesheets/bootstrap.min.css' id='stylesheet1' />
+		<link rel='stylesheet' href='/stylesheets/bootstrap-theme.min.css' />
 		<link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css' />
-		<link rel='stylesheet' href='/stylesheets/style.css' />
+		<link rel='stylesheet' href='/stylesheets/style.css' id='stylesheet2' />
 		<link href='http://fonts.googleapis.com/css?family=Roboto:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
 		<script src="https://rawgithub.com/oampo/Audiolet/master/src/audiolet/Audiolet.js"></script>
 	</head>
@@ -30,7 +30,12 @@
 									<input id="nickname" type="text" class="form-control">
 									<span class="input-group-btn">
 										<button id="randomnick" class="btn btn-default" type="button">Randomize!</button>
+										<button id="modoradmin" class="btn btn-default" type="button" onclick="togglePasswordField();">Mod/Admin</button>
 									</span>
+								</div>
+								<div class="input-group" id="password" style="display: none;">
+									<label>Password</label>
+									<input id="passwordfield" type="password" class="form-control">
 								</div>
 								<div class="input-group">
 									<label>I am a...</label><br/>
@@ -137,19 +142,35 @@
 	</script>
 	<script>
 		function toggleDayNight () {
-			var stylesheet = document.getElementById('stylesheet');
+			var stylesheet1 = document.getElementById('stylesheet1');
+			var stylesheet2 = document.getElementById('stylesheet2');
 			var dayNightToggle = document.getElementById('daynbutton');
 			var dayNightImage = document.getElementById('daynimage');
 			
-			if (stylesheet.getAttribute('href') == '/stylesheets/bootstrap.min.css')
+			if (stylesheet1.getAttribute('href') == '/stylesheets/bootstrap.min.css')
 			{
-				stylesheet.setAttribute('href', '/stylesheets/bootstrap-night.min.css');
+				stylesheet1.setAttribute('href', '/stylesheets/bootstrap-night.min.css');
+				stylesheet2.setAttribute('href', '/stylesheets/style-night.css');
 				dayNightImage.setAttribute('src', '/images/day.png');
 			}
 			else
 			{
-				stylesheet.setAttribute('href', '/stylesheets/bootstrap.min.css');
+				stylesheet1.setAttribute('href', '/stylesheets/bootstrap.min.css');
+				stylesheet2.setAttribute('href', '/stylesheets/style.css');
 				dayNightImage.setAttribute('src', '/images/night.png');
+			}
+		}
+	</script>
+	<script>
+		function togglePasswordField () {
+			var pwField = document.getElementById('password');
+			if (pwField.style.display == "none")
+			{
+				pwField.style.display = "";
+			}
+			else
+			{
+				pwField.style.display = "none";
 			}
 		}
 	</script>
