@@ -75,6 +75,8 @@ $.getScript('/javascripts/tabcomplete.js', function()
 				console.log("Error: '" + nick + "' is not accepted!");
 				return false;
 			}
+			
+			var pass = $('<div/>').text(($('#passwordfield').val())).html();
 
 			if($('#iammale').parent().hasClass('active'))
 				var gender = 'male';
@@ -104,7 +106,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 			else
 				var type = 'either';
 
-			socket.emit('login', { nick: nick, gender: gender, role: role, chatwith: chatwith, type: type });
+			socket.emit('login', { nick: nick, pass: pass, gender: gender, role: role, chatwith: chatwith, type: type });
 			
 			timeSinceLastMessage = Date.now();
 			$('#login-modal').modal('hide');
@@ -122,6 +124,8 @@ $.getScript('/javascripts/tabcomplete.js', function()
 				console.log("Error: '" + nick + "' is not accepted!");
 				return false;
 			}
+			
+			var pass2 = $('<div/>').text(($('#passwordfield').val())).html();
 
 			if($('#iammale').parent().hasClass('active'))
 				var gender = 'male';
@@ -155,7 +159,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 
 			nick = nick2;
 
-			socket.emit('login', { nick: nick2, gender: gender, role: role, chatwith: chatwith, type: type, inBigChat: true });
+			socket.emit('login', { nick: nick2, pass: pass2, gender: gender, role: role, chatwith: chatwith, type: type, inBigChat: true });
 			
 
 			$('#login-modal').modal('hide');

@@ -1,24 +1,24 @@
-.body { background: #000000; color: #ffffff; margin: 0; padding: 0; box-sizing: border-box; font: 1.11em Roboto, Helvetica, Arial; }
+.body { margin: 0; padding: 0; box-sizing: border-box; font: 1.11em Roboto, Helvetica, Arial; }
 
-.body form { background: #555555; color: #ffffff; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+.body form { background: #afafaf; padding: 3px; position: fixed; bottom: 0; width: 100%; }
 
-.body .form-group { background: #000000; color: #ffffff; margin-bottom: 0; }
+.body .form-group { margin-bottom: 0; }
 
-.body #messages { background: #000000; color: #ffffff; list-style-type: none; margin: 0; padding: 0; padding-bottom: 40px;}
+.body #messages { list-style-type: none; margin: 0; padding: 0; padding-bottom: 40px;}
 
-.body #messages li { background: #000000; color: #ffffff; padding: 5px 10px; font-size: 1.4rem;}
+.body #messages li { padding: 5px 10px; font-size: 1.4rem;}
 
-.body #messages .information { background: #000000; color: #ffffff; font-style: italic; font-weight: 700; font: 1.11em Roboto, Helvetica, Arial;}
+.body #messages .information { font-style: italic; font-weight: 700; font: 1.11em Roboto, Helvetica, Arial;}
 
 /*.afk { font-style: italic; font-weight: 700; font: 1.11em Roboto, Helvetica, Arial; color: #111111}*/
 
-.modal-body .input-group { background: #000000; color: #ffffff; margin-bottom: 20px; }
+.modal-body .input-group { margin-bottom: 20px; }
 
-li.self { background: #333333; color: #ffffff; background: #eee; }
+li.self { background: #333333; }
 
-li.highlight { background: #008b8b!important; color: #ffffff; }
+li.highlight { background: #008b8b!important; }
 
-.login-modal { background: #000000; color: #ffffff; font-family: Roboto, Helvetica, Arial; }
+.login-modal { font-family: Roboto, Helvetica, Arial; }
 
 .embedded_image { max-height: 250px; }
 

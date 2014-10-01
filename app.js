@@ -12,13 +12,15 @@ var fs = require('fs');
 require('array.prototype.find');
 
 // This here is the admin password. For obvious reasons, set the ADMINPASS variable in production.
-var amdinP = String(process.env.ADMINPASS || "testpassword");
+var adminP = String(process.env.ADMINPASS || "testpassword");
 var moderatorP = String(process.env.MODPASS || "testpassword");
 
 var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "2"));
 
-// Get lists of mods and stuff
-var moderators = ['ScottB', 'ElysianTail-Senpai', 'Anonymoususer2', 'Coyote_The_Lawgiver']
+// Admin/Mod stuff
+var administrator = "ElysianTail-Senpai";
+var administratorCaps = administrator.toUpperCase();
+var moderators = ['Anonymoususer2', 'Coyote_The_Lawgiver'];
 var moderatorsCaps = moderators.reduce(function(previousValue, currentValue, index, array) 
 {
 	return previousValue.concat([currentValue.toUpperCase()])
@@ -86,7 +88,7 @@ var uniqueHiddenId = 0;
 
 var MILSEC_PER_DAY = 86400000;
 
-commandsInAM = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mmsg', '/fmsg', '/binaural'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
+commandsInAM = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mmsg', '/fmsg'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
 
 io.on('connection', function(socket)
 {
@@ -147,21 +149,27 @@ io.on('connection', function(socket)
 		{
 			socket.emit('information', "[INFO] Please choose a nickname.");
 			socket.conn.close();
+			return;
 		}
-		if(data.nick.indexOf(' ') != -1 && data.nick !== "MrMeapify " + amdinP && moderatorsWithPass.indexOf(data.nick.toUpperCase()) >= 0)
+		else if (data.nick == administrator && data.pass != adminP)
 		{
-			data.nick = data.nick.replace(/[.(): ]/g, '');
-			socket.emit('nickupdate', data.nick);
-		}
-		if(data.nick.toUpperCase() === "MRMEAPIFY" || moderators.indexOf(data.nick) >= 0)
-		{
-			socket.emit('information', "[INFO] You DARE try to impersonate " + data.nick + "? Shame. Shame on you.");
+			socket.emit('information', adminP + " : " + data.pass);
+			console.log ("Person at " + ip + " tried to impersonate Senpai.");
 			socket.conn.close();
+			return;
 		}
-		else if(getUserByNick(data.nick))
+		else if (moderators.indexOf(data.nick) >= 0 && data.pass != moderatorP)
+		{
+			socket.emit('information', "[INFO] You dare attempt to impersonate "+data.nick+"? Shame. Shame on you.");
+			console.log ("Person at " + ip + " tried to impersonate "+data.nick+".");
+			socket.conn.close();
+			return;
+		}
+		if(getUserByNick(data.nick))
 		{
 			socket.emit('information', "[INFO] The nickname you chose was in use. Please reload the page and choose another.");
 			socket.conn.close();
+			return;
 		}
 		else if (checkForBans(data, socket, ip) != null)
 		{
@@ -169,85 +177,67 @@ io.on('connection', function(socket)
 			var rightNow = new Date();
 			socket.emit('information', "[INFO] You've been banned from using this site for "+banned.days.toString()+" day"+(banned.days > 1 ? "s" : "")+" total. (Banned on "+rightNow.getMonth().toString()+"/"+rightNow.getDate().toString()+"/"+rightNow.getFullYear().toString()+")");
 			socket.conn.close();
+			return;
 		}
 		else
 		{
 			data.socket = socket;
-			if(data.nick === "MrMeapify " + amdinP)
-			{
-				nick = "MrMeapify";
-				socket.emit('nickupdate', nick);
-			}
-			else if(moderatorsWithPass.indexOf(data.nick) >= 0)
-			{
-				nick = moderators[moderatorsWithPass.indexOf(data.nick)];
-				socket.emit('nickupdate', nick);
-			}
-			else
-			{
-				nick = data.nick;
-			}
+			nick = data.nick;
 			
 			var testResult = testNick(nick);
 			if (testResult == "")
 			{
-				nick = nick.replace(/&/g, "&#38;"); 	//escape &
-			nick = nick.replace(/</g, "&lt;");  	//escape <
-			nick = nick.replace(/>/g, "&gt;");  	//escape >
-			nick = nick.replace(/"/g, "&quot;");	//escape "
-			nick = nick.replace(/'/g, "&#39;"); 	//escape '
-			data.nick = nick;
-			var hasher = crypto.createHash('sha1');
-			hasher.update(nick + new Date().getTime() + "IAmA Salt AMA" + amdinP);
-			data.token = hasher.digest('hex');
-			console.log(nick + ' ' + data.token);
-			data.AFK = false
-			data.realIp = ip;
-			users.push(data);
-			socket.emit('loggedIn');
+				data.nick = nick;
+				var hasher = crypto.createHash('sha1');
+				hasher.update(nick + new Date().getTime() + "IAmA Salt AMA" + adminP);
+				data.token = hasher.digest('hex');
+				console.log(nick + ' ' + data.token);
+				data.AFK = false
+				data.realIp = ip;
+				users.push(data);
+				socket.emit('loggedIn');
 
-			user = getUserByNick(nick)
-			if (data.nick === "MrMeapify") // Let's set the admin and mod variables
-			{
-				user.admin = true;
-				user.mod = true;
-			}
-			else if (moderators.indexOf(data.nick) >= 0)
-			{
-				socket.emit('information', "You're a moderator!");
-				user.admin = false;
-				user.mod = true;
-			}
-			else
-			{
-				user.admin = false;
-				user.mod = false;
-			}
-
-			if(data.inBigChat)
-			{
-				socket.join('bigroom');
-				io.to('bigroom').emit('information', "[INFO] " + nameAppend(user.nick, user.gender, user.role) + " has joined.");
-				var nicks = new Array(users.length);
-				for (var i = 0; i < nicks.length; i++)
+				user = getUserByNick(nick)
+				if (data.nick === administrator) // Let's set the admin and mod variables
 				{
-					nicks[i] = users[i].nick;
+					user.admin = true;
+					user.mod = true;
 				}
-				io.to('bigroom').emit('rosterupdate', nicks);
-				socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users) + " ]");
-			}
-			else
-			{
-				socket.emit('information', "[INFO] Hi there, " + nick + "! You're now connected to the server.");
-			}
-			console.log(nick +" has joined. IP: " + ip);
+				else if (moderators.indexOf(data.nick) >= 0)
+				{
+					socket.emit('information', "You're a moderator!");
+					user.admin = false;
+					user.mod = true;
+				}
+				else
+				{
+					user.admin = false;
+					user.mod = false;
+				}
+
+				if(data.inBigChat)
+				{
+					socket.join('bigroom');
+					io.to('bigroom').emit('information', "[INFO] " + nameAppend(user.nick, user.gender, user.role) + " has joined.");
+					var nicks = new Array(users.length);
+					for (var i = 0; i < nicks.length; i++)
+					{
+						nicks[i] = users[i].nick;
+					}
+					io.to('bigroom').emit('rosterupdate', nicks);
+					socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users) + " ]");
+				}
+				else
+				{
+					socket.emit('information', "[INFO] Hi there, " + nick + "! You're now connected to the server.");
+				}
+				console.log(nick +" has joined. IP: " + ip);
 			}
 			else
 			{
 				socket.emit('information', "[INFO] Your username was not accepted.");
 				socket.conn.close();
 			}
-			
 		}
 
 	});
@@ -527,7 +517,7 @@ io.on('connection', function(socket)
 						else
 						{
 							var hasher = crypto.createHash('sha1');
-							hasher.update(user.nick + userWanted.nick + new Date().getTime() + "IAmA Pepper AMA" + amdinP);
+							hasher.update(user.nick + userWanted.nick + new Date().getTime() + "IAmA Pepper AMA" + adminP);
 							var newroom =
 							{
 								users: [user, userWanted],
@@ -556,13 +546,13 @@ io.on('connection', function(socket)
 				}
 				else if(message.lastIndexOf('/objection', 0) === 0 && (user.admin || user.mod))
 				{
-					io.to('bigroom').emit('chat message', "$lt;"+user.nick+"$gt;<a target='_blank' href='http://i.imgur.com/OjgtW2P.gif'><img src='http://i.imgur.com/OjgtW2P.gif' class='embedded_image'/></a>", "eval", user.nick);
+					io.to('bigroom').emit('chat message', user.nick+" objects! <a target='_blank' href='http://i.imgur.com/OjgtW2P.gif'><img src='http://i.imgur.com/OjgtW2P.gif' class='embedded_image'/></a>", "eval", user.nick);
 				}
 				else if(message.lastIndexOf('/kick ', 0) === 0 && (user.admin || user.mod))
 				{
-					var command = '/kick ' + amdinP + ' ';
+					var command = '/kick ' + adminP + ' ';
 					var tokick = getUserByNick(message.substring(command.length));
-					io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been kicked by the admin or a moderator.");
+					io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been kicked by "+user.nick+".");
 					tokick.socket.leave('bigroom');
 					tokick.socket.conn.close();
 				}
@@ -587,7 +577,7 @@ io.on('connection', function(socket)
 						days: days,
 						date: rightNow.getTime()
 					};
-					io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been struck by the Ban Hammer, swung by the admin or a moderator.");
+					io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been struck by the Ban Hammer, swung by "+user.nick+". ("+days.toString()+" day ban)");
 					tokick.socket.leave('bigroom');
 					tokick.socket.conn.close();
 					
@@ -866,7 +856,6 @@ var helpCommands = 	[['information', "[INFO] ~~~"],
 					['information', "[INFO] -- /r OR /reply &lt;message&gt; -- Replies to the last person to PM you."],
 					['information', "[INFO] -- /room &lt;user&gt; -- Requests a private chat with the specified user."],
 					['information', "[INFO] -- /whois &lt;user&gt; -- Display sex and role information for a user."],
-					['information', "[INFO] -- /binaural &lt;beat frequency (optional)&gt; -- Plays/stops binaural beat."],
 					['information', "[INFO] ~~~"]];
 
 var helpFormatting = [['information', "[INFO] ~~~"],
@@ -1000,15 +989,15 @@ function alterForCommands(str, user, socket, room, users)
 
 	female_message = f_msg.test(ans);
 	male_message = m_msg.test(ans);
-	if (binaural.test(ans))
-	{
-		function trigger(match, p1, p2, offset, string)
-		{
-			socket.emit('binaural', p1); // All "me" does is highlight the message, so we just use that
-			return match
-		}
-		ans.replace(binaural, trigger);
-	}
+	//if (binaural.test(ans))
+	//{
+	//	function trigger(match, p1, p2, offset, string)
+	//	{
+	//		socket.emit('binaural', p1); // All "me" does is highlight the message, so we just use that
+	//		return match
+	//	}
+	//	ans.replace(binaural, trigger);
+	//}
 	if(male_message || female_message)
 	{
 		if (user.inBigChat)
@@ -1260,7 +1249,7 @@ app.use(function(req,res,next)
 });
 
 app.use('/', index);
-app.use('/' + amdinP, stats);
+app.use('/' + adminP, stats);
 app.use('/room', privateroom);
 app.use('/legal', function(req, res)
 {
