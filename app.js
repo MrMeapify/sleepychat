@@ -132,6 +132,12 @@ io.on('connection', function(socket)
 	
 	socket.on('login', function(data)
 	{
+		if (data == null || typeof data == 'undefined')
+		{
+			console.log("@ " + ip + ": Attempted crash using invalid data.");
+			socket.conn.close();
+			return;
+		}
 		if (loggedIn)
 		{
 			socket.conn.close();
@@ -550,7 +556,7 @@ io.on('connection', function(socket)
 				}
 				else if(message.lastIndexOf('/kick ', 0) === 0 && (user.admin || user.mod))
 				{
-					var command = '/kick ' + adminP + ' ';
+					var command = '/kick ';
 					var tokick = getUserByNick(message.substring(command.length));
 					io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been kicked by "+user.nick+".");
 					tokick.socket.leave('bigroom');
