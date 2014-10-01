@@ -94,14 +94,7 @@ io.on('connection', function(socket)
 {
 	try
 	{
-		
-	}
-	catch (e)
-	{
-		console.log(e);
-		socket.conn.close();
-	}
-	var nick = "";
+		var nick = "";
 	var room = null;
 	
 	var loggedIn = false;
@@ -761,8 +754,14 @@ io.on('connection', function(socket)
 					io.to('bigroom').emit('information', "[INFO] " + data.nick + " has returned!"); 
 			}
 		}
-
 	});
+	}
+	catch (e)
+	{
+		console.log(e);
+		socket.conn.close();
+	}
+	
 });
 
 
