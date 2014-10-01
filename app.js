@@ -18,7 +18,7 @@ var moderatorP = String(process.env.MODPASS || "testpassword");
 var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "2"));
 
 // Get lists of mods and stuff
-var moderators = ['ScottB', 'ElysianTail-Senpai', 'Anonymoususer2']
+var moderators = ['ScottB', 'ElysianTail-Senpai', 'Anonymoususer2', 'Coyote_The_Lawgiver']
 var moderatorsCaps = moderators.reduce(function(previousValue, currentValue, index, array) 
 {
 	return previousValue.concat([currentValue.toUpperCase()])
@@ -554,7 +554,11 @@ io.on('connection', function(socket)
 						console.log(e)
 					}
 				}
-				else if(message.lastIndexOf('/kick ' + amdinP, 0) === 0)
+				else if(message.lastIndexOf('/objection', 0) === 0 && (user.admin || user.mod))
+				{
+					io.to('bigroom').emit('chat message', "$lt;"+user.nick+"$gt;<a target='_blank' href='http://i.imgur.com/OjgtW2P.gif'><img src='http://i.imgur.com/OjgtW2P.gif' class='embedded_image'/></a>", "eval", user.nick);
+				}
+				else if(message.lastIndexOf('/kick ', 0) === 0 && (user.admin || user.mod))
 				{
 					var command = '/kick ' + amdinP + ' ';
 					var tokick = getUserByNick(message.substring(command.length));
@@ -562,9 +566,9 @@ io.on('connection', function(socket)
 					tokick.socket.leave('bigroom');
 					tokick.socket.conn.close();
 				}
-				else if(message.lastIndexOf('/ban ' + amdinP, 0) === 0)
+				else if(message.lastIndexOf('/ban ', 0) === 0 && (user.admin || user.mod))
 				{
-					var command = '/ban ' + amdinP + ' ';
+					var command = '/ban ';
 					var postpass = message.substring(command.length).split(' ');
 					var tokick = getUserByNick(postpass[0]);
 					var days = 1;
@@ -590,7 +594,7 @@ io.on('connection', function(socket)
 					banList.push(nameIpPair);
 					updateBanList();
 				}
-				else if (message.lastIndexOf('/banlist ' + amdinP, 0) === 0)
+				else if (message.lastIndexOf('/banlist ', 0) === 0 && (user.admin || user.mod))
 				{
 					var listString = "[INFO] Banned users: [";
 					

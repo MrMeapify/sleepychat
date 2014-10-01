@@ -1,6 +1,6 @@
 var socket = io();
 var isOldTitle = true;
-var oldTitle = "Sleepychat - Private Room";
+var oldTitle = "Hypnochat - Private Room";
 var newTitle = "*** New message! ***";
 var interval = null;
 var notify = false;
