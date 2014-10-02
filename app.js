@@ -168,7 +168,7 @@ io.on('connection', function(socket)
 		}
 		else if (data.nick == administrator && data.pass != adminP)
 		{
-			socket.emit('information', adminP + " : " + data.pass);
+			socket.emit('information', "You dare impersonate Senpai? Don't think he didn't notice. Despite common belief, Senpai <i>always</i> notices...");
 			console.log ("Person at " + ip + " tried to impersonate Senpai.");
 			socket.conn.close();
 			return;
@@ -233,7 +233,7 @@ io.on('connection', function(socket)
 				if(data.inBigChat)
 				{
 					socket.join('bigroom');
-					io.to('bigroom').emit('information', "[INFO] " + nameAppend(user.nick, user.gender, user.role) + " has joined.");
+					io.to('bigroom').emit('information', "[INFO] " + getAuthority(user) + nameAppend(user.nick, user.gender, user.role) + " has joined.");
 					var nicks = new Array(users.length);
 					for (var i = 0; i < nicks.length; i++)
 					{
@@ -558,9 +558,16 @@ io.on('connection', function(socket)
 						console.log(e)
 					}
 				}
-				else if(message.lastIndexOf('/objection', 0) === 0 && (user.admin || user.mod))
+				else if(message.lastIndexOf('/objection', 0) === 0)
 				{
-					io.to('bigroom').emit('chat message', user.nick+" objects! <a target='_blank' href='http://i.imgur.com/OjgtW2P.gif'><img src='http://i.imgur.com/OjgtW2P.gif' class='embedded_image'/></a>", "eval", user.nick);
+					if (user.admin || user.mod)
+					{
+						io.to('bigroom').emit('chat message', user.nick+" objects! <a target='_blank' href='http://i.imgur.com/OjgtW2P.gif'><img src='http://i.imgur.com/OjgtW2P.gif' class='embedded_image'/></a>", "eval", user.nick);
+					}
+					else
+					{
+						socket.emit('information', "[INFO] That command is reserved for administrators and moderators, sorry.");
+					}
 				}
 				else if(message.lastIndexOf('/kick ', 0) === 0 && (user.admin || user.mod))
 				{
@@ -814,6 +821,9 @@ function sendMessage(information, message, user, room, socket)
 // ==================================
 // ==================================
 
+function getAuthority(user){
+	return (user.admin ? "<span style=\" color: red;\">(A) </span>" : "") + (user.mod ? "<span style=\" color: green;\">(M) </span>" : "");
+}
 
 function nameAppend(name, gender, role){
 	name += (gender=="male") ? "♂" : ((gender=="female") ? "♀" : ""); // put a gender symbol by the name
@@ -831,11 +841,11 @@ function getUsers(users){
 		{
 			if (usercopy[x].AFK)
 			{
-				list += "'" + "<span  style='color: #777777;'>" + nameAppend(usercopy[x].nick, usercopy[x].gender, usercopy[x].role) + "</span>" + "' ";
+				list += getAuthority(usercopy[x]) + "'" + "<span  style='color: #777777;'>" + nameAppend(usercopy[x].nick, usercopy[x].gender, usercopy[x].role) + "</span>" + "' ";
 			}
 			else
 			{
-				list += "'" + nameAppend(usercopy[x].nick, usercopy[x].gender, usercopy[x].role) + "' ";
+				list += getAuthority(usercopy[x]) + "'" + nameAppend(usercopy[x].nick, usercopy[x].gender, usercopy[x].role) + "' ";
 			}
 		}
 	}
