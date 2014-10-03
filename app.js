@@ -934,7 +934,7 @@ function alterForCommands(str, user, socket, room, users)
 	}
 	else if(roll.test(ans))
 	{
-		sendMessage(false, ans, user, room, socket)
+		sendMessage(false, '&lt;' + user.nick + '&gt; ' ans, user, room, socket)
 		sendMessage(true, ans.replace(roll, dice_replacer), user, room, socket)
 		return null
 	}
@@ -952,7 +952,7 @@ function alterForCommands(str, user, socket, room, users)
 	}
 	else if (ans == "/help" || ans == "/formatting")
 	{
-		socket.emit('chat message', ans, "me");
+		socket.emit('chat message', '&lt;' + user.nick + '&gt; ' ans, "me");
 		giveHelp(ans, socket)
 		return null;
 	}
