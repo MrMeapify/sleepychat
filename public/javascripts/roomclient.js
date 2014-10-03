@@ -11,6 +11,10 @@ var args = window.location.pathname.split('/');
 var roomtoken = args[2];
 var usertoken = args[3];
 
+var date = new Date();
+var timeSinceLastMessage = Date.now();
+var isAFK = false;
+
 $(document).ready(function()
 {
 	var socket = io();
@@ -41,30 +45,34 @@ $(document).ready(function()
 		$('#chatbar').submit(function()
 		{
 			socket.emit('chat message', { message: $('#m').val() });
+			timeSinceLastMessage = Date.now();
 			$('#m').val('');
 			return false;
 		});
 		
 		socket.on('chat message', function(msg, who)
 		{
-			if(notify)
+			if(msg)
 			{
-				if(sound)
-					snd.play();
-				clearInterval(interval);
-				interval = setInterval(changeTitle, 1000);
+				if(notify)
+				{
+					if(sound)
+						snd.play();
+					clearInterval(interval);
+					interval = setInterval(changeTitle, 1000);
+				}
+				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
+				if (who === "me")
+				{
+					$('#messages > li').filter(':last').addClass('self');
+				}
+				else if(who === "eval" && msg.lastIndexOf('<' + nick + '>', 0) === 0)
+				{
+					$('#messages > li').filter(':last').addClass('self');
+				}
+				
+				scrollDown();
 			}
-			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
-			if (who === "me")
-			{
-				$('#messages > li').filter(':last').addClass('self');
-			}
-			else if(who === "eval" && msg.lastIndexOf('<' + nick + '>', 0) === 0)
-			{
-				$('#messages > li').filter(':last').addClass('self');
-			}
-			
-			scrollDown();
 		});
 		
 		socket.on('nickupdate', function(newnick)
@@ -74,16 +82,19 @@ $(document).ready(function()
 
 		socket.on('information', function(msg)
 		{
-			if(notify)
+			if(msg)
 			{
-				if(sound)
-					snd.play();
-				newTitle = "*** New message! ***";
-				clearInterval(interval);
-				interval = setInterval(changeTitle, 1000);
+				if(notify)
+				{
+					if(sound)
+						snd.play();
+					newTitle = "*** New message! ***";
+					clearInterval(interval);
+					interval = setInterval(changeTitle, 1000);
+				}
+				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
+				scrollDown();
 			}
-			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
-			scrollDown();
 		});
 
 		socket.on('disconnect', function()
@@ -101,6 +112,34 @@ $(document).ready(function()
 		});
 		
 		socket.emit('joinroom', roomtoken, usertoken);
+		timeSinceLastMessage = Date.now();
+	});
+
+	socket.on('rotate', function(toRotate, userFrom, hash, origintime)
+	{
+		var rotates = toRotate.split(", ");
+		var current = rotates[Math.floor(Math.random()*rotates.length)]
+		$('#messages').append($('<li id="'+ hash +'"">').html(moment().format('h:mm:ss a') + ": &lt;" + userFrom + '&gt; ' + current));
+
+		var TimeBetweenMsgs = Math.max((rotates.reduce(function(previousValue, currentValue, index, array) 
+		{
+			return previousValue+(currentValue.length)
+		}, 0)/rotates.length)*60, 300); // get the average string length, multiply it by 50, and if it's more than 300 return that, otherwise return 300
+		(function(rotates, userFrom, hash, origintime, current) {
+			var prev = current;
+			var current = null;
+			setInterval(function(){
+				var rotemp = rotates.filter(function(i) {
+					return i != prev
+				}); // create a variable called rotemp, wich is the same as rotates, but without the previous value
+				rotemp = rotemp.length ? rotemp : rotates; // if rotemp is empty (because it only contained one variable) then just use rotates
+				current = rotemp[Math.floor(Math.random()*rotemp.length)];
+				$('#'+hash).html(origintime + ": &lt;" + userFrom + '&gt; ' + current);
+				prev = current;
+			}, TimeBetweenMsgs);
+	    })(rotates, userFrom, hash, moment().format('h:mm:ss a'), current); // We do this to create a new scope, so setInterval doesn't forget the vars
+		console.log(toRotate.split(", "));
+		console.log(toRotate);
 	});
 
 	$(window).blur(function()
@@ -114,7 +153,76 @@ $(document).ready(function()
     	clearInterval(interval);
     	$("title").text(oldTitle);
 	});
+
+	//binaural beat setup
+	var playing = false;
+	var prevBeat = null;
+
+	socket.on('binaural', function(BBeat)
+	{
+		if(!BBeat)
+			var BBeat = 7;
+			var prevBeat = 7; // If they just did /binaural we want to stop the binaurals if they're playing
+		console.log(BBeat)
+		var frequency = 65;
+
+		var leftear = (BBeat / 2) + frequency;
+		var rightear = frequency - (BBeat / 2);
+		if (playing && (prevBeat == BBeat))
+		{
+			stop();
+			playing = false;
+		}
+		else
+		{
+			stop();
+			SetupBeat(leftear,rightear);
+			PlayBeat(BBeat,frequency);
+			prevBeat = BBeat
+			playing = true;
+		}
+	});
+
 });
+
+var audiolet = new Audiolet();
+var out = audiolet.output;
+var sine1,sine2,pan1,pan2,gain;
+
+var SetupBeat = function(leftear,rightear){
+	sine1 = new Sine(audiolet, leftear);
+	sine2 = new Sine(audiolet, rightear);
+	pan1 = new Pan(audiolet, 1);
+	pan2 = new Pan(audiolet, 2); 
+	gain = new Gain(audiolet, 0.5)
+	sine1.connect(pan1);
+	sine2.connect(pan2);
+}
+
+var PlayBeat = function(beat,frequency){
+	beat = parseFloat(beat);
+	frequency = parseFloat(frequency);
+	var beat = beat / 2;
+	var leftear = beat + frequency;
+	var rightear = frequency - beat;
+	stop();
+	SetupBeat(leftear,rightear);
+	start();
+}
+
+var start = function(){
+	pan1.connect(gain);
+	pan2.connect(gain);
+	gain.connect(out);
+}
+
+var stop = function(){
+	try
+	{
+		gain.disconnect(out);
+	} catch (e) {}
+}
+
 
 function scrollDown()
 {

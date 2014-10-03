@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/> <!--320-->
+<meta name="HandheldFriendly" content="true" />
 <html>
 	<head>
 		<title><%= title %></title>
@@ -7,6 +9,7 @@
 		<link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css' />
 		<link rel='stylesheet' href='/stylesheets/style.css' />
 		<link href='http://fonts.googleapis.com/css?family=Roboto:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+		<script src="https://rawgithub.com/oampo/Audiolet/master/src/audiolet/Audiolet.js"></script>
 	</head>
 	<body>
 		<div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
@@ -17,7 +20,7 @@
 							<span aria-hidden="true">×</span>
 							<span class="sr-only">Close</span>
 						</button>
-						<h4 class="modal-title" id="myLargeModalLabel">Sleepychat <%= version %></h4>
+						<span class="modal-title" id="myLargeModalLabel"><div style="font-size: 1.3em">Sleepychat <%= version %></div><span id='Splash'>--</span></span>
 					</div>
 					<div class="modal-body">
 						<p>Welcome! This is Sleepychat, a website for hypnotists, subjects, and people who just want to learn! All kinds of hypnosis are acceptable here, from theraputic to recreational to erotic. Our most important rule is that everyone should be kind <i class="fa fa-smile-o"></i></p>
@@ -85,13 +88,13 @@
 										</label>
 									</div>
 								</div>
-								<br/>
 								<button id="loginsubmit" type="submit" disabled class="btn btn-default btn-block">Connecting...</button>
 								<button id="bigchatsubmit" type="button" disabled class="btn btn-default btn-block">Connecting...</button>
 								<button id="bugsandfeatures" type="button" class="btn btn-danger btn-block">Feature Requests &amp; Bug Reports</button>
-								<button id="legalities" type="button" class="btn btn-default btn-block">Legalities</button>
 							</span>
 						</form>
+						<div style="text-align: center;">Or are you just <a href="/curious" target="_blank">curious</a>?</div>
+						<h6 style="text-align: center;"><a href="/legal">Legalities</a></h6>
 					</div>
 				</div>
 			</div>
@@ -100,7 +103,7 @@
 			<ul id="messages"></ul>
 	  		<form id="chatbar" action="">
 				<div class="form-group">
-					<div class="input-group">
+					<div class="input-group" style="background-color: white;">
 						<span class="input-group-btn">
 							<button id="dcbutton" class="btn btn-danger" data-really-text="Really?" type="button" disabled>New Chat</button>
 						</span>
@@ -118,5 +121,19 @@
 	<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
 	<script src="/javascripts/bootstrap.min.js"></script>
 	<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.7.0/moment.min.js"></script>
+	<script src="/javascripts/tabcomplete.js"></script>
 	<script src="/javascripts/client.js"></script>
+	<script>
+		function loadGif(id, url) {
+			document.getElementById("hiddenInd" + id.toString()).setAttribute("src", "/images/ldg.png");
+			document.getElementById("hiddenInd" + id.toString()).setAttribute("onclick", "");
+			document.getElementById("hiddenImg" + id.toString()).setAttribute("src", url);
+			document.getElementById("hiddenLnk" + id.toString()).setAttribute("href", url);
+		}
+
+		function onGifLoaded(id) {
+			document.getElementById("hiddenInd" + id.toString()).style.display = "none";
+			document.getElementById("hiddenLnk" + id.toString()).style.display = "";
+		}
+	</script>
 </html>
