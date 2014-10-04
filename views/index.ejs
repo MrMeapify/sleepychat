@@ -142,23 +142,33 @@
 		}
 	</script>
 	<script>
+		var isDay = true;
 		function toggleDayNight () {
 			var stylesheet1 = document.getElementById('stylesheet1');
 			var stylesheet2 = document.getElementById('stylesheet2');
 			var dayNightToggle = document.getElementById('daynbutton');
 			var dayNightImage = document.getElementById('daynimage');
+			//Text box
+			var mainTextBox = document.getElementById('m');
+			var hintTextBox = document.getElementById('mhint');
 			
-			if (stylesheet1.getAttribute('href') == '/stylesheets/bootstrap.min.css')
+			if (isDay)
 			{
 				stylesheet1.setAttribute('href', '/stylesheets/bootstrap-night.min.css');
 				stylesheet2.setAttribute('href', '/stylesheets/style-night.css');
 				dayNightImage.setAttribute('src', '/images/day.png');
+				hintTextBox.style.backgroundColor = '#222222';
+				mainTextBox.style.color = '#ffffff';
+				isDay = false;
 			}
 			else
 			{
 				stylesheet1.setAttribute('href', '/stylesheets/bootstrap.min.css');
 				stylesheet2.setAttribute('href', '/stylesheets/style.css');
 				dayNightImage.setAttribute('src', '/images/night.png');
+				hintTextBox.style.backgroundColor = '#ffffff';
+				mainTextBox.style.color = '#000000';
+				isDay = true;
 			}
 		}
 	</script>

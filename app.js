@@ -443,6 +443,14 @@ io.on('connection', function(socket)
 					var command = '/server ';
 					io.sockets.emit('information', "[ADMIN] " + message.substring(command.length));
 				}
+				else if(message.lastIndexOf('/lauren', 0) === 0 && user.nick == "Lauren")
+				{
+					socket.emit('information', "[INFO] No, Lauren!");
+				}
+				else if(message.lastIndexOf('/bipen', 0) === 0 && user.nick == "Bipen")
+				{
+					socket.emit('information', "[INFO] No, Bipen!");
+				}
 				else if(message.lastIndexOf('/msg ', 0) === 0)
 				{
 					var userWanted = getUserByNick(message.substring(5, 5+message.substring(5).indexOf(' ')));

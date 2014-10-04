@@ -212,7 +212,7 @@
 		
 		input.css({
 			backgroundColor: "transparent",
-			color: "black",
+			color: (isDay ? "black" : "white"),
 			position: "relative",
 		});
 		
@@ -225,12 +225,12 @@
 			clone = input
 				.clone()
 				.attr("tabindex", -1)
-				.attr("id", input.attr("id")+"hint")
 				.removeAttr("id name placeholder")
+				.attr("id", input.attr("id")+"hint")
 				.addClass("hint")
 				.insertBefore(input);
 			clone.css({
-				backgroundColor: "white",
+				backgroundColor: (isDay ? "white" : "black"),
 				color: "gray",
 				position: "absolute",
 			});
