@@ -785,15 +785,6 @@ io.on('connection', function(socket)
 					users[x].AFK = data.isAFK
 				}
 			}
-			if (data.isAFK)
-			{
-				io.to('bigroom').emit('information', "[INFO] " + data.nick + " is AFK."); 
-			}
-			else
-			{
-				if (data.time > (40*60*1000)) // if they've been gone for 40 minutes
-					io.to('bigroom').emit('information', "[INFO] " + data.nick + " has returned!"); 
-			}
 		}
 	});
 	}
@@ -1169,9 +1160,17 @@ function alterForCommands(str, user, socket, room, users)
 		if (room)
 			socket.emit('information', "[INFO] You can only do /afk in the public chat");
 		else if (user.inBigChat)
+		{
+			if (!user.isAFK)
+			{
+				io.to('bigroom').emit('information', "[INFO] " + user.nick + " is AFK.");
+			}
 			socket.emit('afk');
+		}
 		else
+		{
 			socket.emit('information', "[INFO] You can only do /afk in the public chat");
+		}
 		return null;
 	}
 	else if (me.test(ans))
