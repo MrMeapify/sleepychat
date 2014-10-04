@@ -1,5 +1,5 @@
 {
-  "name": "sleepychat",
+  "name": "hypnochat",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -15,7 +15,7 @@
     "express": "~4.2.0",
     "moment": "^2.8.1",
     "morgan": "~1.0.0",
-    "socket.io": "^1.0.6",
-    "static-favicon": "~1.0.0"
+    "serve-favicon": "^2.1.5",
+    "socket.io": "^1.1.0"
   }
 }
