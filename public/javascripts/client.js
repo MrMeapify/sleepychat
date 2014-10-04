@@ -477,7 +477,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 		$("title").text(oldTitle);
 	});
 
-	var afkTime = 7*60*1000; // 7 minutes in milliseconds
+	var afkTime = 30*60*1000; // 30 minutes in milliseconds
 
 	var afk = setInterval(function(){
 		if(bigchat)
@@ -496,7 +496,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 		}
 
 	}, 250);
-	socket.on('afk', function(nick)
+	socket.on('afk', function()
 	{
 		if(bigchat)
 			timeSinceLastMessage = Date.now() - (afkTime+1000); // simulate the user not having typed something for 8 seconds
