@@ -562,7 +562,8 @@ io.on('connection', function(socket)
 				// ----- Mod/Admin Commands
 				else if(message.lastIndexOf('/modcmd', 0) === 0)
 				{
-					
+					for(var x = 0; x < modCommands.length; x++)
+						socket.emit(modCommands[x][0], modCommands[x][1]);
 				}
 				else if(message.lastIndexOf('/objection', 0) === 0)
 				{
@@ -575,7 +576,7 @@ io.on('connection', function(socket)
 						socket.emit('information', "[INFO] That command is reserved for administrators and moderators, sorry.");
 					}
 				}
-				else if(message.lastIndexOf('/objection', 0) === 0)
+				else if(message.lastIndexOf('/holdit', 0) === 0)
 				{
 					if (user.admin || user.mod)
 					{
@@ -937,13 +938,13 @@ var modCommands = 	[['information', "[INFO] ~~~"],
 					['information', "[INFO] "],
 					['information', "[INFO] As a moderator, you can use several commands:"],
 					['information', "[INFO] -- /modcmd -- Launches this message. Duh"],
-					['information', "[INFO] -- //server &lt;message&gt; -- Displays the specified message to the entire server, including Match Maker and private rooms."],
-					['information', "[INFO] -- //modmsg &lt;message&gt; -- Sends a message to all moderators online, and the admin."],
+					['information', "[INFO] -- /server &lt;message&gt; -- Displays the specified message to the entire server, including Match Maker and private rooms."],
+					['information', "[INFO] -- /modmsg &lt;message&gt; -- Sends a message to all moderators online, and the admin."],
 					['information', "[INFO] -- /kick &lt;name&gt; -- Kicks the specified user from the chat, but does not ban them."],
 					['information', "[INFO] -- /ban &lt;name&gt; &lt;days&gt; -- Bans the specified user for the specified number of days."],
 					['information', "[INFO] -- /banlist -- Lists the banned users and their IP addresses."],
 					['information', "[INFO] -- /objection -- Displays the Ace Attourney \"Objection!\" gif."],
-					['information', "[INFO] -- //holdit -- Displays the Ace Attourney \"Hold it!\" gif."],
+					['information', "[INFO] -- /holdit -- Displays the Ace Attourney \"Hold it!\" gif."],
 					['information', "[INFO] ~~~"]];
 
 var helpFormatting = [['information', "[INFO] ~~~"],
