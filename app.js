@@ -947,11 +947,12 @@ var modCommands = 	[['information', "[INFO] ~~~"],
 					['information', "[INFO] ~~~"]];
 
 var helpFormatting = [['information', "[INFO] ~~~"],
-					['information', "[INFO] -- Text surrounded by double dash (--) is striked through."],
-					['information', "[INFO] -- Text surrounded by double underscore (__) is underlined."],
-					['information', "[INFO] -- Text surrounded by double asterisk (**) is bolded."],
-					['information', "[INFO] -- Text surrounded by single asterisk (*) is italicized."],
-					['information', "[INFO] -- There's a couple more, but you might have to ask around..."],
+					['information', "[INFO] -- Text surrounded by double dash (--) is <strike>stricken through</strike>."],
+					['information', "[INFO] -- Text surrounded by double underscore (__) is <u>underlined</u>."],
+					['information', "[INFO] -- Text surrounded by double asterisk (**) is <strong>bolded</strong>."],
+					['information', "[INFO] -- Text surrounded by single asterisk (*) is <i>italicized</i>."],
+					['information', "[INFO] -- Text surrounded by single tildes (`) is <span style='font-family: monospace'>monospaced</span>."],
+					['information', "[INFO] -- Text surrounded by double tildes (``) is <span style='font-family: Georgia, serif'>serif font</span>."],
 					['information', "[INFO] ~~~"]];
 
 
@@ -964,7 +965,7 @@ function giveHelp(str, socket){
 	else if (str=="/formatting")
 	{
 		for (var x = 0; x < helpFormatting.length; x++)
-			socket.emit(helpCommands[x][0], helpCommands[x][1]);
+			socket.emit(helpFormatting[x][0], helpFormatting[x][1]);
 	}
 }
 
