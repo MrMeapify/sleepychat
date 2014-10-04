@@ -14,9 +14,9 @@
 
 .modal-body .input-group { margin-bottom: 20px; }
 
-li.self { background: #eee; }
+li.self { background: #333333; }
 
-li.highlight { background: #f7ff6a!important; }
+li.highlight { background: #008b8b!important; }
 
 .login-modal { font-family: Roboto, Helvetica, Arial; }
 

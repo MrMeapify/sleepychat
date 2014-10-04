@@ -2,11 +2,12 @@
 <html>
 	<head>
 		<title><%= title %></title>
-		<link rel='stylesheet' href='/stylesheets/bootstrap.min.css' />
+		<link rel='stylesheet' href='/stylesheets/bootstrap.min.css' id='stylesheet1' />
 		<link rel='stylesheet' href='/stylesheets/bootstrap-theme.min.css' />
 		<link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css' />
-		<link rel='stylesheet' href='/stylesheets/style.css' />
+		<link rel='stylesheet' href='/stylesheets/style.css' id='stylesheet2' />
 		<link href='http://fonts.googleapis.com/css?family=Roboto:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+		<script src="https://rawgithub.com/oampo/Audiolet/master/src/audiolet/Audiolet.js"></script>
 	</head>
 	<body>
 		<div class="body">
@@ -16,8 +17,9 @@
 					<div class="input-group">
 						<input id="m" type="text" autocomplete="off" class="form-control">
 						<span class="input-group-btn">
-							<button id="sendbutton" class="btn btn-default" type="submit">Send</button>
-							<button id="mutebutton" class="btn btn-default" type="button"><i class="fa fa-volume-up"></i></button>
+							<button id="sendbutton" class="btn btn-default" type="submit" style="color: #000000">Send</button>
+							<button id="mutebutton" class="btn btn-default" type="button" style="color: #000000"><i class="fa fa-volume-up"></i></button>
+							<button id="daynbutton" class="btn btn-default" type="button" style="color: #000000" onclick="toggleDayNight();"><img id="daynimage" src="/images/night.png" /></button>
 						</span>
 					</div>
 				</div>
@@ -32,4 +34,38 @@
 		var nick = '<%= nick %>';
 	</script>
 	<script src="/javascripts/roomclient.js"></script>
+	<script>
+		function loadGif(id, url) {
+			document.getElementById("hiddenInd" + id.toString()).setAttribute("src", "/images/ldg.png");
+			document.getElementById("hiddenInd" + id.toString()).setAttribute("onclick", "");
+			document.getElementById("hiddenImg" + id.toString()).setAttribute("src", url);
+			document.getElementById("hiddenLnk" + id.toString()).setAttribute("href", url);
+		}
+
+		function onGifLoaded(id) {
+			document.getElementById("hiddenInd" + id.toString()).style.display = "none";
+			document.getElementById("hiddenLnk" + id.toString()).style.display = "";
+		}
+	</script>
+	<script>
+		function toggleDayNight () {
+			var stylesheet1 = document.getElementById('stylesheet1');
+			var stylesheet2 = document.getElementById('stylesheet2');
+			var dayNightToggle = document.getElementById('daynbutton');
+			var dayNightImage = document.getElementById('daynimage');
+			
+			if (stylesheet1.getAttribute('href') == '/stylesheets/bootstrap.min.css')
+			{
+				stylesheet1.setAttribute('href', '/stylesheets/bootstrap-night.min.css');
+				stylesheet2.setAttribute('href', '/stylesheets/style-night.css');
+				dayNightImage.setAttribute('src', '/images/day.png');
+			}
+			else
+			{
+				stylesheet1.setAttribute('href', '/stylesheets/bootstrap.min.css');
+				stylesheet2.setAttribute('href', '/stylesheets/style.css');
+				dayNightImage.setAttribute('src', '/images/night.png');
+			}
+		}
+	</script>
 </html>
