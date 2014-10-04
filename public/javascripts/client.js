@@ -22,7 +22,7 @@ var isAFK = false;
 //For Autocomplete
 var users = [];
 var tcOptions = {
-	minLength: 3
+	minLength: 2
 };
 
 
