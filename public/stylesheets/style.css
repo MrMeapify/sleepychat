@@ -23,3 +23,15 @@ li.highlight { background: #f7ff6a!important; }
 .embedded_image { max-height: 250px; }
 
 .image_loader_link { cursor: pointer; }
+
+.ticker-parent { top: 7px; }
+
+.ticker-bg { background: #afafaf; /* Old browsers */
+background: -moz-linear-gradient(top,  #ffffff 0%, #afafaf 97%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(97%,#afafaf)); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top,  #ffffff 0%,#afafaf 97%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top,  #ffffff 0%,#afafaf 97%); /* Opera 11.10+ */
+background: -ms-linear-gradient(top,  #ffffff 0%,#afafaf 97%); /* IE10+ */
+background: linear-gradient(to bottom,  #ffffff 0%,#afafaf 97%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#afafaf',GradientType=0 ); /* IE6-9 */
+}

@@ -18,6 +18,12 @@ var denied = false;
 var date = new Date();
 var timeSinceLastMessage = Date.now();
 var isAFK = false;
+var isDCd = false;
+
+//For news ticker
+var currentNews = [];
+var currentNewsInd = 0;
+var newsTicker;
 
 //For Autocomplete
 var users = [];
@@ -52,12 +58,23 @@ $.getScript('/javascripts/tabcomplete.js', function()
 
 	socket.on('connect', function()
 	{
-		socket.on('allow', function()
-		{
-			$('#login-modal').modal({keyboard: false, backdrop: 'static'});
-		});
-		
-		var errorLabel = document.getElementById('error-label');
+        newsTicker = document.getElementById('sc-news');
+        
+        var tickInterval = setInterval(function()
+        {
+            currentNewsInd++;
+            if (currentNewsInd >= currentNews.length) { currentNewsInd = 0; }
+            newsTicker.innerHTML = currentNews[currentNewsInd];
+        }, 10000);
+        
+        $('#ticker-x').click(function()
+        {
+            var toRemove = newsTicker.parentElement.parentElement;
+            toRemove.parentElement.removeChild(toRemove);
+            clearInterval(tickInterval);
+        });
+        
+        var errorLabel = document.getElementById('error-label');
 		
 		var ignore_list = new Array()
 		$('#loginsubmit').prop('disabled', false).removeClass('btn-default').addClass('btn-success').text('Start Matchmaking!');
@@ -168,6 +185,39 @@ $.getScript('/javascripts/tabcomplete.js', function()
 			$('#login-modal').modal('hide');
 			return false;
 		});
+        
+        socket.on('allow', function()
+		{
+			$('#login-modal').modal({keyboard: false, backdrop: 'static'});
+		});
+		
+		socket.on('denial', function()
+		{
+			denied = true;
+			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Your connection was refused. There are too many users with your IP address at this time.</span>"));
+		});
+        
+        socket.on('newsmod', function(newsData)
+        {
+            $('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\" id=\"newsspan"+newsData.id.toString()+"\">" + "<textarea class='form-control' id='newsmod"+newsData.id.toString()+"' rows='5' style='width: 500px;'>"+newsData.currentVal+"</textarea><button id='newsmodsubmit"+newsData.id.toString()+"'>Submit</button></span>"));
+            
+            $('#newsmodsubmit'+newsData.id.toString()).click(function() {
+                
+                var newNews = $('#newsmod'+newsData.id.toString()).val();
+                socket.emit('newsmodsubmit', { nick: nick, newNews: newNews });
+                
+                var parentItem = document.getElementById('newsspan'+newsData.id.toString()).parentElement;
+                parentItem.parentElement.removeChild(parentItem);
+                $('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] News changed.</span>"));
+            });
+        });
+        
+        socket.on('newsupdate', function(newNews)
+        {
+            currentNews = newNews.array;
+            newsTicker.innerHTML = currentNews[0];
+            currentNewsInd = 0;
+        });
 		
 		socket.on('rosterupdate', function(newList)
 		{
@@ -270,6 +320,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 				scrollDown(scroll_down);
 			}
 		});
+        
 		socket.on('information', function(msg, userFrom)
 		{
 			if (msg)
@@ -314,12 +365,6 @@ $.getScript('/javascripts/tabcomplete.js', function()
 			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + themsg + "</span>"));
 			scrollDown(scroll_down);
 		});
-		
-		socket.on('denial', function()
-		{
-			denied = true;
-			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Your connection was refused. There are too many users with your IP address at this time.</span>"));
-		});
 
 		socket.on('disconnect', function()
 		{
@@ -341,6 +386,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Sorry! You seem to have been disconnected from the server. Please reload the page and try again.</span>"));
 			}
 			scrollDown(scroll_down);
+            isDCd = true;
 		});
 	});
 
@@ -603,10 +649,15 @@ function scrollDown(scroll_down)
 	}
 }
 
+function scrollTicker()
+{
+    
+}
+
 window.onbeforeunload = confirmExit;
 function confirmExit()
 {
-	if (chatting || bigchat)
+	if ((chatting || bigchat) && !isDCd)
 		return "Wait, you're still in a chat session!";
 }
 
