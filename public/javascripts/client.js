@@ -211,13 +211,15 @@ $.getScript('/javascripts/tabcomplete.js', function()
         {
             currentNews = newNews.array;
             
-            $('#news-container').innerHTML="";
+            $('#sc-news').vTicker('stop');
+            
+            $('#news-container').empty();
             for (var i = 0; i < currentNews.length; i++)
             {
                 $('#news-container').append($('<li>').html(currentNews[i]));
             }
             
-            $('#sc-news').vTicker();
+            $('#sc-news').vTicker('init');
         });
 		
 		socket.on('rosterupdate', function(newList)
