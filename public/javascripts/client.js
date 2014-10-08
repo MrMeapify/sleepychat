@@ -23,7 +23,8 @@ var isDCd = false;
 //For news ticker
 var currentNews = [];
 var currentNewsInd = 0;
-var newsTicker;
+var newsTicker = true;
+var initialNews = false;
 
 //For Autocomplete
 var users = [];
@@ -59,15 +60,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 	socket.on('connect', function()
 	{
         
-        $('#ticker-x').click(function()
-        {
-            var tickerScript = document.getElementById('ticker-script');
-            tickerScript.parentElement.removeChild(tickerScript);
-            var tickerDiv = document.getElementById('ticker-x').parentElement;
-            tickerDiv.parentElement.removeChild(tickerDiv);
-            var messagesSection = document.getElementById('messages');
-            messagesSection.style.paddingBottom = "40px";
-        });
+        $('#ticker-x').click(removeTicker);
         
         var errorLabel = document.getElementById('error-label');
 		
@@ -211,15 +204,27 @@ $.getScript('/javascripts/tabcomplete.js', function()
         {
             currentNews = newNews.array;
             
-            $('#sc-news').vTicker('stop');
-            
-            $('#news-container').empty();
-            for (var i = 0; i < currentNews.length; i++)
+            if (newsTicker)
             {
-                $('#news-container').append($('<li>').html(currentNews[i]));
+                $('#sc-news').vTicker('stop');
+
+                $('#news-container').empty();
+                for (var i = 0; i < currentNews.length; i++)
+                {
+                    $('#news-container').append($('<li>').html(currentNews[i]));
+                }
+
+                $('#sc-news').vTicker('init');
             }
             
-            $('#sc-news').vTicker('init');
+            if (initialNews)
+            {
+                $('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] The news was updated! Use \"/news\" to see it!.</span>"));
+            }
+            else
+            {
+                initialNews = true;
+            }
         });
 		
 		socket.on('rosterupdate', function(newList)
@@ -404,11 +409,23 @@ $.getScript('/javascripts/tabcomplete.js', function()
 			$('#chatbar').unbind('submit');
 			$('#chatbar').submit(function()
 			{
-				socket.emit('chat message', { message: $('#m').val() });
-				timeSinceLastMessage = Date.now();
-				$('#m').val('');
-				$('#mhint').val('');
-				scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
+                var msgInBox = $('#m').val();
+                if (msgInBox == "/news")
+                {
+                    if (!newsTicker)
+                    {
+                        replaceTicker();
+                    }
+                }
+                else
+                {
+                    socket.emit('chat message', { message: msgInBox });
+                    timeSinceLastMessage = Date.now();
+                    scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
+                    
+                }
+                $('#m').val('');
+                $('#mhint').val('');
 				return false;
 			});
 			
@@ -480,11 +497,23 @@ $.getScript('/javascripts/tabcomplete.js', function()
 		$('#chatbar').unbind('submit');
 		$('#chatbar').submit(function()
 		{
-			socket.emit('chat message', { message: $('#m').val() });
-			timeSinceLastMessage = Date.now();
+            var msgInBox = $('#m').val();
+            if (msgInBox == "/news")
+            {
+                if (!newsTicker)
+                {
+                    scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
+                }
+            }
+            else
+            {
+                socket.emit('chat message', { message: msgInBox });
+                timeSinceLastMessage = Date.now();
+                scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
+            }
+            
 			$('#m').val('');
 			$('#mhint').val('');
-			scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
 			return false;
 		});
 		
@@ -652,9 +681,31 @@ function scrollDown(scroll_down)
 	}
 }
 
-function scrollTicker()
+function replaceTicker()
 {
+    $('.body').append('<div class="ticker-bg" style="position: fixed; bottom: 40px; width: 100%; height: 34px; padding: 3px;">\n<button id="ticker-x" type="button" class="btn btn-default" style="padding-top: 3px; padding-bottom: 3px; color: #000000; float: right;">X</button>\n<div class="ticker-parent" style="position: relative; width: 97.5%;">\n<div id="sc-news" class="ticker" style="font: 1em Roboto, Helvetica, Arial;">\n<ul id="news-container">\n</ul>\n</div>\n</div>\n</div>');
     
+    var messagesSection = document.getElementById('messages');
+    messagesSection.style.paddingBottom = "74px";
+    
+    for (var i = 0; i < currentNews.length; i++)
+    {
+        $('#news-container').append($('<li>').html(currentNews[i]));
+    }
+    
+    $('#ticker-x').click(removeTicker);
+    $('#sc-news').vTicker('init');
+    newsTicker = true;
+}
+
+function removeTicker()
+{
+    $('#sc-news').vTicker('stop');
+    var tickerDiv = document.getElementById('ticker-x').parentElement;
+    tickerDiv.parentElement.removeChild(tickerDiv);
+    var messagesSection = document.getElementById('messages');
+    messagesSection.style.paddingBottom = "40px";
+    newsTicker = false;
 }
 
 window.onbeforeunload = confirmExit;
