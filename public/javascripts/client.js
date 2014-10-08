@@ -58,20 +58,15 @@ $.getScript('/javascripts/tabcomplete.js', function()
 
 	socket.on('connect', function()
 	{
-        newsTicker = document.getElementById('sc-news');
-        
-        var tickInterval = setInterval(function()
-        {
-            currentNewsInd++;
-            if (currentNewsInd >= currentNews.length) { currentNewsInd = 0; }
-            newsTicker.innerHTML = currentNews[currentNewsInd];
-        }, 10000);
         
         $('#ticker-x').click(function()
         {
-            var toRemove = newsTicker.parentElement.parentElement;
-            toRemove.parentElement.removeChild(toRemove);
-            clearInterval(tickInterval);
+            var tickerScript = document.getElementById('ticker-script');
+            tickerScript.parentElement.removeChild(tickerScript);
+            var tickerDiv = document.getElementById('ticker-x').parentElement;
+            tickerDiv.parentElement.removeChild(tickerDiv);
+            var messagesSection = document.getElementById('messages');
+            messagesSection.style.paddingBottom = "40px";
         });
         
         var errorLabel = document.getElementById('error-label');
@@ -215,8 +210,14 @@ $.getScript('/javascripts/tabcomplete.js', function()
         socket.on('newsupdate', function(newNews)
         {
             currentNews = newNews.array;
-            newsTicker.innerHTML = currentNews[0];
-            currentNewsInd = 0;
+            
+            $('#news-container').innerHTML="";
+            for (var i = 0; i < currentNews.length; i++)
+            {
+                $('#news-container').append($('<li>').html(currentNews[i]));
+            }
+            
+            $('#sc-news').vTicker();
         });
 		
 		socket.on('rosterupdate', function(newList)

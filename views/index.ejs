@@ -105,13 +105,13 @@
 		</div>
 		<div class="body">
 			<ul id="messages"></ul>
-            <div class="ticker-bg" style="position: absolute; bottom: 40px; width: 100%; height: 34px; padding: 3px;">
-                <div class="ticker-parent" style="position: relative;">
-                    <span id="sc-news" class="ticker" style="color: #000000;">
-                    </span>
-                    <span style="float: right; position: relative; top: -7px">
-                        <button id="ticker-x" type="button" class="btn btn-default" style="padding-top: 3px; padding-bottom: 3px; color: #000000;">X</button>
-                    </span>
+            <div class="ticker-bg" style="position: fixed; bottom: 40px; width: 100%; height: 34px; padding: 3px;">
+                <button id="ticker-x" type="button" class="btn btn-default" style="padding-top: 3px; padding-bottom: 3px; color: #000000; float: right;">X</button>
+                <div class="ticker-parent" style="position: relative; width: 97.5%;">
+                    <div id="sc-news" class="ticker" style="font: 1em Roboto, Helvetica, Arial;">
+                        <ul id="news-container">
+                        </ul>
+                    </div>
                 </div>
                 
             </div>
@@ -137,6 +137,7 @@
 	<script src="/javascripts/bootstrap.min.js"></script>
 	<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.7.0/moment.min.js"></script>
 	<script src="/javascripts/tabcomplete.js"></script>
+	<script src="/javascripts/ticker.js" id="ticker-script"></script>
 	<script src="/javascripts/client.js"></script>
 	<script>
 		function loadGif(id, url) {
