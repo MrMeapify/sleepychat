@@ -458,10 +458,15 @@ io.on('connection', function(socket)
                     message = message.replace(/"/g, "&quot;");			//escape "
                     message = message.replace(/'/g, "&#39;"); 			//escape '
                     message = message.replace(/^\s+|\s+$/g, '');
-                    if(message.lastIndexOf('/server ', 0) === 0 && (user.admin || user.mod))
+                    if(message.lastIndexOf('/svrmsg ', 0) === 0 && (user.admin || user.mod))
                     {
-                        var command = '/server ';
-                        io.sockets.emit('information', "[ADMIN] " + message.substring(command.length));
+                        var command = '/svrmsg ';
+                        io.sockets.emit('information', "[SERVER MESSAGE] " + message.substring(command.length));
+                    }
+                    else if(message.lastIndexOf('/rmmsg ', 0) === 0 && (user.admin || user.mod))
+                    {
+                        var command = '/rmmsg ';
+                        io.to('bigroom').emit('information', "[ROOM MESSAGE] " + message.substring(command.length));
                     }
                     else if(message.lastIndexOf('/lauren', 0) === 0 && user.nick == "Lauren")
                     {
@@ -1010,7 +1015,8 @@ var modCommands = 	[['information', "[INFO] ~~~"],
 					['information', "[INFO] "],
 					['information', "[INFO] As a moderator, you can use several commands:"],
 					['information', "[INFO] -- /modcmd -- Launches this message. Duh"],
-					['information', "[INFO] -- /server &lt;message&gt; -- Displays the specified message to the entire server, including Match Maker and private rooms."],
+					['information', "[INFO] -- /svrmsg &lt;message&gt; -- Displays the specified message to the entire server, including Match Maker and private rooms. This should be rarely used."],
+					['information', "[INFO] -- /rmmsg &lt;message&gt; -- Displays the specified message to the big chat only."],
 					['information', "[INFO] -- /modmsg &lt;message&gt; -- Sends a message to all moderators online, and the admin."],
 					['information', "[INFO] -- /kick &lt;name&gt; -- Kicks the specified user from the chat, but does not ban them."],
 					['information', "[INFO] -- /ban &lt;name&gt; &lt;days&gt; -- Bans the specified user for the specified number of days."],
