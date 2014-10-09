@@ -230,7 +230,7 @@
 				.addClass("hint")
 				.insertBefore(input);
 			clone.css({
-				backgroundColor: (isDay ? "white" : "black"),
+				backgroundColor: (isDay ? "white" : "#222222"),
 				color: "gray",
 				position: "absolute",
 			});
