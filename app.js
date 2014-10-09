@@ -990,25 +990,37 @@ var pies = ["http://i.imgur.com/Zb2ZnBF.jpg",
 			"http://i.imgur.com/R115ftN.jpg",
 			"http://i.imgur.com/4yYHZ4S.jpg"];
 
-var helpCommands = 	[['information', "[INFO] ~~~"],
+var helpPage1 = 	[['information', "[INFO] ~~~"],
 					['information', "[INFO] Welcome to Sleepychat!"],
 					['information', "[INFO] Sleepychat was created by MrMeapify, and is now operated by ElysianTail-Senpai."],
-					['information', "[INFO] "],
+					['information', "[INFO] Help Page 1:"],
 					['information', "[INFO] While in chat, you can use several commands:"],
 					['information', "[INFO] -- /help -- Launches this message. Duh"],
 					['information', "[INFO] -- /formatting -- Shows formatting tips."],
 					['information', "[INFO] -- /news -- Re-opens the news ticker if it was closed."],
-					['information', "[INFO] -- /coinflip -- Publicly flips a coin."],
-					['information', "[INFO] -- /roll &lt;number (optional)&gt; -- Publicly rolls up to 10 dice."],
-					['information', "[INFO] -- /banana -- Sends a picture of banana cream pie."],
 					['information', "[INFO] -- /ignore user -- Ignores all messages for a user."],
 					['information', "[INFO] -- /names OR /list -- While in the big chatroom, this will list the names of every current user in the chatroom with you."],
-					['information', "[INFO] -- /me &lt;did a thing&gt; -- Styles your message differently to indicate that you're doing an action."],
-					['information', "[INFO] -- /msg &lt;username&gt; &lt;message&gt; -- Sends a message to username that only they can see in chat."],
-					['information', "[INFO] -- /r OR /reply &lt;message&gt; -- Replies to the last person to PM you."],
-					['information', "[INFO] -- /room &lt;user&gt; -- Requests a private chat with the specified user."],
-					['information', "[INFO] -- /whois &lt;user&gt; -- Display sex and role information for a user."],
+					['information', "[INFO] -- /help 2 -- Shows page 2 of help."],
 					['information', "[INFO] ~~~"]];
+
+var helpPage2 = [['information', "[INFO] ~~~"],
+                ['information', "[INFO] Help Page 2:"],
+                ['information', "[INFO] -- /whois &lt;user&gt; -- Display sex and role information for a user."],
+                ['information', "[INFO] -- /msg &lt;username&gt; &lt;message&gt; -- Sends a message to username that only they can see in chat."],
+                ['information', "[INFO] -- /r OR /reply &lt;message&gt; -- Replies to the last person to PM you."],
+                ['information', "[INFO] -- /room &lt;user&gt; -- Requests a private chat with the specified user."],
+                ['information', "[INFO] -- /me &lt;did a thing&gt; -- Styles your message differently to indicate that you're doing an action."],
+                ['information', "[INFO] -- /coinflip -- Publicly flips a coin."],
+                ['information', "[INFO] -- /roll &lt;number (optional)&gt; -- Publicly rolls up to 10 dice."],
+                ['information', "[INFO] -- /banana -- Sends a picture of banana cream pie."],
+                ['information', "[INFO] -- /help 3 -- Shows page 3 of help."],
+                ['information', "[INFO] ~~~"]];
+
+var helpPage3 = [['information', "[INFO] ~~~"],
+                ['information', "[INFO] Help Page 3:"],
+                ['information', "[INFO] -- /mmsg &lt;message&gt; -- Sends a massage to males only."],
+                ['information', "[INFO] -- /fmsg &lt;message&gt; -- Sends a message to females only."],
+                ['information', "[INFO] ~~~"]];
 
 var modCommands = 	[['information', "[INFO] ~~~"],
 					['information', "[INFO] Welcome, moderator!"],
@@ -1036,10 +1048,20 @@ var helpFormatting = [['information', "[INFO] ~~~"],
 
 
 function giveHelp(str, socket){
-	if (str=="/help")
+	if (str=="/help" || str=="/help 1")
 	{
-		for(var x = 0; x < helpCommands.length; x++)
-			socket.emit(helpCommands[x][0], helpCommands[x][1]);		// for example, socket.emit(['information', "[INFO] ~~~"][0], ['information', "[INFO] ~~~"][1])
+		for(var x = 0; x < helpPage1.length; x++)
+			socket.emit(helpPage1[x][0], helpPage1[x][1]);
+	}
+    else if (str=="/help 2")
+	{
+		for(var x = 0; x < helpPage2.length; x++)
+			socket.emit(helpPage2[x][0], helpPage2[x][1]);
+	}
+    else if (str=="/help 3")
+	{
+		for(var x = 0; x < helpPage3.length; x++)
+			socket.emit(helpPage3[x][0], helpPage3[x][1]);
 	}
 	else if (str=="/formatting")
 	{
@@ -1229,7 +1251,7 @@ function alterForCommands(str, user, socket, room, users)
 		socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users) + "]");
 		return null;
 	}
-	else if (ans == "/help" || ans == "/formatting")
+	else if (ans.substring(0, 5) == "/help" || ans == "/formatting")
 	{
 		socket.emit('chat message', "&lt;"+user.nick+"&gt; "+ans, "me");
 		giveHelp(ans, socket);
