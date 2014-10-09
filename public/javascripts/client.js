@@ -242,7 +242,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
             
             if (initialNews)
             {
-                $('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] The news was updated! Use \"/news\" to see it!.</span>"));
+                $('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] The news was updated!"+(newsTicker? "" : " Use \"/news\" to see it.")+"</span>"));
             }
             else
             {
