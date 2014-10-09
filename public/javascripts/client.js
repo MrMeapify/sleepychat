@@ -430,6 +430,10 @@ $.getScript('/javascripts/tabcomplete.js', function()
 		timeSinceLastMessage = Date.now();
 		if(bigchat)
 		{
+            if (!isMobile.any())
+            {
+                $('#m').focus();
+            }
 			$('#dcbutton').parent().hide();
 			$('#sendbutton').removeAttr('disabled');
 			$('#chatbar').unbind('submit');
