@@ -255,8 +255,9 @@ $.getScript('/javascripts/tabcomplete.js', function()
 			users = newList;
             if (!isMobile.any())
             {
+                var hadFocus = $("#m").is(":focus")
                 $('#m').tabcomplete(users, tcOptions);
-                $('#m').focus();
+                if (hadFocus) { $('#m').focus(); }
             }
 		});
 		
