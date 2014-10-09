@@ -851,7 +851,7 @@ io.on('connection', function(socket)
             try
             {
                 var sender = getUserByNick(newsData.nick);
-                if (sender.admin)
+                if (password == adminP)
                 {
                     var newNews = newsData.newNews.split('\n');
                     currentNews = newNews;
