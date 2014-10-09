@@ -12,13 +12,16 @@ var snd = new Audio("/sounds/notify.ogg");
 var newchatclickedonce = false;
 var bigchat = false;
 var sound = true;
-var lastMessenger = "";
 var denied = false;
+var isDCd = false;
 
+//For /r and /reply
+var lastMessenger = "";
+
+//For AFK
 var date = new Date();
 var timeSinceLastMessage = Date.now();
 var isAFK = false;
-var isDCd = false;
 
 //For news ticker
 var currentNews = [];
@@ -32,6 +35,26 @@ var tcOptions = {
 	minLength: 2
 };
 
+var isMobile = {
+    Android: function() {
+        return navigator.userAgent.match(/Android/i);
+    },
+    BlackBerry: function() {
+        return navigator.userAgent.match(/BlackBerry/i);
+    },
+    iOS: function() {
+        return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+    },
+    Opera: function() {
+        return navigator.userAgent.match(/Opera Mini/i);
+    },
+    Windows: function() {
+        return navigator.userAgent.match(/IEMobile/i) || navigator.userAgent.match(/WPDesktop/i);
+    },
+    any: function() {
+        return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows());
+    }
+};
 
 $.getScript('/javascripts/tabcomplete.js', function()
 {
@@ -230,8 +253,11 @@ $.getScript('/javascripts/tabcomplete.js', function()
 		socket.on('rosterupdate', function(newList)
 		{
 			users = newList;
-			$('#m').tabcomplete(users, tcOptions);
-			$('#m').focus();
+            if (!isMobile.any())
+            {
+                $('#m').tabcomplete(users, tcOptions);
+                $('#m').focus();
+            }
 		});
 		
 		socket.on('nickupdate', function(newnick)
