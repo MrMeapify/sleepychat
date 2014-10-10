@@ -4,7 +4,7 @@
 
 .body .form-group { margin-bottom: 0; }
 
-.body #messages { list-style-type: none; margin: 0; padding: 0; padding-bottom: 40px;}
+.body #messages { list-style-type: none; margin: 0; padding: 0; padding-bottom: 74px;}
 
 .body #messages li { padding: 5px 10px; font-size: 1.4rem;}
 
@@ -23,3 +23,9 @@ li.highlight { background: #008b8b!important; }
 .embedded_image { max-height: 250px; }
 
 .image_loader_link { cursor: pointer; }
+
+.ticker-parent { top: 6px; }
+
+.ticker-bg { background: #444444; }
+
+.ticker { color: #ffffff; }

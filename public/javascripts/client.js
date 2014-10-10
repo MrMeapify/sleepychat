@@ -12,12 +12,22 @@ var snd = new Audio("/sounds/notify.ogg");
 var newchatclickedonce = false;
 var bigchat = false;
 var sound = true;
-var lastMessenger = "";
 var denied = false;
+var isDCd = false;
 
+//For /r and /reply
+var lastMessenger = "";
+
+//For AFK
 var date = new Date();
 var timeSinceLastMessage = Date.now();
 var isAFK = false;
+
+//For news ticker
+var currentNews = [];
+var currentNewsInd = 0;
+var newsTicker = true;
+var initialNews = false;
 
 //For Autocomplete
 var users = [];
@@ -25,6 +35,26 @@ var tcOptions = {
 	minLength: 2
 };
 
+var isMobile = {
+    Android: function() {
+        return navigator.userAgent.match(/Android/i);
+    },
+    BlackBerry: function() {
+        return navigator.userAgent.match(/BlackBerry/i);
+    },
+    iOS: function() {
+        return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+    },
+    Opera: function() {
+        return navigator.userAgent.match(/Opera Mini/i);
+    },
+    Windows: function() {
+        return navigator.userAgent.match(/IEMobile/i) || navigator.userAgent.match(/WPDesktop/i);
+    },
+    any: function() {
+        return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows());
+    }
+};
 
 $.getScript('/javascripts/tabcomplete.js', function()
 {
@@ -52,12 +82,10 @@ $.getScript('/javascripts/tabcomplete.js', function()
 
 	socket.on('connect', function()
 	{
-		socket.on('allow', function()
-		{
-			$('#login-modal').modal({keyboard: false, backdrop: 'static'});
-		});
-		
-		var errorLabel = document.getElementById('error-label');
+        
+        $('#ticker-x').click(removeTicker);
+        
+        var errorLabel = document.getElementById('error-label');
 		
 		var ignore_list = new Array()
 		$('#loginsubmit').prop('disabled', false).removeClass('btn-default').addClass('btn-success').text('Start Matchmaking!');
@@ -168,12 +196,70 @@ $.getScript('/javascripts/tabcomplete.js', function()
 			$('#login-modal').modal('hide');
 			return false;
 		});
+        
+        socket.on('allow', function()
+		{
+			$('#login-modal').modal({keyboard: false, backdrop: 'static'});
+		});
+		
+		socket.on('denial', function()
+		{
+			denied = true;
+			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Your connection was refused. There are too many users with your IP address at this time.</span>"));
+		});
+        
+        socket.on('newsmod', function(newsData)
+        {
+            $('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\" id=\"newsspan"+newsData.id.toString()+"\">" + "<textarea class='form-control' id='newsmod"+newsData.id.toString()+"' rows='5' style='width: 500px;'>"+newsData.currentVal+"</textarea>Password: <input type='password' class='' id='newsmodpass"+newsData.id.toString()+"' /><button id='newsmodsubmit"+newsData.id.toString()+"'>Submit</button></span>"));
+            
+            $('#newsmodsubmit'+newsData.id.toString()).click(function() {
+                
+                var newNews = $('#newsmod'+newsData.id.toString()).val();
+                var password = $('#newsmodpass'+newsData.id.toString()).val();
+                socket.emit('newsmodsubmit', { nick: nick, password: password, newNews: newNews });
+                
+                var parentItem = document.getElementById('newsspan'+newsData.id.toString()).parentElement;
+                parentItem.parentElement.removeChild(parentItem);
+                $('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] News changed.</span>"));
+            });
+        });
+        
+        socket.on('newsupdate', function(newNews)
+        {
+            currentNews = newNews.array;
+            
+            if (newsTicker)
+            {
+                $('#sc-news').vTicker('stop');
+
+                $('#news-container').empty();
+                for (var i = 0; i < currentNews.length; i++)
+                {
+                    $('#news-container').append($('<li>').html(currentNews[i]));
+                }
+
+                $('#sc-news').vTicker('init');
+            }
+            
+            if (initialNews)
+            {
+                $('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] The news was updated!"+(newsTicker? "" : " Use \"/news\" to see it.")+"</span>"));
+            }
+            else
+            {
+                initialNews = true;
+            }
+        });
 		
 		socket.on('rosterupdate', function(newList)
 		{
 			users = newList;
-			$('#m').tabcomplete(users, tcOptions);
-			$('#m').focus();
+            if (!isMobile.any())
+            {
+                var hadFocus = $("#m").is(":focus")
+                $('#m').tabcomplete(users, tcOptions);
+                if (hadFocus) { $('#m').focus(); }
+            }
 		});
 		
 		socket.on('nickupdate', function(newnick)
@@ -198,11 +284,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 					interval = setInterval(changeTitle, 1000);
 				}
 				
-				var scroll_down = false;
-				if ($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight)
-				{
-					scroll_down = true;
-				}
+				var scroll_down = isWithinScrollThreshold();
 				if(sender !== nick)
 				{
 					lastMessenger = sender;
@@ -236,11 +318,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 					interval = setInterval(changeTitle, 1000);
 				}
 
-				var scroll_down = false;
-				if ($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight)
-				{
-					scroll_down = true;
-				}
+				var scroll_down = isWithinScrollThreshold();
 
 				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
 				var user = msg.match(/&lt;(.+)&gt;/);
@@ -270,6 +348,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 				scrollDown(scroll_down);
 			}
 		});
+        
 		socket.on('information', function(msg, userFrom)
 		{
 			if (msg)
@@ -282,11 +361,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 					clearInterval(interval);
 					interval = setInterval(changeTitle, 1000);
 				}
-				var scroll_down = false;
-				if ($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight)
-				{
-					scroll_down = true;
-				}
+				var scroll_down = isWithinScrollThreshold();
 				if (!(userFrom && ignore_list.indexOf(userFrom) != -1))
 				{
 					$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
@@ -306,19 +381,9 @@ $.getScript('/javascripts/tabcomplete.js', function()
 			chatting = false;
 			$('#sendbutton').attr('disabled', true);
 			var themsg = '[INFO] ' + nick + ' has disconnected from you.';
-			var scroll_down = false;
-			if ($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight)
-			{
-				scroll_down = true;
-			}
+			var scroll_down = isWithinScrollThreshold();
 			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + themsg + "</span>"));
 			scrollDown(scroll_down);
-		});
-		
-		socket.on('denial', function()
-		{
-			denied = true;
-			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Your connection was refused. There are too many users with your IP address at this time.</span>"));
 		});
 
 		socket.on('disconnect', function()
@@ -331,16 +396,13 @@ $.getScript('/javascripts/tabcomplete.js', function()
 				clearInterval(interval);
 				interval = setInterval(changeTitle, 1000);
 			}
-			var scroll_down = false;
-			if ($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight)
-			{
-				scroll_down = true;
-			}
+			var scroll_down = isWithinScrollThreshold();
 			if (!denied)
 			{
 				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Sorry! You seem to have been disconnected from the server. Please reload the page and try again.</span>"));
 			}
 			scrollDown(scroll_down);
+            isDCd = true;
 		});
 	});
 
@@ -350,16 +412,32 @@ $.getScript('/javascripts/tabcomplete.js', function()
 		timeSinceLastMessage = Date.now();
 		if(bigchat)
 		{
+            if (!isMobile.any())
+            {
+                $('#m').focus();
+            }
 			$('#dcbutton').parent().hide();
 			$('#sendbutton').removeAttr('disabled');
 			$('#chatbar').unbind('submit');
 			$('#chatbar').submit(function()
 			{
-				socket.emit('chat message', { message: $('#m').val() });
-				timeSinceLastMessage = Date.now();
-				$('#m').val('');
-				$('#mhint').val('');
-				scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
+                var msgInBox = $('#m').val();
+                if (msgInBox == "/news")
+                {
+                    if (!newsTicker)
+                    {
+                        replaceTicker();
+                    }
+                }
+                else
+                {
+                    socket.emit('chat message', { message: msgInBox });
+                    timeSinceLastMessage = Date.now();
+                    scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
+                    
+                }
+                $('#m').val('');
+                $('#mhint').val('');
 				return false;
 			});
 			
@@ -407,11 +485,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 				if(chatting)
 				{
 					var msg = "[INFO] You have disconnected from " + lastChat + ".";
-					var scroll_down = false;
-					if ($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight)
-					{
-						scroll_down = true;
-					}
+					var scroll_down = isWithinScrollThreshold();
 					$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
 					scrollDown(scroll_down);
 				}
@@ -431,11 +505,23 @@ $.getScript('/javascripts/tabcomplete.js', function()
 		$('#chatbar').unbind('submit');
 		$('#chatbar').submit(function()
 		{
-			socket.emit('chat message', { message: $('#m').val() });
-			timeSinceLastMessage = Date.now();
+            var msgInBox = $('#m').val();
+            if (msgInBox == "/news")
+            {
+                if (!newsTicker)
+                {
+                    scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
+                }
+            }
+            else
+            {
+                socket.emit('chat message', { message: msgInBox });
+                timeSinceLastMessage = Date.now();
+                scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
+            }
+            
 			$('#m').val('');
 			$('#mhint').val('');
-			scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
 			return false;
 		});
 		
@@ -569,6 +655,19 @@ var stop = function(){
 	} catch (e) {}
 }
 
+function isWithinScrollThreshold() {
+    
+    return ($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight);
+}
+
+function scrollDown(scroll_down)
+{
+	if (scroll_down)
+	{
+		$('body,html').stop(true,true).animate({ scrollTop: $('body,html')[0].scrollHeight}, 500);
+	}
+}
+
 function testNick(nickToTest)
 {
 	var regex = /^[a-z0-9-_~]+$/i;
@@ -595,18 +694,37 @@ function testNick(nickToTest)
 	}
 }
 
-function scrollDown(scroll_down)
+function replaceTicker()
 {
-	if (scroll_down)
-	{
-		$('body,html').stop(true,true).animate({ scrollTop: $('body,html')[0].scrollHeight}, 500);
-	}
+    $('.body').append('<div class="ticker-bg" style="position: fixed; bottom: 40px; width: 100%; height: 34px; padding: 3px;">\n<button id="ticker-x" type="button" class="btn btn-default" style="padding-top: 3px; padding-bottom: 3px; color: #000000; float: right;">X</button>\n<div class="ticker-parent" style="position: relative; width: 97.5%;">\n<div id="sc-news" class="ticker" style="font: 1em Roboto, Helvetica, Arial;">\n<ul id="news-container">\n</ul>\n</div>\n</div>\n</div>');
+    
+    var messagesSection = document.getElementById('messages');
+    messagesSection.style.paddingBottom = "74px";
+    
+    for (var i = 0; i < currentNews.length; i++)
+    {
+        $('#news-container').append($('<li>').html(currentNews[i]));
+    }
+    
+    $('#ticker-x').click(removeTicker);
+    $('#sc-news').vTicker('init');
+    newsTicker = true;
+}
+
+function removeTicker()
+{
+    $('#sc-news').vTicker('stop');
+    var tickerDiv = document.getElementById('ticker-x').parentElement;
+    tickerDiv.parentElement.removeChild(tickerDiv);
+    var messagesSection = document.getElementById('messages');
+    messagesSection.style.paddingBottom = "40px";
+    newsTicker = false;
 }
 
 window.onbeforeunload = confirmExit;
 function confirmExit()
 {
-	if (chatting || bigchat)
+	if ((chatting || bigchat) && !isDCd)
 		return "Wait, you're still in a chat session!";
 }
 
