@@ -284,11 +284,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 					interval = setInterval(changeTitle, 1000);
 				}
 				
-				var scroll_down = false;
-				if ($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight)
-				{
-					scroll_down = true;
-				}
+				var scroll_down = isWithinScrollThreshold();
 				if(sender !== nick)
 				{
 					lastMessenger = sender;
@@ -322,11 +318,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 					interval = setInterval(changeTitle, 1000);
 				}
 
-				var scroll_down = false;
-				if ($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight)
-				{
-					scroll_down = true;
-				}
+				var scroll_down = isWithinScrollThreshold();
 
 				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
 				var user = msg.match(/&lt;(.+)&gt;/);
@@ -369,11 +361,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 					clearInterval(interval);
 					interval = setInterval(changeTitle, 1000);
 				}
-				var scroll_down = false;
-				if ($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight)
-				{
-					scroll_down = true;
-				}
+				var scroll_down = isWithinScrollThreshold();
 				if (!(userFrom && ignore_list.indexOf(userFrom) != -1))
 				{
 					$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
@@ -393,11 +381,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 			chatting = false;
 			$('#sendbutton').attr('disabled', true);
 			var themsg = '[INFO] ' + nick + ' has disconnected from you.';
-			var scroll_down = false;
-			if ($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight)
-			{
-				scroll_down = true;
-			}
+			var scroll_down = isWithinScrollThreshold();
 			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + themsg + "</span>"));
 			scrollDown(scroll_down);
 		});
@@ -412,11 +396,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 				clearInterval(interval);
 				interval = setInterval(changeTitle, 1000);
 			}
-			var scroll_down = false;
-			if ($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight)
-			{
-				scroll_down = true;
-			}
+			var scroll_down = isWithinScrollThreshold();
 			if (!denied)
 			{
 				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Sorry! You seem to have been disconnected from the server. Please reload the page and try again.</span>"));
@@ -505,11 +485,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 				if(chatting)
 				{
 					var msg = "[INFO] You have disconnected from " + lastChat + ".";
-					var scroll_down = false;
-					if ($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight)
-					{
-						scroll_down = true;
-					}
+					var scroll_down = isWithinScrollThreshold();
 					$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
 					scrollDown(scroll_down);
 				}
@@ -679,6 +655,19 @@ var stop = function(){
 	} catch (e) {}
 }
 
+function isWithinScrollThreshold() {
+    
+    return ($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight);
+}
+
+function scrollDown(scroll_down)
+{
+	if (scroll_down)
+	{
+		$('body,html').stop(true,true).animate({ scrollTop: $('body,html')[0].scrollHeight}, 500);
+	}
+}
+
 function testNick(nickToTest)
 {
 	var regex = /^[a-z0-9-_~]+$/i;
@@ -702,14 +691,6 @@ function testNick(nickToTest)
 	else
 	{
 		return "";
-	}
-}
-
-function scrollDown(scroll_down)
-{
-	if (scroll_down)
-	{
-		$('body,html').stop(true,true).animate({ scrollTop: $('body,html')[0].scrollHeight}, 500);
 	}
 }
 
