@@ -1111,7 +1111,10 @@ function link_replacer(match, p1, p2, offset, string)
 	}
 	else if ((p2 == '.gif')) {
 		uniqueHiddenId++;
-		a = "<img id=\"hiddenInd"+uniqueHiddenId.toString()+"\" class=\"image_loader_link\" src=\"/images/gif.png\" onclick=\"loadGif("+uniqueHiddenId.toString()+", 'http://"+p1+"')\" />\n<a id=\"hiddenLnk"+uniqueHiddenId.toString()+"\" target='_blank' href=\"\" style=\"display:none\"><img class=\"embedded_image\" id=\"hiddenImg"+uniqueHiddenId.toString()+"\" src=\"\" onload=\"onGifLoaded("+uniqueHiddenId.toString()+")\" /></a>";
+		a = "<img id='hiddenInd"+uniqueHiddenId.toString()+"' class='image_loader_link' src='/images/gif.png' onclick=\"loadGif("+uniqueHiddenId.toString()+", 'http://"+p1+"')\" />\n<a id=\"hiddenLnk"+uniqueHiddenId.toString()+"\" target='_blank' href=\"\" style=\"display:none\"><img class=\"embedded_image\" id=\"hiddenImg"+uniqueHiddenId.toString()+"\" src=\"\" onload=\"onGifLoaded("+uniqueHiddenId.toString()+")\" /></a>";
+	}
+	else if ((p2 == '.gifv')) {
+		a = "<a href='http://"+p1+"' target='_blank'>\n<video poster='http://"+p1.substring(0, p1.length-5)+"h.jpg' preload='auto' autoplay='autoplay' muted='muted' loop='loop' class='embedded_image' style='vertical-align: middle;'>\n<source src='http://"+p1.substring(0, p1.length-4)+"mp4' type='video/mp4'>\n</video>\n</a>";
 	}
     else {
 		a = "<a target='_blank' href='http://"+p1+"'>"+p1+"</a>";
