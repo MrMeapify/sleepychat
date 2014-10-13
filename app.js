@@ -208,17 +208,9 @@ io.on('connection', function(socket)
             }
             else if (checkForBans(data, socket, ip) != null)
             {
-                var banned = checkForBans(data, socket);
+                var banned = checkForBans(data, socket, ip);
                 var rightNow = new Date();
-                try
-                {
-                    socket.emit('information', "[INFO] You've been banned from using this site for "+banned.days.toString()+" day"+(banned.days > 1 ? "s" : "")+" total. (Banned on "+rightNow.getMonth().toString()+"/"+rightNow.getDate().toString()+"/"+rightNow.getFullYear().toString()+")");
-                }
-                catch (e)
-                {
-                    
-                }
-                
+                socket.emit('information', "[INFO] You've been banned from using this site for "+banned.days.toString()+" day"+(banned.days > 1 ? "s" : "")+" total. (Banned on "+rightNow.getMonth().toString()+"/"+rightNow.getDate().toString()+"/"+rightNow.getFullYear().toString()+")");
                 socket.conn.close();
                 return;
             }
@@ -691,7 +683,7 @@ io.on('connection', function(socket)
                         }
                         else
                         {
-                            socket.emit('information', "[INFO] You can't kick Senpai!");
+                            socket.emit('information', "[INFO] You can't ban Senpai!");
                         }
                     }
                     else if (message.lastIndexOf('/banlist', 0) === 0 && (user.admin || user.mod))
@@ -1406,6 +1398,7 @@ function checkForBans(user, socket, ip)
 	if (splice > -1)
 	{
 		banList.remove(banList[splice]);
+        updateBanList();
 	}
 	
 	return null;
