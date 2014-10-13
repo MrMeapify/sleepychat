@@ -616,7 +616,7 @@ io.on('connection', function(socket)
                     {
                         if (user.admin || user.mod)
                         {
-                            io.to('bigroom').emit('chat message', user.nick+" objects! <a target='_blank' href='http://i.imgur.com/OjgtW2P.gif'><img src='http://i.imgur.com/OjgtW2P.gif' class='embedded_image'/></a>", "eval", user.nick);
+                            io.to('bigroom').emit('chat message', user.nick+" objects! <a tabindex='-1' target='_blank' href='http://i.imgur.com/OjgtW2P.gif'><img src='http://i.imgur.com/OjgtW2P.gif' class='embedded_image'/></a>", "eval", user.nick);
                         }
                         else
                         {
@@ -627,7 +627,7 @@ io.on('connection', function(socket)
                     {
                         if (user.admin || user.mod)
                         {
-                            io.to('bigroom').emit('chat message', user.nick+" says stop! <a target='_blank' href='http://i.imgur.com/Yra5xbb.gif'><img src='http://i.imgur.com/Yra5xbb.gif' class='embedded_image'/></a>", "eval", user.nick);
+                            io.to('bigroom').emit('chat message', user.nick+" says stop! <a tabindex='-1' target='_blank' href='http://i.imgur.com/Yra5xbb.gif'><img src='http://i.imgur.com/Yra5xbb.gif' class='embedded_image'/></a>", "eval", user.nick);
                         }
                         else
                         {
@@ -1107,17 +1107,17 @@ function dice_replacer(match, p1, p2, offset, string){
 function link_replacer(match, p1, p2, offset, string)
 {
     if ((p2 == '.jpg') || (p2 == '.jpeg') || (p2 == '.png')) {
-		a = "<a target='_blank' href='http://"+p1+"'><img src='http://"+p1+"' class='embedded_image'/></a>";
+		a = "<a tabindex='-1' target='_blank' href='http://"+p1+"'><img src='http://"+p1+"' class='embedded_image'/></a>";
 	}
 	else if ((p2 == '.gif')) {
 		uniqueHiddenId++;
-		a = "<img id='hiddenInd"+uniqueHiddenId.toString()+"' class='image_loader_link' src='/images/gif.png' onclick=\"loadGif("+uniqueHiddenId.toString()+", 'http://"+p1+"')\" />\n<a id=\"hiddenLnk"+uniqueHiddenId.toString()+"\" target='_blank' href=\"\" style=\"display:none\"><img class=\"embedded_image\" id=\"hiddenImg"+uniqueHiddenId.toString()+"\" src=\"\" onload=\"onGifLoaded("+uniqueHiddenId.toString()+")\" /></a>";
+		a = "<img id='hiddenInd"+uniqueHiddenId.toString()+"' class='image_loader_link' src='/images/gif.png' onclick=\"loadGif("+uniqueHiddenId.toString()+", 'http://"+p1+"')\" />\n<a tabindex='-1' id=\"hiddenLnk"+uniqueHiddenId.toString()+"\" target='_blank' href=\"\" style=\"display:none\"><img class=\"embedded_image\" id=\"hiddenImg"+uniqueHiddenId.toString()+"\" src=\"\" onload=\"onGifLoaded("+uniqueHiddenId.toString()+")\" /></a>";
 	}
 	else if ((p2 == '.gifv')) {
-		a = "<a href='http://"+p1+"' target='_blank'>\n<video poster='http://"+p1.substring(0, p1.length-5)+"h.jpg' preload='auto' autoplay='autoplay' muted='muted' loop='loop' class='embedded_image' style='vertical-align: middle;'>\n<source src='http://"+p1.substring(0, p1.length-4)+"mp4' type='video/mp4'>\n</video>\n</a>";
+		a = "<a tabindex='-1' href='http://"+p1+"' target='_blank'>\n<video poster='http://"+p1.substring(0, p1.length-5)+"h.jpg' preload='auto' autoplay='autoplay' muted='muted' loop='loop' class='embedded_image' style='vertical-align: middle;'>\n<source src='http://"+p1.substring(0, p1.length-4)+"mp4' type='video/mp4'>\n</video>\n</a>";
 	}
     else {
-		a = "<a target='_blank' href='http://"+p1+"'>"+p1+"</a>";
+		a = "<a tabindex='-1' target='_blank' href='http://"+p1+"'>"+p1+"</a>";
 	}
     return a;
 }
@@ -1154,7 +1154,7 @@ function alterForFormatting(str, user)
 	var prevans = ans;
 	ans = ans.replace(link, link_replacer);
 	if(ans === prevans) // Only if the link replacer hasn't done anything yet.
-		ans = ans.replace(subreddit, "<a target='_blank' href='http://www.reddit.com$&'>$&</a>");
+		ans = ans.replace(subreddit, "<a tabindex='-1' target='_blank' href='http://www.reddit.com$&'>$&</a>");
 
 
 	ans = ans.replace(banana, giveBanana()); // We have to do this *after* the link replacer
