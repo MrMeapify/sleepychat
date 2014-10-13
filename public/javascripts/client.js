@@ -211,7 +211,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
         
         socket.on('newsmod', function(newsData)
         {
-            $('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\" id=\"newsspan"+newsData.id.toString()+"\">" + "<textarea class='form-control' id='newsmod"+newsData.id.toString()+"' rows='5' style='width: 500px;'>"+newsData.currentVal+"</textarea>Password: <input type='password' class='' id='newsmodpass"+newsData.id.toString()+"' /><button id='newsmodsubmit"+newsData.id.toString()+"'>Submit</button></span>"));
+            $('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\" id=\"newsspan"+newsData.id.toString()+"\">" + "<textarea class='form-control' id='newsmod"+newsData.id.toString()+"' rows='5' style='width: 500px;'>"+newsData.currentVal+"</textarea>Password: <input type='password' class='' id='newsmodpass"+newsData.id.toString()+"' /><button id='newsmodsubmit"+newsData.id.toString()+"'>Submit</button><button id='newsmodcancel"+newsData.id.toString()+"'>Cancel</button></span>"));
             
             $('#newsmodsubmit'+newsData.id.toString()).click(function() {
                 
@@ -222,6 +222,13 @@ $.getScript('/javascripts/tabcomplete.js', function()
                 var parentItem = document.getElementById('newsspan'+newsData.id.toString()).parentElement;
                 parentItem.parentElement.removeChild(parentItem);
                 $('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] News changed.</span>"));
+            });
+            
+            $('#newsmodcancel'+newsData.id.toString()).click(function() {
+                
+                var parentItem = document.getElementById('newsspan'+newsData.id.toString()).parentElement;
+                parentItem.parentElement.removeChild(parentItem);
+                $('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] News mod cancelled.</span>"));
             });
         });
         
