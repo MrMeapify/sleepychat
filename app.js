@@ -210,7 +210,15 @@ io.on('connection', function(socket)
             {
                 var banned = checkForBans(data, socket);
                 var rightNow = new Date();
-                socket.emit('information', "[INFO] You've been banned from using this site for "+banned.days.toString()+" day"+(banned.days > 1 ? "s" : "")+" total. (Banned on "+rightNow.getMonth().toString()+"/"+rightNow.getDate().toString()+"/"+rightNow.getFullYear().toString()+")");
+                try
+                {
+                    socket.emit('information', "[INFO] You've been banned from using this site for "+banned.days.toString()+" day"+(banned.days > 1 ? "s" : "")+" total. (Banned on "+rightNow.getMonth().toString()+"/"+rightNow.getDate().toString()+"/"+rightNow.getFullYear().toString()+")");
+                }
+                catch (e)
+                {
+                    
+                }
+                
                 socket.conn.close();
                 return;
             }
