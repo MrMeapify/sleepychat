@@ -11,6 +11,8 @@
 		up: 38,
 		down: 40
 	};
+    
+    var wrappedOnce = false;
 	
 	$.fn.tab = // Alias
 	$.fn.tabcomplete = function(args, options) {
@@ -219,9 +221,12 @@
 		// Lets create a clone of the input if it does
 		// not already exist.
 		if (!clone.length) {
-			input.wrap(
-				$("<div>").css({position: "relative"})
-			);
+            
+            if (!wrappedOnce)
+            {
+                input.wrap($("<div>").css({position: "relative"}));
+                wrappedOnce = true;
+            }
 			clone = input
 				.clone()
 				.attr("tabindex", -1)
