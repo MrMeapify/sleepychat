@@ -668,7 +668,81 @@ io.on('connection', function(socket)
                             }
                             var rightNow = new Date();
                             var nameIpPair = {
+                                name: "?",
+                                ip: tokick.realIp,
+                                days: days,
+                                date: rightNow.getTime()
+                            };
+
+                            io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been struck by the Ban Hammer, swung by "+user.nick+". ("+days.toString()+" day ban)");
+                            tokick.socket.leave('bigroom');
+                            tokick.socket.conn.close();
+
+                            banList.push(nameIpPair);
+                            updateBanList();
+                        }
+                        else
+                        {
+                            socket.emit('information', "[INFO] You can't ban Senpai!");
+                        }
+                    }
+                    else if(message.lastIndexOf('/banname ', 0) === 0 && (user.admin || user.mod))
+                    {
+                        var command = '/banname ';
+                        var postpass = message.substring(command.length).split(' ');
+                        var tokick = getUserByNick(postpass[0]);
+
+                        if (!tokick.admin)
+                        {
+                            var days = 1;
+                            try
+                            {
+                                days = parseInt(postpass[1]);
+                            }
+                            catch (e)
+                            {
+                                days = 1;
+                            }
+                            var rightNow = new Date();
+                            var nameIpPair = {
                                 name: tokick.nick,
+                                ip: tokick.realIp,
+                                days: days,
+                                date: rightNow.getTime()
+                            };
+
+                            io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been struck by the Ban Hammer, swung by "+user.nick+". ("+days.toString()+" day ban)");
+                            tokick.socket.leave('bigroom');
+                            tokick.socket.conn.close();
+
+                            banList.push(nameIpPair);
+                            updateBanList();
+                        }
+                        else
+                        {
+                            socket.emit('information', "[INFO] You can't ban Senpai!");
+                        }
+                    }
+                    else if(message.lastIndexOf('/banip ', 0) === 0 && (user.admin || user.mod))
+                    {
+                        var command = '/banip ';
+                        var postpass = message.substring(command.length).split(' ');
+                        var tokick = getUserByIP(postpass[0]);
+
+                        if (!tokick.admin)
+                        {
+                            var days = 1;
+                            try
+                            {
+                                days = parseInt(postpass[1]);
+                            }
+                            catch (e)
+                            {
+                                days = 1;
+                            }
+                            var rightNow = new Date();
+                            var nameIpPair = {
+                                name: "?",
                                 ip: tokick.realIp,
                                 days: days,
                                 date: rightNow.getTime()
@@ -1031,7 +1105,9 @@ var modCommands = 	[['information', "[INFO] ~~~"],
 					['information', "[INFO] -- /rmmsg &lt;message&gt; -- Displays the specified message to the big chat only."],
 					['information', "[INFO] -- /modmsg &lt;message&gt; -- Sends a message to all moderators online, and the admin."],
 					['information', "[INFO] -- /kick &lt;name&gt; -- Kicks the specified user from the chat, but does not ban them."],
-					['information', "[INFO] -- /ban &lt;name&gt; &lt;days&gt; -- Bans the specified user for the specified number of days."],
+					['information', "[INFO] -- /ban &lt;name&gt; &lt;days&gt; -- Bans the specified user for the specified number of days, based only on IP."],
+					['information', "[INFO] -- /banname &lt;name&gt; &lt;days&gt; -- Bans the specified user for the specified number of days, based on both name and IP."],
+					['information', "[INFO] -- /banip &lt;IP address&gt; &lt;days&gt; -- Bans the specified IP for the specified number of days, based only on IP."],
 					['information', "[INFO] -- /banlist -- Lists the banned users and their IP addresses."],
 					['information', "[INFO] -- /objection -- Displays the Ace Attourney \"Objection!\" gif."],
 					['information', "[INFO] -- /holdit -- Displays the Ace Attourney \"Hold it!\" gif."],
@@ -1172,7 +1248,7 @@ function alterForCommands(str, user, socket, room, users)
 	// regex's
 	var m_msg = /^\/mmsg (.+)/g; // Matches "/mmsg " followed by anything
 	var f_msg = /^\/fmsg (.+)/g; // Matches "/fmsg " followed by anything
-	var mod_msg = /^\/modmsg (.+)/g; // Matches "/fmsg " followed by anything
+	var mod_msg = /^\/mod (.+)/g; // Matches "/fmsg " followed by anything
 	var roll = /^\/roll ?([0-9]*)$/; // Matches "roll' or "roll " followed by a number 
 	var binaural = /^\/binaural ?(\d*)?$/;
 	var me = /^\/me( .*)/g; // Matches "/me " followed by anything
@@ -1359,6 +1435,19 @@ function getUserByNick(nick)
 	return null;
 }
 
+function getUserByIP(ip)
+{
+	var userscopy = users;
+	for(var x = 0; x < userscopy.length; x++)
+	{
+		if(userscopy[x].realIp === ip)
+		{
+			return userscopy[x];
+		}
+	}
+	return null;
+}
+
 function getUserByToken(token)
 {
 	var userscopy = users;
@@ -1378,7 +1467,22 @@ function checkForBans(user, socket, ip)
 	
 	for (var i = 0; i < banList.length; i++)
 	{
-		if (user.nick === banList[i].name || ip === banList[i].ip)
+        if (user.nick === "?" && ip === banList[i].ip)
+        {
+            var rightNow = new Date();
+			var dayUnbanned = new Date(banList[i].date + (MILSEC_PER_DAY * banList[i].days));
+			
+			if (dayUnbanned > rightNow)
+			{
+				return banList[i];
+			}
+			else
+			{
+				splice = i;
+				break;
+			}
+        }
+        else if (user.nick === banList[i].name || ip === banList[i].ip)
 		{
 			var rightNow = new Date();
 			var dayUnbanned = new Date(banList[i].date + (MILSEC_PER_DAY * banList[i].days));
