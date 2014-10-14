@@ -661,6 +661,10 @@ io.on('connection', function(socket)
                             try
                             {
                                 days = parseInt(postpass[1]);
+                                if (isNaN(days))
+                                {
+                                    days = 1;
+                                }
                             }
                             catch (e)
                             {
@@ -698,6 +702,10 @@ io.on('connection', function(socket)
                             try
                             {
                                 days = parseInt(postpass[1]);
+                                if (isNaN(days))
+                                {
+                                    days = 1;
+                                }
                             }
                             catch (e)
                             {
@@ -729,12 +737,16 @@ io.on('connection', function(socket)
                         var postpass = message.substring(command.length).split(' ');
                         var tokick = getUserByIP(postpass[0]);
 
-                        if (!tokick.admin)
+                        if (!tokick.admin || tokick == null)
                         {
                             var days = 1;
                             try
                             {
                                 days = parseInt(postpass[1]);
+                                if (isNaN(days))
+                                {
+                                    days = 1;
+                                }
                             }
                             catch (e)
                             {
@@ -743,14 +755,17 @@ io.on('connection', function(socket)
                             var rightNow = new Date();
                             var nameIpPair = {
                                 name: "?",
-                                ip: tokick.realIp,
+                                ip: (tokick == null ? postpass[0] : tokick.realIp),
                                 days: days,
                                 date: rightNow.getTime()
                             };
 
-                            io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been struck by the Ban Hammer, swung by "+user.nick+". ("+days.toString()+" day ban)");
-                            tokick.socket.leave('bigroom');
-                            tokick.socket.conn.close();
+                            if (tokick != null)
+                            {
+                                io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been struck by the Ban Hammer, swung by "+user.nick+". ("+days.toString()+" day ban)");
+                                tokick.socket.leave('bigroom');
+                                tokick.socket.conn.close();
+                            }
 
                             banList.push(nameIpPair);
                             updateBanList();
