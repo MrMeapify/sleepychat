@@ -1255,8 +1255,16 @@ function alterForFormatting(str, user)
 
 	var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/\,]*(\.[\w\-_()\:]+)?(?:[\-\+=&;%@\.\w?#\/\:\,]*))/gi; //matches "google.com/" and "blog.google.com/" and but not P.H.D. For details, see http://pastebin.com/8zQJmt9N
 	var subreddit = /\/r\/[A-Za-z0-9][A-Za-z0-9_]{2,20}[^ ]*/g; //matches /r/Hello
+    var strawpoll = /http:\/\/strawpoll\.me\/([0-9]{6,10})\/r/g; //matches http://strawpoll.me/*/r
 
 	var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:[oO]\.[oO])|(?:\>\:\))|(?:\>\:\()|(?:\:O)|(?:&#59\;\))|(?:&#59\;\())/g;
+    
+    ans = ans.replace(strawpoll, "<span style=\"font-size: 24px; font-family: 'Sigmar One', sans-serif; color: #c83232; cursor: pointer;\" onclick=\"modalPoll('$1');\">Straw Poll <span style='font-size: 18px;'>(Click to vote!)</span></span>");
+	
+	var prevans = ans;
+	ans = ans.replace(link, link_replacer);
+	if(ans === prevans) // Only if the link replacer hasn't done anything yet.
+		ans = ans.replace(subreddit, "<a tabindex='-1' target='_blank' href='http://www.reddit.com$&'>$&</a>");
 
 	//implementations
 	ans = ans.replace(bold, "<strong>$1</strong>"); 
@@ -1266,11 +1274,6 @@ function alterForFormatting(str, user)
 	ans = ans.replace(serif, "<span style='font-family: Georgia, serif'>$1</span>"); 
 	ans = ans.replace(monospace, "<span style='font-family: monospace'>$1</span>"); 
 	ans = ans.replace(emoticons, "<strong>$&</strong>");
-	
-	var prevans = ans;
-	ans = ans.replace(link, link_replacer);
-	if(ans === prevans) // Only if the link replacer hasn't done anything yet.
-		ans = ans.replace(subreddit, "<a tabindex='-1' target='_blank' href='http://www.reddit.com$&'>$&</a>");
 
 
 	ans = ans.replace(banana, giveBanana()); // We have to do this *after* the link replacer
