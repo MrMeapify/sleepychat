@@ -107,7 +107,7 @@ var uniqueHiddenId = 0;
 
 var MILSEC_PER_DAY = 86400000;
 
-commandsInAM = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/modmsg', '/mmsg', '/fmsg'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
+commandsInAM = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mod', '/mmsg', '/fmsg'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
 
 io.on('connection', function(socket)
 {
@@ -147,7 +147,7 @@ io.on('connection', function(socket)
             socket.conn.close();
         }
 
-        socket.emit('allow');
+        socket.emit('allow', {keyString: process.env.YTAPIKEY || "NOKEY"});
         socket.emit('newsupdate', { array: currentNews });
         var connection = { realIp: ip };
         connections.push(connection);
@@ -1143,7 +1143,7 @@ var modCommands = 	[['information', "[INFO] ~~~"],
 					['information', "[INFO] -- /modcmd -- Launches this message. Duh"],
 					['information', "[INFO] -- /svrmsg &lt;message&gt; -- Displays the specified message to the entire server, including Match Maker and private rooms. This should be rarely used."],
 					['information', "[INFO] -- /rmmsg &lt;message&gt; -- Displays the specified message to the big chat only."],
-					['information', "[INFO] -- /modmsg &lt;message&gt; -- Sends a message to all moderators online, and the admin."],
+					['information', "[INFO] -- /mod &lt;message&gt; -- Sends a message to all moderators online, and the admin."],
 					['information', "[INFO] -- /kick &lt;name&gt; -- Kicks the specified user from the chat, but does not ban them."],
 					['information', "[INFO] -- /ban &lt;name&gt; &lt;days&gt; -- Bans the specified user for the specified number of days, based only on IP."],
 					['information', "[INFO] -- /banname &lt;name&gt; &lt;days&gt; -- Bans the specified user for the specified number of days, based on both name and IP."],
@@ -1260,7 +1260,9 @@ function alterForFormatting(str, user)
 	var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:[oO]\.[oO])|(?:\>\:\))|(?:\>\:\()|(?:\:O)|(?:&#59\;\))|(?:&#59\;\())/g;
     
     ans = ans.replace(strawpoll, "<span style=\"font-size: 24px; font-family: 'Sigmar One', sans-serif; color: #c83232; cursor: pointer;\" onclick=\"modalPoll('$1');\">Straw Poll <span style='font-size: 18px;'>(Click to vote!)</span></span>");
-	
+    
+	ans = checkForYouTubeLinks(ans);
+    
 	var prevans = ans;
 	ans = ans.replace(link, link_replacer);
 	if(ans === prevans) // Only if the link replacer hasn't done anything yet.
@@ -1590,6 +1592,11 @@ function updateFile(file, data)
     fs.writeFile(file, data, function(err) {
 		if (err) console.log(err);
 	});
+}
+
+function checkForYouTubeLinks(url) {
+  var p = /(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?/;
+  return (url.match(p)) ? url.replace(p, "^~$1~^") : url;
 }
 
 setInterval(function()

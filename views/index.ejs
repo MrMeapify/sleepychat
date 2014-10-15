@@ -6,7 +6,8 @@
 		<link rel='stylesheet' href='/stylesheets/bootstrap-theme.min.css' />
 		<link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css' />
 		<link rel='stylesheet' href='/stylesheets/style.css' id='stylesheet2' />
-		<link href='http://fonts.googleapis.com/css?family=Roboto:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+		<link rel='stylesheet' href='/stylesheets/yt.css' />
+		<link href='http://fonts.googleapis.com/css?family=Roboto:400,700,400italic,700italic|Sigmar+One&v2' rel='stylesheet' type='text/css'>
 		<script src="/javascripts/audiolet.js"></script>
 	</head>
 	<body>
@@ -108,13 +109,41 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal">
-							<span aria-hidden="true">X</span>
+							<span aria-hidden="true">x</span>
 							<span class="sr-only">Close</span>
 						</button>
-                        <h4 class="modal-title" id="iframe-modal-title">Title</h4>
+                        <h4 class="modal-title" id="iframe-modal-title">Empty</h4>
                     </div>
                     <div class="modal-body" id="iframe-modal-body">
-                        <h3>Modal Body</h3>
+                        <h3>Congratulations!</h3>
+                        <p>You're a smart one! Gratz on finding this easter egg! Here's a little gift for your find:</p>
+                        <img style="display: block; margin: auto; padding: 5px; background-color: #303030;" src="http://i.imgur.com/AVdIrof.png" />
+                    </div>
+                    <div class="modal-body" id="iframe-modal-body">
+                        <h4>Re-open with "/dialog"</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="sound-modal" tabindex="-1" role="dialog" aria-labelledby="soundModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">
+							<span aria-hidden="true">x</span>
+							<span class="sr-only">Close</span>
+						</button>
+                        <h4 class="modal-title" id="iframe-modal-title">Sound Options</h4>
+                    </div>
+                    <div class="modal-body" id="iframe-modal-body">
+                        <input type="checkbox" id="mesg-alerts" checked>Message Alerts
+                        <br /><br />
+                        <input type="checkbox" id="whsp-alerts" checked>Whisper Alerts
+                        <br /><br />
+                        <input type="checkbox" id="site-alerts" checked>Site Alerts
+                    </div>
+                    <div class="modal-body" id="iframe-modal-body">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Done</button>
                     </div>
                 </div>
             </div>
@@ -154,6 +183,7 @@
 	<script src="/javascripts/tabcomplete.js"></script>
 	<script src="/javascripts/ticker.js" id="ticker-script"></script>
 	<script src="/javascripts/client.js"></script>
+    <script src="https://apis.google.com/js/client.js?onload=youtubeApiLoad"></script>
 	<script>
 		function loadGif(id, url) {
 			document.getElementById("hiddenInd" + id.toString()).setAttribute("src", "/images/ldg.png");
