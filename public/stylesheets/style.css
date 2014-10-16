@@ -8,7 +8,9 @@
 
 .body #messages li { padding: 5px 10px; font-size: 1.4rem;}
 
-.body #messages .information { font-style: italic; font-weight: 700; font: 1.11em Roboto, Helvetica, Arial;}
+.body #messages .information { font-style: italic; font-weight: 700; font: 1.11em Roboto, Helvetica, Arial; }
+
+.body #messages .blocking { display: inline-block; vertical-align: top; max-width: 95%; }
 
 /*.afk { font-style: italic; font-weight: 700; font: 1.11em Roboto, Helvetica, Arial; color: #111111}*/
 

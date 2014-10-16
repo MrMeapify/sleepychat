@@ -295,6 +295,7 @@ io.on('connection', function(socket)
                 if(room)
                 {
                     socket.join(room.token);
+                    socket.emit('information', "[INFO] For your safety, private rooms are logged and viewable only by the Admin. The room can opt out of logging if <strong>all</strong> users opt out.<br />You can opt out by typing \"/private\" into chat. You can also force logging for complete safety by typing \"/private never\" into chat.<br />Please only opt out if you trust your partner.");
                     io.to(room.token).emit('information', "[INFO] " + nick + " has joined.");
                 }
                 else
@@ -458,7 +459,7 @@ io.on('connection', function(socket)
                     message = message.replace(/"/g, "&quot;");			//escape "
                     message = message.replace(/'/g, "&#39;"); 			//escape '
                     message = message.replace(/^\s+|\s+$/g, '');
-                    if(message.lastIndexOf('/svrmsg ', 0) === 0 && (user.admin || user.mod))
+                    if (message.lastIndexOf('/svrmsg ', 0) === 0 && (user.admin || user.mod))
                     {
                         var command = '/svrmsg ';
                         var msg = message.substring(command.length);
@@ -466,7 +467,7 @@ io.on('connection', function(socket)
                         msg = msg.replace(link, "<a tabindex='-1' target='_blank' href='http://$1'>$1</a>");
                         io.sockets.emit('information', "[SERVER MESSAGE] " + msg);
                     }
-                    else if(message.lastIndexOf('/rmmsg ', 0) === 0 && (user.admin || user.mod))
+                    else if (message.lastIndexOf('/rmmsg ', 0) === 0 && (user.admin || user.mod))
                     {
                         var command = '/rmmsg ';
                         var msg = message.substring(command.length);
@@ -474,15 +475,11 @@ io.on('connection', function(socket)
                         msg = msg.replace(link, "<a tabindex='-1' target='_blank' href='http://$1'>$1</a>");
                         io.to('bigroom').emit('information', "[ROOM MESSAGE] " + msg);
                     }
-                    else if(message.lastIndexOf('/lauren', 0) === 0 && user.nick == "Lauren")
+                    else if (message.lastIndexOf('/'+user.nick, 0) === 0)
                     {
-                        socket.emit('information', "[INFO] No, Lauren!");
+                        socket.emit('information', "[INFO] No, "+user.nick+"!");
                     }
-                    else if(message.lastIndexOf('/bipen', 0) === 0 && user.nick == "Bipen")
-                    {
-                        socket.emit('information', "[INFO] No, Bipen!");
-                    }
-                    else if(message.lastIndexOf('/msg ', 0) === 0)
+                    else if (message.lastIndexOf('/msg ', 0) === 0)
                     {
                         var userWanted = getUserByNick(message.substring(5, 5+message.substring(5).indexOf(' ')));
                         if(!userWanted)
@@ -499,7 +496,7 @@ io.on('connection', function(socket)
                             socket.emit('whisper', nick, userWanted.nick, alterForFormatting(message, userWanted));
                         }
                     }
-                    else if(message.lastIndexOf('/ignore ', 0) === 0)
+                    else if (message.lastIndexOf('/ignore ', 0) === 0)
                     {
                         var userWanted = getUserByNick(message.substring(8));
                         if(!userWanted)
@@ -516,7 +513,7 @@ io.on('connection', function(socket)
                             socket.emit('ignore', userWanted.nick);
                         }
                     }
-                    else if(message.lastIndexOf('/whois ', 0) === 0)
+                    else if (message.lastIndexOf('/whois ', 0) === 0)
                     {
                         var userWanted = getUserByNick(message.substring(7));
                         if(!userWanted)
@@ -528,7 +525,7 @@ io.on('connection', function(socket)
                             socket.emit('information', "[INFO] User " + userWanted.nick + " is a " + userWanted.gender + " " + userWanted.role);
                         }
                     }
-                    else if(message.lastIndexOf('/room ', 0) === 0)
+                    else if (message.lastIndexOf('/room ', 0) === 0)
                     {
                         socket.emit('chat message', alterMessage(message, user, socket, null, users));
                         var userWanted = getUserByNick(message.substring(6));
@@ -576,7 +573,10 @@ io.on('connection', function(socket)
                                 {
                                     users: [user, userWanted],
                                     token: hasher.digest('hex'),
-                                    lastchat: new Date().getTime()
+                                    lastchat: new Date().getTime(),
+                                    optouts: [false, false],
+                                    isprivate: false,
+                                    forcelogs: false
                                 };
                                 privaterooms.push(newroom);
                                 userWanted.socket.emit('information', "[INFO] " + nick + " would like to chat with you privately!");
@@ -586,7 +586,59 @@ io.on('connection', function(socket)
                             }
                         }
                     }
-                    else if(message.lastIndexOf('/close', 0) === 0 && room)
+                    else if (message.lastIndexOf('/private', 0) === 0 && room)
+                    {
+                        for (var i = 0; i < room.users.length; i++)
+                        {
+                            if (room.users[i].token == user.token)
+                            {
+                                if (message == "/private never")
+                                {
+                                    room.forcelogs = true;
+                                    room.isprivate = false;
+                                    console.log(user+" has forced logging for his/her room.");
+                                    io.to(room.token).emit('information', "[INFO] Logging has been forced on for this room.");
+                                }
+                                else
+                                {
+                                    room.optouts[i] = !room.optouts[i];
+
+                                    roomPrivate = true;
+
+                                    var leftToOptOut = 0;
+
+                                    for (var j = 0; j < room.users.length; j++)
+                                    {
+                                        roomPrivate = roomPrivate && room.optouts[j];
+                                        if (!room.optouts[j])
+                                        {
+                                            leftToOptOut++;
+                                        }
+                                    }
+
+                                    var wasPrivate = room.isprivate;
+                                    room.isprivate = roomPrivate;
+                                    
+                                    if (room.forcelogs)
+                                    {
+                                        room.isprivate = false;
+                                        socket.emit('information', "[INFO] Logging for this room has been forced on by one of the users. Sorry about that.");
+                                    }
+                                    else
+                                    {
+                                        console.log(user.nick+" has opted "+(room.optouts[i] ? "out of" : "in to")+" private logging.")
+
+                                        socket.emit('information', "[INFO] You have opted "+(room.optouts[i] ? "out of" : "in to")+" private logging. "+(leftToOptOut > 0 ? leftToOptOut.toString()+" more user"+(leftToOptOut > 1 ? "s" : "")+" must opt out to make the room private." : ""));
+                                        if (wasPrivate != roomPrivate)
+                                        {
+                                            io.to(room.token).emit('information', "[INFO] The room is no"+(roomPrivate ? "w private. No l" : "t private. L")+"ogging will occur.");
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (message.lastIndexOf('/close', 0) === 0 && room)
                     {
                         try
                         {
@@ -598,7 +650,7 @@ io.on('connection', function(socket)
                             console.log(e)
                         }
                     }
-                    else if(message.lastIndexOf('/coinflip', 0) === 0)
+                    else if (message.lastIndexOf('/coinflip', 0) === 0)
                     {
                         var result = Math.random()>0.5 ? "Heads" : "Tails";
                         if (room) // We need to know if we're in a room to actually transmit the message
@@ -613,12 +665,12 @@ io.on('connection', function(socket)
                         }
                     }
                     // ----- Mod/Admin Commands
-                    else if(message.lastIndexOf('/modcmd', 0) === 0)
+                    else if (message.lastIndexOf('/modcmd', 0) === 0)
                     {
                         for(var x = 0; x < modCommands.length; x++)
                             socket.emit(modCommands[x][0], modCommands[x][1]);
                     }
-                    else if(message.lastIndexOf('/objection', 0) === 0)
+                    else if (message.lastIndexOf('/objection', 0) === 0)
                     {
                         if (user.admin || user.mod)
                         {
@@ -629,7 +681,7 @@ io.on('connection', function(socket)
                             socket.emit('information', "[INFO] That command is reserved for administrators and moderators, sorry.");
                         }
                     }
-                    else if(message.lastIndexOf('/holdit', 0) === 0)
+                    else if (message.lastIndexOf('/holdit', 0) === 0)
                     {
                         if (user.admin || user.mod)
                         {
@@ -640,7 +692,7 @@ io.on('connection', function(socket)
                             socket.emit('information', "[INFO] That command is reserved for administrators and moderators, sorry.");
                         }
                     }
-                    else if(message.lastIndexOf('/kick ', 0) === 0 && (user.admin || user.mod))
+                    else if (message.lastIndexOf('/kick ', 0) === 0 && (user.admin || user.mod))
                     {
                         var command = '/kick ';
                         var tokick = getUserByNick(message.substring(command.length));
@@ -655,7 +707,7 @@ io.on('connection', function(socket)
                             socket.emit('information', "[INFO] You can't kick Senpai!");
                         }
                     }
-                    else if(message.lastIndexOf('/ban ', 0) === 0 && (user.admin || user.mod))
+                    else if (message.lastIndexOf('/ban ', 0) === 0 && (user.admin || user.mod))
                     {
                         var command = '/ban ';
                         var postpass = message.substring(command.length).split(' ');
@@ -696,7 +748,7 @@ io.on('connection', function(socket)
                             socket.emit('information', "[INFO] You can't ban Senpai!");
                         }
                     }
-                    else if(message.lastIndexOf('/banname ', 0) === 0 && (user.admin || user.mod))
+                    else if (message.lastIndexOf('/banname ', 0) === 0 && (user.admin || user.mod))
                     {
                         var command = '/banname ';
                         var postpass = message.substring(command.length).split(' ');
@@ -737,7 +789,7 @@ io.on('connection', function(socket)
                             socket.emit('information', "[INFO] You can't ban Senpai!");
                         }
                     }
-                    else if(message.lastIndexOf('/banip ', 0) === 0 && (user.admin || user.mod))
+                    else if (message.lastIndexOf('/banip ', 0) === 0 && (user.admin || user.mod))
                     {
                         var command = '/banip ';
                         var postpass = message.substring(command.length).split(' ');
@@ -766,7 +818,7 @@ io.on('connection', function(socket)
                                 date: rightNow.getTime()
                             };
                             
-                            socket.emit('information', "[INFO] IP" + postpass[0] + " has been struck by the Ban Hammer, swung by "+user.nick+". ("+days.toString()+" day ban)");
+                            socket.emit('information', "[INFO] IP " + postpass[0] + " has been struck by the Ban Hammer, swung by "+user.nick+". ("+days.toString()+" day ban)");
 
                             banList.push(nameIpPair);
                             updateBanList();
@@ -847,7 +899,7 @@ io.on('connection', function(socket)
                             socket.emit('information', "[INFO] Only the Admin may modify the news feed at this time.");
                         }
                     }
-                    else if(message.lastIndexOf('/', 0) === 0)
+                    else if (message.lastIndexOf('/', 0) === 0)
                     {
                         inAFC = false; // is it matched by alterMessage?
                         for(var x = 0; x < commandsInAM.length; x++)
@@ -867,7 +919,7 @@ io.on('connection', function(socket)
                             socket.emit('information', "[INFO] Command not recognized. Try /help for a list of commands.");
                         }
                     }
-                    else if(room)
+                    else if (room)
                     {
                         try
                         {
@@ -881,7 +933,7 @@ io.on('connection', function(socket)
                             console.log(e)
                         }
                     }
-                    else if(user.inBigChat)
+                    else if (user.inBigChat)
                     {
                         try
                         {
@@ -899,7 +951,7 @@ io.on('connection', function(socket)
                             //user.partner.socket.emit('chat message', '<' + nick + '> ' + message);
                             //socket.emit('chat message', '<' + nick + '> ' + message);
                             user.partner.socket.emit('chat message',  alterMessage(message, user, socket, null, users), "them");
-                            socket.emit('chat message', alterMessage(message, user, socket, null, users), "me");
+                            socket.emit('chat message', alterMessage(message, user, socket, null, users, false), "me");
                         }
                         catch(e)
                         {
@@ -910,7 +962,7 @@ io.on('connection', function(socket)
             }
             catch (e)
             {
-                console.log("@ " + ip + ": " + e);
+                console.log("@ " + ip + ": " + e.message);
             }
 
         });
@@ -1126,8 +1178,8 @@ var helpPage1 = 	[['information', "[INFO] ~~~"],
 var helpPage2 = [['information', "[INFO] ~~~"],
                 ['information', "[INFO] Help Page 2:"],
                 ['information', "[INFO] -- /whois &lt;user&gt; -- Display sex and role information for a user."],
-                ['information', "[INFO] -- /msg &lt;username&gt; &lt;message&gt; -- Sends a message to username that only they can see in chat."],
-                ['information', "[INFO] -- /r OR /reply &lt;message&gt; -- Replies to the last person to PM you."],
+                ['information', "[INFO] -- /msg &lt;username&gt; &lt;message&gt; -- Sends a private message to the specified user."],
+                ['information', "[INFO] -- /r OR /reply &lt;message&gt; -- Replies to the last user to privately message you."],
                 ['information', "[INFO] -- /room &lt;user&gt; -- Requests a private chat with the specified user."],
                 ['information', "[INFO] -- /me &lt;did a thing&gt; -- Styles your message differently to indicate that you're doing an action."],
                 ['information', "[INFO] -- /coinflip -- Publicly flips a coin."],
@@ -1164,8 +1216,8 @@ var helpFormatting = [['information', "[INFO] ~~~"],
 					['information', "[INFO] -- Text surrounded by double underscore (__) is <u>underlined</u>."],
 					['information', "[INFO] -- Text surrounded by double asterisk (**) is <strong>bolded</strong>."],
 					['information', "[INFO] -- Text surrounded by single asterisk (*) is <i>italicized</i>."],
-					['information', "[INFO] -- Text surrounded by single tildes (`) is <span style='font-family: monospace'>monospaced</span>."],
-					['information', "[INFO] -- Text surrounded by double tildes (``) is <span style='font-family: Georgia, serif'>serif font</span>."],
+					['information', "[INFO] -- Text surrounded by single grave accents (`) is <span style='font-family: monospace'>monospaced</span>."],
+					['information', "[INFO] -- Text surrounded by double grave accents (``) is <span style='font-family: Georgia, serif'>serif font</span>."],
 					['information', "[INFO] ~~~"]];
 
 
@@ -1239,7 +1291,7 @@ function link_replacer(match, p1, p2, offset, string)
 		a = "<a tabindex='-1' href='http://"+p1+"' target='_blank'>\n<video poster='http://"+p1.substring(0, p1.length-5)+"h.jpg' preload='auto' autoplay='autoplay' muted='muted' loop='loop' class='embedded_image' style='vertical-align: middle;'>\n<source src='http://"+p1.substring(0, p1.length-4)+"mp4' type='video/mp4'>\n</video>\n</a>";
 	}
     else {
-		a = "<a tabindex='-1' target='_blank' href='http://"+p1+"'>"+p1+"</a>";
+		a = "<a tabindex='-1' target='_blank' href='http://"+p1+"'>"+(p1.length > 250 ? (p1.substring(0, 247)+"...") : p1)+"</a>";
 	}
     return a;
 }
@@ -1265,26 +1317,37 @@ function alterForFormatting(str, user)
 
 	var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:[oO]\.[oO])|(?:\>\:\))|(?:\>\:\()|(?:\:O)|(?:&#59\;\))|(?:&#59\;\())/g;
     
-    ans = ans.replace(strawpoll, "<span style=\"font-size: 24px; font-family: 'Sigmar One', sans-serif; color: #c83232; cursor: pointer;\" onclick=\"modalPoll('$1');\">Straw Poll <span style='font-size: 18px;'>(Click to vote!)</span></span>");
+    var ansCopy = ans;
+    var changed = false;
     
-	ans = checkForYouTubeLinks(ans);
+    ansCopy = ansCopy.replace(strawpoll, "<span style=\"font-size: 24px; font-family: 'Sigmar One', sans-serif; color: #c83232; cursor: pointer;\" onclick=\"modalPoll('$1');\">Straw Poll <span style='font-size: 18px;'>(Click to vote!)</span></span>");
     
-	var prevans = ans;
-	ans = ans.replace(link, link_replacer);
-	if(ans === prevans) // Only if the link replacer hasn't done anything yet.
-		ans = ans.replace(subreddit, "<a tabindex='-1' target='_blank' href='http://www.reddit.com$&'>$&</a>");
+	ansCopy = checkForYouTubeLinks(ansCopy);
+    
+	var prevans = ansCopy;
+	ansCopy = ansCopy.replace(link, link_replacer);
+	if(ansCopy === prevans) // Only if the link replacer hasn't done anything yet.
+		ansCopy = ansCopy.replace(subreddit, "<a tabindex='-1' target='_blank' href='http://www.reddit.com$&'>$&</a>");
 
-	//implementations
-	ans = ans.replace(bold, "<strong>$1</strong>"); 
-	ans = ans.replace(italics, "<i>$1</i>"); 
-	ans = ans.replace(underline, "<span style='text-decoration: underline;'>$1</span>"); 
-	ans = ans.replace(strikethrough, "<span style='text-decoration: line-through;'>$1</span>"); 
-	ans = ans.replace(serif, "<span style='font-family: Georgia, serif'>$1</span>"); 
-	ans = ans.replace(monospace, "<span style='font-family: monospace'>$1</span>"); 
-	ans = ans.replace(emoticons, "<strong>$&</strong>");
-
-
-	ans = ans.replace(banana, giveBanana()); // We have to do this *after* the link replacer
+	ansCopy = ansCopy.replace(banana, giveBanana()); // We have to do this *after* the link replacer
+    
+    changed = (ansCopy != ans);
+    
+    if (ansCopy == ans)
+    {
+        //implementations
+        ans = ans.replace(bold, "<strong>$1</strong>"); 
+        ans = ans.replace(italics, "<i>$1</i>"); 
+        ans = ans.replace(underline, "<span style='text-decoration: underline;'>$1</span>"); 
+        ans = ans.replace(strikethrough, "<span style='text-decoration: line-through;'>$1</span>"); 
+        ans = ans.replace(serif, "<span style='font-family: Georgia, serif'>$1</span>"); 
+        ans = ans.replace(monospace, "<span style='font-family: monospace'>$1</span>"); 
+        ans = ans.replace(emoticons, "<strong>$&</strong>");
+    }
+    else
+    {
+        ans = ansCopy;
+    }
 
 	return ans
 }
@@ -1434,10 +1497,20 @@ function alterForCommands(str, user, socket, room, users)
 }
 
 
-function alterMessage(str, user, socket, room, users)
+function alterMessage(str, user, socket, room, users, dontLog)
 {
 	var ans = str; // Copies the variable so V8 can do it's optimizations.
-	console.log(user.nick + ": " + ans);
+    if (dontLog != true)
+    {
+        if (room == null)
+        {
+            console.log("BC: " + user.nick + ": " + ans);
+        }
+        else if (!room.isprivate)
+        {
+            console.log("PR: " + user.nick + ": " + ans);
+        }
+    }
 	var formatted = alterForFormatting(str, user);
 	var commanded = alterForCommands(formatted, user, socket, room, users);
 	return commanded;
