@@ -35,13 +35,15 @@
 										<button id="modoradmin" class="btn btn-default" type="button" onclick="togglePasswordField();">Mod/Admin</button>
 									</span>
 								</div>
-								<div class="input-group" id="password" style="display: none;">
+								<div id="password" style="display: none;">
 									<label>Password</label>
-									<input id="passwordfield" type="password" class="form-control">
+                                    <div  class="input-group" style="width: 100%;">
+									   <input id="passwordfield" type="password" class="form-control">
+                                    </div>
 								</div>
-								<div class="input-group">
+								<div class="input-group" style="width: 100%;">
 									<label>I am a...</label><br/>
-									<div class="btn-group" data-toggle="buttons">
+									<div class="btn-group btn-group-justified" data-toggle="buttons">
 										<label class="btn btn-default" style="color: #000000">
 											<input name="iamgender" id="iammale" type="radio"> Male
 										</label>
@@ -52,22 +54,22 @@
 											<input name="iamgender" id="iamundisclosed" type="radio" checked> Undisclosed
 										</label>
 									</div>
-									<br/><br/>
-									<div class="btn-group" data-toggle="buttons">
-										<label class="btn btn-default" style="color: #000000">
+									<br/>
+									<div class="btn-group btn-group-justified" data-toggle="buttons">
+										<label class="btn btn-default" style="color: #000000;">
 											<input name="iamrole" id="iamtist" type="radio"> Hypnotist
 										</label>
-										<label class="btn btn-default" style="color: #000000">
+										<label class="btn btn-default" style="color: #000000;">
 											<input name="iamrole" id="iamsub" type="radio"> Subject
 										</label>
-										<label class="btn btn-default active" style="color: #000000">
+										<label class="btn btn-default active" style="color: #000000;">
 											<input name="iamrole" id="iamswitch" type="radio" checked> Switch
 										</label>
 									</div>
 								</div>
-								<div class="input-group">
+								<div class="input-group" style="width: 100%;">
 									<label>looking to chat with...</label><br/>
-									<div class="btn-group" data-toggle="buttons">
+									<div class="btn-group btn-group-justified" data-toggle="buttons">
 										<label class="btn btn-default" style="color: #000000">
 											<input name="chatwith" id="chatwithmales" type="radio"> Males Only
 										</label>
@@ -79,9 +81,9 @@
 										</label>
 									</div>
 								</div>
-								<div class="input-group">
+								<div class="input-group" style="width: 100%;">
 									<label>for...</label><br/>
-									<div class="btn-group" data-toggle="buttons">
+									<div class="btn-group btn-group-justified" data-toggle="buttons">
 										<label class="btn btn-default" style="color: #000000">
 											<input name="iwant" id="iwantrp" type="radio"> Role Playing
 										</label>
@@ -133,16 +135,16 @@
 							<span aria-hidden="true">x</span>
 							<span class="sr-only">Close</span>
 						</button>
-                        <h4 class="modal-title" id="iframe-modal-title">Sound Options</h4>
+                        <h4 class="modal-title">Sound Options</h4>
                     </div>
-                    <div class="modal-body" id="iframe-modal-body">
+                    <div class="modal-body">
                         <input type="checkbox" id="mesg-alerts" checked>Message Alerts
                         <br /><br />
                         <input type="checkbox" id="whsp-alerts" checked>Whisper Alerts
                         <br /><br />
                         <input type="checkbox" id="site-alerts" checked>Site Alerts
                     </div>
-                    <div class="modal-body" id="iframe-modal-body">
+                    <div class="modal-body">
                         <button type="button" class="btn btn-primary" data-dismiss="modal">Done</button>
                     </div>
                 </div>

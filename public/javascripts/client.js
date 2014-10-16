@@ -20,7 +20,7 @@ var isDCd = false;
 //For YouTube Embedding
 var apiKey = "NOTLOADED";
 var isYapiLoaded = false;
-var youTubeMatcher = /\^~([A-Za-z0-9-_]{11})~\^/g; // Matches stuff between `` ``
+var youTubeMatcher = /\^~([A-Za-z0-9-_]{11})~\^/g; // Matches stuff between ^~ ~^
 
 //For /r and /reply
 var lastMessenger = "";
@@ -950,7 +950,7 @@ function youtubeRequestSucceeded (resp) {
         length += (seconds.length < 2 ? "0"+seconds : seconds);
         
         var displayString = "<div class='yt-video-container'>\n<div class='yt-thumbnail'>\n<a target='_blank' class='yt-thumbnail-imglink' href='http://www.youtube.com/watch?v="+id+"'>\n<span class='yt-thumbnail-imgspan'>\n<img class='yt-thumbnail-img' src='http://i.ytimg.com/vi/"+id+"/mqdefault.jpg' />\n</span>\n<span class='yt-thumbnail-time'>"+length+"</span>\n</a>\n</div>\n<div class='yt-details'>\n<h3 class='yt-details-title'><a target='_blank' href='http://www.youtube.com/watch?v="+id+"'>"+title+"</a></h3>\n<div style='display: block; margin: 5px 0 0;'>\n<ul class='yt-details-meta'>\n<li style='padding: 0px;'>by <a target='_blank' href='"+channelLink+"'>"+channel+"</a></li>\n<li style='padding: 0px;'>"+views+" views</li>\n</ul>\n</div>\n<div class='yt-details-desc'>"+description+"</div>\n</div>\n</div>";
-        var embedString = resultingVideo.status.embeddable ? "\n<div class='yt-video-container' style='width: 112px;' videoid='"+id+"'>\n<img src='images/yt-play-embedded.png' style='cursor: pointer;' onclick='modalYouTube(\""+id+"\")' />\n</div>" : "\n<div class='yt-video-container' style='width: 112px;' videoid='"+id+"'>\n<img src='images/yt-cant-embed.png' />\n</div>";
+        var embedString = resultingVideo.status.embeddable ? "\n<div class='yt-video-container' style='width: 112px;' videoid='"+id+"'>\n<img src='/images/yt-play-embedded.png' style='cursor: pointer;' onclick='modalYouTube(\""+id+"\")' />\n</div>" : "\n<div class='yt-video-container' style='width: 112px;' videoid='"+id+"'>\n<img src='/images/yt-cant-embed.png' />\n</div>";
         
         correctContainer.innerHTML = displayString+embedString;
     }

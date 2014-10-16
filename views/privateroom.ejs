@@ -2,14 +2,57 @@
 <html>
 	<head>
 		<title><%= title %></title>
-		<link rel='stylesheet' href='/stylesheets/bootstrap.min.css' id='stylesheet1' />
-		<link rel='stylesheet' href='/stylesheets/bootstrap-theme.min.css' />
-		<link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css' />
-		<link rel='stylesheet' href='/stylesheets/style.css' id='stylesheet2' />
-		<link href='http://fonts.googleapis.com/css?family=Roboto:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
-		<script src="https://rawgithub.com/oampo/Audiolet/master/src/audiolet/Audiolet.js"></script>
+		<link rel='stylesheet' type='text/css' href='/stylesheets/bootstrap.min.css' id='stylesheet1' />
+		<link rel='stylesheet' type='text/css' href='/stylesheets/bootstrap-theme.min.css' />
+		<link rel='stylesheet' type='text/css' href='//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css' />
+		<link rel='stylesheet' type='text/css' href='http://fonts.googleapis.com/css?family=Roboto:400,700,400italic,700italic|Sigmar+One&v2'>
+		<link rel='stylesheet' type='text/css' href='/stylesheets/style.css' id='stylesheet2' />
+		<link rel='stylesheet' type='text/css' href='/stylesheets/yt.css' />
+		<script src="/javascripts/audiolet.js"></script>
 	</head>
 	<body>
+        <div class="modal fade" id="iframe-modal" tabindex="-1" role="dialog" aria-labelledby="iFrameModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">
+							<span aria-hidden="true">x</span>
+							<span class="sr-only">Close</span>
+						</button>
+                        <h4 class="modal-title" id="iframe-modal-title">Empty</h4>
+                    </div>
+                    <div class="modal-body" id="iframe-modal-body">
+                        <h3>Congratulations!</h3>
+                        <p>You're a smart one! Gratz on finding this easter egg! Here's a little gift for your find:</p>
+                        <img style="display: block; margin: auto; padding: 5px; background-color: #303030;" src="http://i.imgur.com/AVdIrof.png" />
+                    </div>
+                    <div class="modal-body" id="iframe-modal-body">
+                        <h4>Re-open with "/dialog"</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="sound-modal" tabindex="-1" role="dialog" aria-labelledby="soundModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">
+							<span aria-hidden="true">x</span>
+							<span class="sr-only">Close</span>
+						</button>
+                        <h4 class="modal-title">Sound Options</h4>
+                    </div>
+                    <div class="modal-body">
+                        <input type="checkbox" id="mesg-alerts" checked>Message Alerts
+                        <br /><br />
+                        <input type="checkbox" id="site-alerts" checked>Site Alerts
+                    </div>
+                    <div class="modal-body">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Done</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 		<div class="body">
 			<ul id="messages" style="padding-bottom: 40px;"></ul>
 	  		<form id="chatbar" action="">
@@ -34,47 +77,5 @@
 		var nick = '<%= nick %>';
 	</script>
 	<script src="/javascripts/roomclient.js"></script>
-	<script>
-		function loadGif(id, url) {
-			document.getElementById("hiddenInd" + id.toString()).setAttribute("src", "/images/ldg.png");
-			document.getElementById("hiddenInd" + id.toString()).setAttribute("onclick", "");
-			document.getElementById("hiddenImg" + id.toString()).setAttribute("src", url);
-			document.getElementById("hiddenLnk" + id.toString()).setAttribute("href", url);
-		}
-
-		function onGifLoaded(id) {
-			document.getElementById("hiddenInd" + id.toString()).style.display = "none";
-			document.getElementById("hiddenLnk" + id.toString()).style.display = "";
-		}
-	</script>
-	<script>
-		var isDay = true;
-		function toggleDayNight () {
-			var stylesheet1 = document.getElementById('stylesheet1');
-			var stylesheet2 = document.getElementById('stylesheet2');
-			var dayNightToggle = document.getElementById('daynbutton');
-			var dayNightImage = document.getElementById('daynimage');
-			//Text box
-			var mainTextBox = document.getElementById('m');
-			
-			if (isDay)
-			{
-				stylesheet1.setAttribute('href', '/stylesheets/bootstrap-night.min.css');
-				stylesheet2.setAttribute('href', '/stylesheets/style-night.css');
-				dayNightImage.setAttribute('src', '/images/day.png');
-				mainTextBox.style.backgroundColor = '#222222';
-				mainTextBox.style.color = '#ffffff';
-				isDay = false;
-			}
-			else
-			{
-				stylesheet1.setAttribute('href', '/stylesheets/bootstrap.min.css');
-				stylesheet2.setAttribute('href', '/stylesheets/style.css');
-				dayNightImage.setAttribute('src', '/images/night.png');
-				mainTextBox.style.backgroundColor = '#ffffff';
-				mainTextBox.style.color = '#000000';
-				isDay = true;
-			}
-		}
-	</script>
+    <script src="https://apis.google.com/js/client.js?onload=youtubeApiLoad"></script>
 </html>
