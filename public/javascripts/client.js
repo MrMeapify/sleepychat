@@ -30,6 +30,9 @@ var date = new Date();
 var timeSinceLastMessage = Date.now();
 var isAFK = false;
 
+//For Day/Night Mode
+var isDay = true;
+
 //For news ticker
 var currentNews = [];
 var currentNewsInd = 0;
@@ -777,6 +780,68 @@ function removeTicker()
     var messagesSection = document.getElementById('messages');
     messagesSection.style.paddingBottom = "40px";
     newsTicker = false;
+}
+
+function loadGif(id, url)
+{
+    document.getElementById("hiddenInd" + id.toString()).setAttribute("src", "/images/ldg.png");
+    document.getElementById("hiddenInd" + id.toString()).setAttribute("onclick", "");
+    document.getElementById("hiddenImg" + id.toString()).setAttribute("src", url);
+    document.getElementById("hiddenLnk" + id.toString()).setAttribute("href", url);
+}
+
+function onGifLoaded(id) {
+    document.getElementById("hiddenInd" + id.toString()).style.display = "none";
+    document.getElementById("hiddenLnk" + id.toString()).style.display = "";
+}
+
+function togglePasswordField ()
+{
+    var pwField = document.getElementById('password');
+    if (pwField.style.display == "none")
+    {
+        pwField.style.display = "";
+    }
+    else
+    {
+        pwField.style.display = "none";
+    }
+}
+
+function toggleDayNight ()
+{
+    var stylesheet1 = document.getElementById('stylesheet1');
+    var stylesheet2 = document.getElementById('stylesheet2');
+    var dayNightToggle = document.getElementById('daynbutton');
+    var dayNightImage = document.getElementById('daynimage');
+    //Text box
+    var mainTextBox = document.getElementById('m');
+    var hintTextBox = document.getElementById('mhint');
+
+    if (isDay)
+    {
+        stylesheet1.setAttribute('href', '/stylesheets/bootstrap-night.min.css');
+        stylesheet2.setAttribute('href', '/stylesheets/style-night.css');
+        dayNightImage.setAttribute('src', '/images/day.png');
+        hintTextBox.style.backgroundColor = '#222222';
+        mainTextBox.style.color = '#ffffff';
+        isDay = false;
+    }
+    else if (!isHalloween)
+    {
+        stylesheet1.setAttribute('href', '/stylesheets/bootstrap.min.css');
+        stylesheet2.setAttribute('href', '/stylesheets/style.css');
+        dayNightImage.setAttribute('src', '/images/night.png');
+        hintTextBox.style.backgroundColor = '#ffffff';
+        mainTextBox.style.color = '#000000';
+        isDay = true;
+    }
+    else
+    {
+        var scroll_down = isWithinScrollThreshold();
+        $('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] You're in Halloween Mode. Use \"/halloween\" to turn it off.</span>"));
+        scrollDown(scroll_down);
+    }
 }
 
 // --------------
