@@ -461,12 +461,18 @@ io.on('connection', function(socket)
                     if(message.lastIndexOf('/svrmsg ', 0) === 0 && (user.admin || user.mod))
                     {
                         var command = '/svrmsg ';
-                        io.sockets.emit('information', "[SERVER MESSAGE] " + message.substring(command.length));
+                        var msg = message.substring(command.length);
+                        var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/\,]*(\.[\w\-_()\:]+)?(?:[\-\+=&;%@\.\w?#\/\:\,]*))/gi;
+                        msg = msg.replace(link, "<a tabindex='-1' target='_blank' href='http://$1'>$1</a>");
+                        io.sockets.emit('information', "[SERVER MESSAGE] " + msg);
                     }
                     else if(message.lastIndexOf('/rmmsg ', 0) === 0 && (user.admin || user.mod))
                     {
                         var command = '/rmmsg ';
-                        io.to('bigroom').emit('information', "[ROOM MESSAGE] " + message.substring(command.length));
+                        var msg = message.substring(command.length);
+                        var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/\,]*(\.[\w\-_()\:]+)?(?:[\-\+=&;%@\.\w?#\/\:\,]*))/gi;
+                        msg = msg.replace(link, "<a tabindex='-1' target='_blank' href='http://$1'>$1</a>");
+                        io.to('bigroom').emit('information', "[ROOM MESSAGE] " + msg);
                     }
                     else if(message.lastIndexOf('/lauren', 0) === 0 && user.nick == "Lauren")
                     {
