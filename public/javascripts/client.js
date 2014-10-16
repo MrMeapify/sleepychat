@@ -849,7 +849,7 @@ function toggleDayNight ()
 // --------------
 function modalPoll(pollId) {
     
-    $('#iframe-modal-body').html("<iframe src='http://strawpoll.me/embed_1/"+pollId+"/r' style='width: 800px; height: 496px; border: 0; display: block; margin: auto;'>Loading poll...</iframe>");
+    $('#iframe-modal-body').html("<iframe src='http://strawpoll.me/embed_1/"+pollId+"' style='width: 800px; height: 496px; border: 0; display: block; margin: auto;'>Loading poll...</iframe>");
     $('#iframe-modal-title').text("Straw Poll - Vote Now!");
     
     $('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
