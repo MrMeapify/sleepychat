@@ -739,8 +739,21 @@ io.on('connection', function(socket)
                             io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been struck by the Ban Hammer, swung by "+user.nick+". ("+days.toString()+" day ban)");
                             tokick.socket.leave('bigroom');
                             tokick.socket.conn.close();
-
-                            banList.push(nameIpPair);
+                            
+                            var replaced = false;
+                            for (var i = 0; i < banList.length; i++)
+                            {
+                                if (banList[i].ip == nameIpPair.ip)
+                                {
+                                    banList[i] = nameIpPair;
+                                    replaced = true;
+                                    break;
+                                }
+                            }
+                            
+                            if (!replaced)
+                                banList.push(nameIpPair);
+                            
                             updateBanList();
                         }
                         else
@@ -781,7 +794,20 @@ io.on('connection', function(socket)
                             tokick.socket.leave('bigroom');
                             tokick.socket.conn.close();
 
-                            banList.push(nameIpPair);
+                            var replaced = false;
+                            for (var i = 0; i < banList.length; i++)
+                            {
+                                if (banList[i].ip == nameIpPair.ip)
+                                {
+                                    banList[i] = nameIpPair;
+                                    replaced = true;
+                                    break;
+                                }
+                            }
+                            
+                            if (!replaced)
+                                banList.push(nameIpPair);
+                            
                             updateBanList();
                         }
                         else
@@ -820,7 +846,20 @@ io.on('connection', function(socket)
                             
                             socket.emit('information', "[INFO] IP " + postpass[0] + " has been struck by the Ban Hammer, swung by "+user.nick+". ("+days.toString()+" day ban)");
 
-                            banList.push(nameIpPair);
+                            var replaced = false;
+                            for (var i = 0; i < banList.length; i++)
+                            {
+                                if (banList[i].ip == nameIpPair.ip)
+                                {
+                                    banList[i] = nameIpPair;
+                                    replaced = true;
+                                    break;
+                                }
+                            }
+                            
+                            if (!replaced)
+                                banList.push(nameIpPair);
+                            
                             updateBanList();
                         }
                         else if (!tokick.admin)
@@ -850,7 +889,20 @@ io.on('connection', function(socket)
                             tokick.socket.leave('bigroom');
                             tokick.socket.conn.close();
 
-                            banList.push(nameIpPair);
+                            var replaced = false;
+                            for (var i = 0; i < banList.length; i++)
+                            {
+                                if (banList[i].ip == nameIpPair.ip)
+                                {
+                                    banList[i] = nameIpPair;
+                                    replaced = true;
+                                    break;
+                                }
+                            }
+                            
+                            if (!replaced)
+                                banList.push(nameIpPair);
+                            
                             updateBanList();
                         }
                         else
