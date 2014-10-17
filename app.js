@@ -1104,18 +1104,23 @@ function sendMessage(information, message, user, room, socket)
 // ==================================
 
 function getAuthority(user){
+    
+    var toRet = "";
+    
 	if (user.admin)
 	{
-		return "<img src='/images/admin.png' class='embedded_image' />";
+		toRet = "<img src='/images/admin.png' class='embedded_image' />";
 	}
 	else if (user.mod)
 	{
-		return "<img src='/images/mod.png' class='embedded_image' />";
+		toRet = "<img src='/images/mod.png' class='embedded_image' />";
 	}
-	else
-	{
-		return "";
-	}
+	if (user.nick == "MrMeapify")
+    {
+        toRet += "<img src='/images/creator.png' class='embedded_image' />";
+    }
+    
+    return toRet;
 }
 
 function nameAppend(name, gender, role){
