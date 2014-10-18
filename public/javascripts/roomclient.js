@@ -393,7 +393,7 @@ function youtubeRequestSucceeded (resp) {
         console.log('ERROR: Loading container not found for id: ' + resultingVideo.id);
     }
     
-    if (/*resultingVideo.processingDetails.processingStatus == "succeeded"*/true)
+    if (/*resultingVideo.processingDetails.processingStatus == "succeeded"*/true) // Need to find out which requests only require the API key and not OAuth.
     {
         correctContainer.className = "";
         correctContainer.style.verticalAlign = "middle";
@@ -402,7 +402,7 @@ function youtubeRequestSucceeded (resp) {
         var id = resultingVideo.id;
         var title = resultingVideo.snippet.title;
         var channel = resultingVideo.snippet.channelTitle;
-        var channelLink = "http://http://www.youtube.com/channel/"+resultingVideo.snippet.channelId;
+        var channelLink = "http://www.youtube.com/channel/"+resultingVideo.snippet.channelId;
         
         var description = resultingVideo.snippet.description;
         var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/\,]*(\.[\w\-_()\:]+)?(?:[\-\+=&;%@\.\w?#\/\:\,]*))/gi;
