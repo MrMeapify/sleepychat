@@ -412,9 +412,9 @@ function youtubeRequestSucceeded (resp) {
         var views = resultingVideo.statistics.viewCount.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         
         var length = resultingVideo.contentDetails.duration;
-        var hours = length.replace(/PT(?:([0-9])H)?(?:([0-9]{1,2})M)?([0-9]{1,2})S/g, "$1");
-        var minutes = length.replace(/PT(?:([0-9])H)?(?:([0-9]{1,2})M)?([0-9]{1,2})S/g, "$2");
-        var seconds = length.replace(/PT(?:([0-9])H)?(?:([0-9]{1,2})M)?([0-9]{1,2})S/g, "$3");
+        var hours = length.replace(/PT(?:([0-9])H)?(?:([0-9]{1,2})M)?(?:([0-9]{1,2})S)?/g, "$1");
+        var minutes = length.replace(/PT(?:([0-9])H)?(?:([0-9]{1,2})M)?(?:([0-9]{1,2})S)?/g, "$2");
+        var seconds = length.replace(/PT(?:([0-9])H)?(?:([0-9]{1,2})M)?(?:([0-9]{1,2})S)?/g, "$3");
         
         length = (hours.length != "" ? hours+":" : "");
         length += (hours != "" ? (minutes != "" ? (minutes.length < 2 ? "0"+minutes : minutes) : "00") : (minutes != "" ? minutes : "0"))+":";
