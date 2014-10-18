@@ -20,6 +20,8 @@ li.self { background: #333333; }
 
 li.highlight { background: #008b8b!important; }
 
+li.mention { background: #006d6d!important; }
+
 .login-modal { font-family: Roboto, Helvetica, Arial; }
 
 .embedded_image { max-height: 250px; }

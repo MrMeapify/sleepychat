@@ -12,6 +12,7 @@ var snd = new Audio("/sounds/notify.ogg");
 var newchatclickedonce = false;
 var bigchat = false;
 var soundMesg = true;
+var soundMent = true;
 var soundWhsp = true;
 var soundJnLv = true;
 var soundSite = true;
@@ -21,7 +22,7 @@ var isDCd = false;
 //For YouTube Embedding
 var apiKey = "NOTLOADED";
 var isYapiLoaded = false;
-var youTubeMatcher = /\^~([A-Za-z0-9-_]{11})~\^/g; // Matches stuff between ^~ ~^
+var youTubeMatcher = /\^~([A-Za-z0-9-_]{11})~\^~(?:([A-Za-z0-9-_]{24}))?~\^?/g; // Matches the video ID between ^~ ~^, and optionally matches the playlist ID between ~ ~^
 
 //For /r and /reply
 var lastMessenger = "";
@@ -74,6 +75,11 @@ $.getScript('/javascripts/tabcomplete.js', function()
         soundMesg = this.checked;
     });
     
+    $('#ment-alerts').click(function () {
+        
+        soundMent = this.checked;
+    });
+    
     $('#whsp-alerts').click(function () {
         
         soundWhsp = this.checked;
@@ -90,6 +96,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
     });
     
     soundMesg = $('#mesg-alerts').checked;
+    soundMent = $('#ment-alerts').checked;
     soundWhsp = $('#whsp-alerts').checked;
     soundJnLv = $('#jnlv-alerts').checked;
     soundSite = $('#site-alerts').checked;
@@ -335,7 +342,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
                     youTubeMatcher.lastIndex = 0;
                     var videoId = youTubeMatcher.exec(msg)[1];
                     youTubeMatcher.lastIndex = 0;
-                    msg = msg.replace(youTubeMatcher, "<div class='yt-video-container yt-loader-container' videoid='$1'><div style='vertical-align: middle; text-align: center;'>"+(isYapiLoaded ? "Fetching Video Information..." : "YouTube API Not Loaded =/")+"</div></div>");
+                    msg = msg.replace(youTubeMatcher, "<div class='yt-video-container yt-loader-container' videoid='$1' playlistid='$2'><div style='vertical-align: middle; text-align: center;'>"+(isYapiLoaded ? "Fetching Video Information..." : "YouTube API Not Loaded =/")+"</div></div>");
                     requestYouTubeEmbed(videoId);
                 }
                 
@@ -360,28 +367,19 @@ $.getScript('/javascripts/tabcomplete.js', function()
 		{
 			if(msg)
 			{
-				if(notify)
-				{
-					if(soundMesg)
-						snd.play();
-					if(bigchat)
-						newTitle = "*** People are talking! ***";
-					else
-						newTitle = "*** " + lastChat + " messaged you! ***";
-					clearInterval(interval);
-					interval = setInterval(changeTitle, 1000);
-				}
-
 				var scroll_down = isWithinScrollThreshold();
                 
                 if (youTubeMatcher.test(msg))
                 {
+                    console.log(msg);
                     youTubeMatcher.lastIndex = 0;
                     var videoId = youTubeMatcher.exec(msg)[1];
                     youTubeMatcher.lastIndex = 0;
-                    msg = msg.replace(youTubeMatcher, "<div class='yt-video-container yt-loader-container' videoid='$1'><div style='vertical-align: middle; text-align: center;'>"+(isYapiLoaded ? "Fetching Video Information..." : "YouTube API Not Loaded =/")+"</div></div>");
+                    msg = msg.replace(youTubeMatcher, "<div class='yt-video-container yt-loader-container' videoid='$1' playlistid='$2'><div style='vertical-align: middle; text-align: center;'>"+(isYapiLoaded ? "Fetching Video Information..." : "YouTube API Not Loaded =/")+"</div></div>");
                     requestYouTubeEmbed(videoId);
                 }
+                
+                var isMention = false;
 
 				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
 				var user = msg.match(/&lt;(.+)&gt;/);
@@ -398,7 +396,8 @@ $.getScript('/javascripts/tabcomplete.js', function()
 				{
 					if(bigchat && msg.split('&gt;')[1].substring(1).indexOf(nick) != -1)
 					{
-						$('#messages > li').filter(':last').addClass('highlight');
+						$('#messages > li').filter(':last').addClass('mention');
+                        isMention = true;
 					}
 				}
 				catch(e) {}
@@ -406,6 +405,26 @@ $.getScript('/javascripts/tabcomplete.js', function()
 				if (userFrom && ignore_list.indexOf(userFrom) != -1)
 				{
 					$('#messages > li').filter(':last').hide();
+				}
+
+				if(notify)
+				{
+                    if (isMention)
+                    {
+                        if(soundMent)
+					       	snd.play();
+                    }
+                    else
+                    {
+                        if(soundMesg)
+                            snd.play();
+                    }
+					if(bigchat)
+						newTitle = "*** People are talking! ***";
+					else
+						newTitle = "*** " + lastChat + " messaged you! ***";
+					clearInterval(interval);
+					interval = setInterval(changeTitle, 1000);
 				}
 
 				scrollDown(scroll_down);
@@ -895,9 +914,9 @@ function modalPoll(pollId) {
 // -----------
 // For YouTube
 // -----------
-function modalYouTube(videoId) {
+function modalYouTube(videoId, playlistId) {
     
-    $('#iframe-modal-body').html("<iframe width='800' height='450' style='display: block; margin: auto;' src='http://www.youtube.com/embed/"+videoId+"' frameborder='0' allowfullscreen></iframe>");
+    $('#iframe-modal-body').html("<iframe width='800' height='450' style='display: block; margin: auto;' src='http://www.youtube.com/embed/"+videoId+(playlistId != "" ? ("?list="+playlistId) : "")+"' frameborder='0' allowfullscreen></iframe>");
     $('#iframe-modal-title').text("YouTube");
     
     $('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
@@ -966,6 +985,7 @@ function youtubeRequestSucceeded (resp) {
         correctContainer.style.display = "inline-block";
         
         var id = resultingVideo.id;
+        var playlist = correctContainer.getAttribute('playlistid');
         var title = resultingVideo.snippet.title;
         var channel = resultingVideo.snippet.channelTitle;
         var channelLink = "http://www.youtube.com/channel/"+resultingVideo.snippet.channelId;
@@ -987,7 +1007,7 @@ function youtubeRequestSucceeded (resp) {
         length += (seconds.length < 2 ? (seconds.length < 1 ? "00" : "0"+seconds) : seconds);
         
         var displayString = "<div class='yt-video-container'>\n<div class='yt-thumbnail'>\n<a target='_blank' class='yt-thumbnail-imglink' href='http://www.youtube.com/watch?v="+id+"'>\n<span class='yt-thumbnail-imgspan'>\n<img class='yt-thumbnail-img' src='http://i.ytimg.com/vi/"+id+"/mqdefault.jpg' />\n</span>\n<span class='yt-thumbnail-time'>"+length+"</span>\n</a>\n</div>\n<div class='yt-details'>\n<h3 class='yt-details-title'><a target='_blank' href='http://www.youtube.com/watch?v="+id+"'>"+title+"</a></h3>\n<div style='display: block; margin: 5px 0 0;'>\n<ul class='yt-details-meta'>\n<li style='padding: 0px;'>by <a target='_blank' href='"+channelLink+"'>"+channel+"</a></li>\n<li style='padding: 0px;'>"+views+" views</li>\n</ul>\n</div>\n<div class='yt-details-desc'>"+description+"</div>\n</div>\n</div>";
-        var embedString = resultingVideo.status.embeddable ? "\n<div class='yt-video-container' style='width: 112px;' videoid='"+id+"'>\n<img src='/images/yt-play-embedded.png' style='cursor: pointer;' onclick='modalYouTube(\""+id+"\")' />\n</div>" : "\n<div class='yt-video-container' style='width: 112px;' videoid='"+id+"'>\n<img src='/images/yt-cant-embed.png' />\n</div>";
+        var embedString = resultingVideo.status.embeddable ? "\n<div class='yt-video-container' style='width: 112px;' videoid='"+id+" playlistid='"+playlist+"'>\n<img src='/images/yt-play-embedded.png' style='cursor: pointer;' onclick='modalYouTube(\""+id+"\", \""+playlist+"\")' />\n</div>" : "\n<div class='yt-video-container' style='width: 112px;' videoid='"+id+" playlistid='"+playlist+"'>\n<img src='/images/yt-cant-embed.png' />\n</div>";
         
         correctContainer.innerHTML = displayString+embedString;
     }
