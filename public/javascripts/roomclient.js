@@ -156,7 +156,7 @@ $(document).ready(function()
 					clearInterval(interval);
 					interval = setInterval(changeTitle, 1000);
 				}
-				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
+				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information blocking\">" + msg + "</span>"));
 				scrollDown();
 			}
 		});
@@ -171,7 +171,7 @@ $(document).ready(function()
 				clearInterval(interval);
 				interval = setInterval(changeTitle, 1000);
 			}
-			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Sorry! You seem to have been disconnected from the server. Please reload the page to resume chatting.</span>"));
+			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information blocking\">" + "[INFO] Sorry! You seem to have been disconnected from the server. Please reload the page to resume chatting.</span>"));
 			scrollDown();
 		});
 		

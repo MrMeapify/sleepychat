@@ -455,7 +455,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 				var scroll_down = isWithinScrollThreshold();
 				if (!(userFrom && ignore_list.indexOf(userFrom) != -1))
 				{
-					$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
+					$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information blocking\">" + msg + "</span>"));
 					scrollDown(scroll_down);
 				}
 
@@ -473,7 +473,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 			$('#sendbutton').attr('disabled', true);
 			var themsg = '[INFO] ' + nick + ' has disconnected from you.';
 			var scroll_down = isWithinScrollThreshold();
-			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + themsg + "</span>"));
+			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information blocking\">" + themsg + "</span>"));
 			scrollDown(scroll_down);
 		});
 
@@ -490,7 +490,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 			var scroll_down = isWithinScrollThreshold();
 			if (!denied)
 			{
-				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Sorry! You seem to have been disconnected from the server. Please reload the page and try again.</span>"));
+				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information blocking\">" + "[INFO] Sorry! You seem to have been disconnected from the server. Please reload the page and try again.</span>"));
 			}
 			scrollDown(scroll_down);
             isDCd = true;
