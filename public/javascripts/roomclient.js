@@ -298,7 +298,7 @@ function toggleDayNight ()
         mainTextBox.style.color = '#ffffff';
         isDay = false;
     }
-    else if (!isHalloween)
+    else
     {
         stylesheet1.setAttribute('href', '/stylesheets/bootstrap.min.css');
         stylesheet2.setAttribute('href', '/stylesheets/style.css');
@@ -306,12 +306,6 @@ function toggleDayNight ()
         hintTextBox.style.backgroundColor = '#ffffff';
         mainTextBox.style.color = '#000000';
         isDay = true;
-    }
-    else
-    {
-        var scroll_down = isWithinScrollThreshold();
-        $('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] You're in Halloween Mode. Use \"/halloween\" to turn it off.</span>"));
-        scrollDown(scroll_down);
     }
 }
 
