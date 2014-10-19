@@ -1,4 +1,4 @@
-var socket = io();
+var socket = null;
 var isOldTitle = true;
 var oldTitle = "Hypnochat - Private Room";
 var newTitle = "*** New message! ***";
@@ -7,6 +7,7 @@ var notify = false;
 var snd = new Audio("/sounds/notify.ogg");
 var soundMesg = true;
 var soundSite = true;
+var denied = false;
 
 var isDay = true;
 
@@ -61,7 +62,7 @@ $(document).ready(function()
         soundSite = this.checked;
     });
     
-	var socket = io();
+	var socket = io("/", { reconnection: false, transport: ['websocket'] });
 	
 	$('#chatbar').unbind('submit');
 	$('#chatbar').submit(function()
@@ -102,6 +103,12 @@ $(document).ready(function()
             {
                 youtubeApiLoad();
             }
+		});
+		
+		socket.on('denial', function()
+		{
+			denied = true;
+			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Your connection was refused. There are too many users with your IP address at this time.</span>"));
 		});
 		
 		socket.on('chat message', function(msg, who)
@@ -171,7 +178,10 @@ $(document).ready(function()
 				clearInterval(interval);
 				interval = setInterval(changeTitle, 1000);
 			}
-			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information blocking\">" + "[INFO] Sorry! You seem to have been disconnected from the server. Please reload the page to resume chatting.</span>"));
+            if (!denied)
+			{
+				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information blocking\">" + "[INFO] Sorry! You seem to have been disconnected from the server. Please reload the page to resume chatting.</span>"));
+			}
 			scrollDown();
 		});
 		
