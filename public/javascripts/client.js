@@ -21,6 +21,7 @@ var isDCd = false;
 
 //For YouTube Embedding
 var apiKey = "NOTLOADED";
+var isGapiLoaded = false;
 var isYapiLoaded = false;
 var youTubeMatcher = /\^~([A-Za-z0-9-_]{11})~\^~(?:([A-Za-z0-9-_]{24}))?~\^?/g; // Matches the video ID between ^~ ~^, and optionally matches the playlist ID between ~ ~^
 
@@ -239,7 +240,14 @@ $.getScript('/javascripts/tabcomplete.js', function()
             apiKey = googleApiKey.keyString;
             if (!isYapiLoaded)
             {
-                youtubeApiLoad();
+                if (isGapiLoaded)
+                {
+                    youtubeApiLoad();
+                }
+                else
+                {
+                    console.log("Warining: Google API Script not yet loaded. Waiting...");
+                }
             }
 		});
 		
@@ -930,6 +938,7 @@ function requestYouTubeEmbed (videoId) {
 
 function youtubeApiLoad() {
     
+    isGapiLoaded = true;
     if (apiKey != "NOKEY" && apiKey != "NOTLOADED")
     {
         gapi.client.setApiKey(apiKey);
