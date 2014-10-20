@@ -19,6 +19,9 @@ var soundSite = true;
 var denied = false;
 var isDCd = false;
 
+//For cookies!!!
+var cookies = [];
+
 //For the 18+ disclaimer
 var wasConnectionAllowed = false;
 var isOnDisclaimer = true;
@@ -75,51 +78,59 @@ var isMobile = {
 
 $.getScript('/javascripts/tabcomplete.js', function()
 {
-    // Disclaimer setup
-    $('#disclaimer-modal').modal({keyboard: false, backdrop: 'static'});
-    $('#accept-button').click(function() {
-        
-        isOnDisclaimer = false;
-        $('#disclaimer-modal').modal('hide');
-        if (wasConnectionAllowed)
-        {
-            $('#login-modal').modal({keyboard: false, backdrop: 'static'});
-        }
-    });
-    $('#deny-button').click(function() {
-        
-        window.history.back();
-    });
+    // Cookies!!!
+    parseCookies();
     
+    // Disclaimer setup
+    if (getCookie("disclaimer", "show") == "show")
+    {
+        $('#disclaimer-modal').modal({keyboard: false, backdrop: 'static'});
+        $('#accept-button').click(function() {
+
+            isOnDisclaimer = false;
+            $('#disclaimer-modal').modal('hide');
+            setCookie("disclaimer", "accepted");
+            if (wasConnectionAllowed)
+            {
+                $('#login-modal').modal({keyboard: false, backdrop: 'static'});
+            }
+        });
+        $('#deny-button').click(function() {
+
+            window.history.back();
+        });
+    }
     
     // Sound setup
     $('#mesg-alerts').click(function () {
         
         soundMesg = this.checked;
+        setCookie("soundMesg", soundMesg.toString());
     });
     $('#ment-alerts').click(function () {
         
         soundMent = this.checked;
+        setCookie("soundMent", soundMent.toString());
     });
     $('#whsp-alerts').click(function () {
         
         soundWhsp = this.checked;
+        setCookie("soundWhsp", soundWhsp.toString());
     });
     $('#jnlv-alerts').click(function () {
         
         soundJnLv = this.checked;
+        setCookie("soundJnLv", soundJnLv.toString());
     });
     $('#site-alerts').click(function () {
         
         soundSite = this.checked;
+        setCookie("soundSite", soundSite.toString());
     });
-    soundMesg = $('#mesg-alerts').checked;
-    soundMent = $('#ment-alerts').checked;
-    soundWhsp = $('#whsp-alerts').checked;
-    soundJnLv = $('#jnlv-alerts').checked;
-    soundSite = $('#site-alerts').checked;
+    setUpSound();
     
-	$('#randomnick').click();
+    setUpModal();
+    
 	var socket = io("/", { reconnection: false, transport: ['websocket'] });
 
 	$('#loginform').submit(function()
@@ -191,6 +202,8 @@ $.getScript('/javascripts/tabcomplete.js', function()
 				var type = 'either';
 
 			socket.emit('login', { nick: nick, pass: pass, gender: gender, role: role, chatwith: chatwith, type: type });
+            
+            saveModal();
 			
 			timeSinceLastMessage = Date.now();
 			$('#login-modal').modal('hide');
@@ -244,7 +257,8 @@ $.getScript('/javascripts/tabcomplete.js', function()
 			nick = nick2;
 
 			socket.emit('login', { nick: nick2, pass: pass2, gender: gender, role: role, chatwith: chatwith, type: type, inBigChat: true });
-			
+            
+            saveModal();
 
 			$('#login-modal').modal('hide');
 			return false;
@@ -924,6 +938,114 @@ function toggleDayNight ()
             $(window).scrollTop(scrollValue);
         }
     }
+}
+
+// ----------
+// Cookies!!!
+// ----------
+function parseCookies () {
+    
+    var all = document.cookie;
+    
+    if (all == "")
+    {
+        return;
+    }
+    
+    var list = all.split('; ');
+    
+    for (var i = 0; i < list.length; i++)
+    {
+        cookies[i] = list[i].split('=');
+    }
+}
+
+function getCookie (name, defaultVal) {
+    
+    for (var i = 0; i < cookies.length; i++)
+    {
+        if (cookies[i][0] == name)
+        {
+            return cookies[i][1];
+        }
+    }
+    
+    return defaultVal;
+}
+
+function setCookie (name, newValue) {
+    
+    for (var i = 0; i < cookies.length; i++)
+    {
+        if (cookies[i][0] == name)
+        {
+            cookies[i][1] = newValue.toString();
+            var expiry = new Date();
+            expiry.setMonth(expiry.getMonth()+1);
+            document.cookie = name+"="+newValue.toString()+"; expires="+expiry.toUTCString();
+            return;
+        }
+    }
+    
+    var newCookie = [name, newValue.toString()];
+    cookies.push(newCookie);
+    var expiry = new Date();
+    expiry.setMonth(expiry.getMonth()+1);
+    document.cookie = name+"="+newValue.toString()+"; expires="+expiry.toUTCString();
+}
+
+function setUpSound () {
+    
+    soundMesg = getCookie("soundMesg", "true") == "true";
+    soundMent = getCookie("soundMent", "true") == "true";
+    soundWhsp = getCookie("soundWhsp", "true") == "true";
+    soundJnLv = getCookie("soundJnLv", "true") == "true";
+    soundSite = getCookie("soundSite", "true") == "true";
+}
+
+function setUpModal () {
+    
+    var cookieName = getCookie("username", "");
+    if (cookieName == "")
+    {
+	   $('#randomnick').click();
+    }
+    else
+    {
+        $('#nickname').val(cookieName);
+    }
+    
+    var cookieGender = getCookie("gender", "undisclosed");
+    $('#iam'+cookieGender).click();
+    
+    var cookieRole = getCookie("role", "swtich");
+    $('#iam'+cookieRole).click();
+    
+    var cookiePrefer = getCookie("prefer", "either");
+    $('#chatwith'+cookiePrefer).click();
+    
+    var cookieHypRp = getCookie("chatfor", "either");
+    $('#iwant'+cookieHypRp).click();
+    
+    var cookiePassword = getCookie("password", "none");
+    document.getElementById('password').style.display = cookiePassword;
+}
+
+function saveModal () {
+    
+    var cookieName = $('#nickname').val();
+    var cookieGender = ($('#iammale').parent().hasClass('active') ? "male" : ($('#iamfemale').parent().hasClass('active') ? "female" : "undisclosed"));
+    var cookieRole = ($('#iamtist').parent().hasClass('active') ? "tist" : ($('#iamsub').parent().hasClass('active') ? "sub" : "switch"));
+    var cookiePrefer = ($('#chatwithmales').parent().hasClass('active') ? "males" : ($('#chatwithfemales').parent().hasClass('active') ? "females" : "either"));
+    var cookieHypRp = ($('#iwantrp').parent().hasClass('active') ? "rp" : ($('#iwanthyp').parent().hasClass('active') ? "hyp" : "either"));
+    var cookiePassword = document.getElementById('password').style.display;
+    
+    setCookie("username", cookieName);
+    setCookie("gender", cookieGender);
+    setCookie("role", cookieRole);
+    setCookie("prefer", cookiePrefer);
+    setCookie("chatfor", cookieHypRp);
+    setCookie("password", cookiePassword);
 }
 
 // --------------
