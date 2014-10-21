@@ -100,6 +100,10 @@ $.getScript('/javascripts/tabcomplete.js', function()
             window.history.back();
         });
     }
+    else
+    {
+        isOnDisclaimer = false;
+    }
     
     // Sound setup
     $('#mesg-alerts').click(function () {
