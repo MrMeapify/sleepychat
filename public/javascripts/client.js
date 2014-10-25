@@ -487,7 +487,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 			{
 				if(notify)
 				{
-                    if (msg.indexOf("has joined.") == -1 && msg.indexOf("has left.") == -1)
+                    if (msg.indexOf("has joined.") == -1 && msg.indexOf("has left.") == -1 && msg.indexOf("is AFK.") == -1)
                     {
                         if(soundSite)
                             snd.play();
