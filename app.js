@@ -103,6 +103,19 @@ var connections = [];
 var users = [];
 var privaterooms = [];
 
+//Mod Room
+var modroom =
+{
+    users: [],
+    token: 'modroom',
+    lastchat: new Date().getTime(),
+    optouts: [false, false],
+    isprivate: false,
+    forcelogs: true
+};
+
+privaterooms.push(modroom);
+
 var uniqueHiddenId = 0;
 
 var MILSEC_PER_DAY = 86400000;
@@ -290,13 +303,28 @@ io.on('connection', function(socket)
             {
                 console.log('Lookup user by ' + usertoken + "...");
                 var finduser = getUserByToken(usertoken);
-                console.log(finduser.nick);
+                console.log(finduser.nick + "has joined a private room.");
                 nick = finduser.nick;
                 if(room)
                 {
-                    socket.join(room.token);
-                    socket.emit('information', "[INFO] For your safety, private rooms are logged and viewable only by the Admin. The room can opt out of logging if <strong>all</strong> users opt out.<br />You can opt out by typing \"/private\" into chat. You can also force logging for complete safety by typing \"/private never\" into chat.<br />Please only opt out if you trust your partner.");
-                    io.to(room.token).emit('information', "[INFO] " + nick + " has joined.");
+                    if (room.token == "modroom")
+                    {
+                        if (finduser.mod || finduser.admin)
+                        {
+                            socket.join(room.token);
+                            io.to(room.token).emit('information', "[INFO] " + nick + " has joined.");
+                        }
+                        else
+                        {
+                            socket.emit('information', "[INFO] You are not an admin or mod. Access is denied.");
+                        }
+                    }
+                    else
+                    {
+                        socket.join(room.token);
+                        socket.emit('information', "[INFO] For your safety, private rooms are logged and viewable only by the Admin. The room can opt out of logging if <strong>all</strong> users opt out.<br />You can opt out by typing \"/private\" into chat. You can also force logging for complete safety by typing \"/private never\" into chat.<br />Please only opt out if you trust your partner.");
+                        io.to(room.token).emit('information', "[INFO] " + nick + " has joined.");
+                    }
                 }
                 else
                 {
@@ -640,14 +668,17 @@ io.on('connection', function(socket)
                     }
                     else if (message.lastIndexOf('/close', 0) === 0 && room)
                     {
-                        try
+                        if (room.token != "modroom")
                         {
-                            privaterooms.remove(room);
-                            io.to(room.token).emit('information', "[INFO] " + nick + " has closed the room.");
-                        }
-                        catch(e) 
-                        {
-                            console.log(e)
+                            try
+                            {
+                                privaterooms.remove(room);
+                                io.to(room.token).emit('information', "[INFO] " + nick + " has closed the room.");
+                            }
+                            catch(e) 
+                            {
+                                console.log(e)
+                            }
                         }
                     }
                     else if (message.lastIndexOf('/coinflip', 0) === 0)
@@ -669,6 +700,21 @@ io.on('connection', function(socket)
                     {
                         for(var x = 0; x < modCommands.length; x++)
                             socket.emit(modCommands[x][0], modCommands[x][1]);
+                    }
+                    else if (message.lastIndexOf('/modroom', 0) === 0)
+                    {
+                        if (user.admin || user.mod)
+                        {
+                            socket.emit('information', "[INFO] Welcome back to the <a href='/room/modroom/"+user.token+"' target='_blank'>mod room</a>, "+user.nick+".");
+                        }
+                        else
+                        {
+                            socket.emit('information', "[INFO] That command is reserved for administrators and moderators, sorry.");
+                        }
+                    }
+                    else if (message.lastIndexOf('/mytoken', 0) === 0) // <-------TEST FUNCTION
+                    {
+                        socket.emit('information', user.token);
                     }
                     else if (message.lastIndexOf('/objection', 0) === 0)
                     {
@@ -1566,7 +1612,7 @@ function alterMessage(str, user, socket, room, users, dontLog)
         }
         else if (!room.isprivate)
         {
-            console.log("PR: " + user.nick + ": " + ans);
+            console.log((room.token == "modroom" ? "MR: " : "PR: ") + user.nick + ": " + ans);
         }
     }
 	var formatted = alterForFormatting(str, user);
@@ -1772,7 +1818,7 @@ setInterval(function()
 	for(var x = 0; x < roomscopy.length; x++)
 	{
 		var room = roomscopy[x];
-		if(room.lastchat < new Date().getTime() - 43200000) // If the last chat message was over 12 hours ago.
+		if((room.lastchat < new Date().getTime() - (MILSEC_PER_DAY / 4)) && room.token != 'modroom') // If the last chat message was over 6 hours ago.
 		{
 			privaterooms.remove(room); // Clean up
 		}

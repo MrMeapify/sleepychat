@@ -39,7 +39,14 @@ router.get('/*', function(req, res)
 			}
 			if(!included)
 			{
-				res.send('An unknown error has occured. Code: 3');
+                if (room.token == "modroom")
+                {
+                    res.render('privateroom', { title: 'Sleepychat - Private Room ' + room.token.substring(6), nick: nick });
+                }
+                else
+                {
+                    res.send('An unknown error has occured. Code: 3');
+                }
 			}
 			else
 			{
