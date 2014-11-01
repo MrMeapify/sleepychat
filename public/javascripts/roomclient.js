@@ -426,13 +426,21 @@ function youtubeRequestSucceeded (resp) {
         var views = resultingVideo.statistics.viewCount.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         
         var length = resultingVideo.contentDetails.duration;
-        var hours = length.replace(/PT(?:([0-9])H)?(?:([0-9]{1,2})M)?(?:([0-9]{1,2})S)?/g, "$1");
-        var minutes = length.replace(/PT(?:([0-9])H)?(?:([0-9]{1,2})M)?(?:([0-9]{1,2})S)?/g, "$2");
-        var seconds = length.replace(/PT(?:([0-9])H)?(?:([0-9]{1,2})M)?(?:([0-9]{1,2})S)?/g, "$3");
+        var durationRegex = /PT(?:([0-9]{1,2})H)?(?:([0-9]{1,2})M)?(?:([0-9]{1,2})S)?/g;
+        var hours = length.replace(durationRegex, "$1");
+        var minutes = length.replace(durationRegex, "$2");
+        var seconds = length.replace(durationRegex, "$3");
         
-        length = (hours.length != "" ? hours+":" : "");
-        length += (hours != "" ? (minutes != "" ? (minutes.length < 2 ? "0"+minutes : minutes) : "00") : (minutes != "" ? minutes : "0"))+":";
-        length += (seconds.length < 2 ? "0"+seconds : seconds);
+        if (length == "P1D")
+        {
+            length = "1 Day (Why?)";
+        }
+        else
+        {
+            length = (hours != "" ? hours+":" : "");
+            length += (hours != "" ? (minutes != "" ? (minutes.length < 2 ? "0"+minutes : minutes) : "00") : (minutes != "" ? minutes : "0"))+":";
+            length += (seconds.length < 2 ? (seconds.length < 1 ? "00" : "0"+seconds) : seconds);
+        }
         
         var displayString = "<div class='yt-video-container'>\n<div class='yt-thumbnail'>\n<a target='_blank' class='yt-thumbnail-imglink' href='http://www.youtube.com/watch?v="+id+"'>\n<span class='yt-thumbnail-imgspan'>\n<img class='yt-thumbnail-img' src='http://i.ytimg.com/vi/"+id+"/mqdefault.jpg' />\n</span>\n<span class='yt-thumbnail-time'>"+length+"</span>\n</a>\n</div>\n<div class='yt-details'>\n<h3 class='yt-details-title'><a target='_blank' href='http://www.youtube.com/watch?v="+id+"'>"+title+"</a></h3>\n<div style='display: block; margin: 5px 0 0;'>\n<ul class='yt-details-meta'>\n<li style='padding: 0px;'>by <a target='_blank' href='"+channelLink+"'>"+channel+"</a></li>\n<li style='padding: 0px;'>"+views+" views</li>\n</ul>\n</div>\n<div class='yt-details-desc'>"+description+"</div>\n</div>\n</div>";
         var embedString = resultingVideo.status.embeddable ? "\n<div class='yt-video-container' style='width: 112px;' videoid='"+id+" playlistid='"+playlist+"'>\n<img src='/images/yt-play-embedded.png' style='cursor: pointer;' onclick='modalYouTube(\""+id+"\", \""+playlist+"\")' />\n</div>" : "\n<div class='yt-video-container' style='width: 112px;' videoid='"+id+" playlistid='"+playlist+"'>\n<img src='/images/yt-cant-embed.png' />\n</div>";
