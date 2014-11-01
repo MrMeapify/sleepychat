@@ -23,7 +23,7 @@ router.get('/*', function(req, res)
 		}
 		if(!room)
 		{
-			res.send('An unknown error has occured. Code: 2');
+			res.send('Error: The room could not be found.');
 		}
 		else
 		{
@@ -41,11 +41,11 @@ router.get('/*', function(req, res)
 			{
                 if (room.token == "modroom")
                 {
-                    res.render('privateroom', { title: 'Sleepychat - Private Room ' + room.token.substring(6), nick: nick });
+                    res.render('privateroom', { title: 'Sleepychat - Mod Room', nick: nick });
                 }
                 else
                 {
-                    res.send('An unknown error has occured. Code: 3');
+                    res.send('You were not invited to this room.');
                 }
 			}
 			else

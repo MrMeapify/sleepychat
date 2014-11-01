@@ -368,7 +368,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 		socket.on('openroom', function(data)
 		{
 			var url = window.location.protocol + "//" + window.location.host + "/room/" + data.roomtoken + "/" + data.usertoken;
-			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] <a id="toclick" href="' + url + '" target="_blank">Click here to enter the private room.</a>' + "</span>"));
+			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] <a id="toclick" href="' + url + '" target="_blank">Click here to enter the room.</a>' + "</span>"));
 			setTimeout(function() { $('#toclick').click(); $('#toclick').attr("id","clicked"); }, 500);
 		});
 		

@@ -303,7 +303,7 @@ io.on('connection', function(socket)
             {
                 console.log('Lookup user by ' + usertoken + "...");
                 var finduser = getUserByToken(usertoken);
-                console.log(finduser.nick + "has joined a private room.");
+                console.log(finduser.nick + " has joined a private room.");
                 nick = finduser.nick;
                 if(room)
                 {
@@ -322,7 +322,7 @@ io.on('connection', function(socket)
                     else
                     {
                         socket.join(room.token);
-                        socket.emit('information', "[INFO] For your safety, private rooms are logged and viewable only by the Admin. The room can opt out of logging if <strong>all</strong> users opt out.<br />You can opt out by typing \"/private\" into chat. You can also force logging for complete safety by typing \"/private never\" into chat.<br />Please only opt out if you trust your partner.");
+                        socket.emit('information', "[INFO] For your safety, private rooms are logged and viewable only by the Admin. The room can opt out of logging if <strong>all</strong> users opt out.<br />You can opt out by typing \"/private\" into chat. You can also force logging for complete safety by typing \"/private never\" into chat.<br />Please only opt out if you trust your hypnotist.");
                         io.to(room.token).emit('information', "[INFO] " + nick + " has joined.");
                     }
                 }
@@ -590,7 +590,7 @@ io.on('connection', function(socket)
                             }
                             if(roomfound)
                             {
-                                socket.emit('information', "[INFO] Joining " + userWanted.nick + "'s room...");
+                                socket.emit('information', "[INFO] Click to join " + userWanted.nick + "'s room...");
                                 socket.emit('openroom', { roomtoken: roomfound.token, usertoken: user.token });
                             }
                             else
@@ -611,6 +611,129 @@ io.on('connection', function(socket)
                                 userWanted.socket.emit('openroom', { roomtoken: newroom.token, usertoken: userWanted.token });
                                 socket.emit('information', "[INFO] Request sent to " + userWanted.nick + ".");
                                 socket.emit('openroom', { roomtoken: newroom.token, usertoken: user.token });
+                            }
+                        }
+                    }
+                    else if (message.lastIndexOf('/publicroom ', 0) === 0)
+                    {
+                        socket.emit('chat message', alterMessage(message, user, socket, null, users));
+                        var roomName = message.substring(12);
+                        if(roomName.length < 3)
+                        {
+                            socket.emit('information', "[INFO] Public room names must be 3 characters or longer.");
+                        }
+                        else
+                        {
+                            var roomfound = null;
+                            for(var x = 0; x < privaterooms.length; x++)
+                            {
+                                if (privaterooms[x].token == roomName)
+                                {
+                                    roomfound = privaterooms[x];
+                                }
+                            }
+                            if(roomfound)
+                            {
+                                socket.emit('information', "[INFO] Click to join public room \""+roomName+"\"...");
+                                socket.emit('openroom', { roomtoken: roomfound.token, usertoken: user.token });
+                            }
+                            else
+                            {
+                                var newroom =
+                                {
+                                    users: [user],
+                                    token: roomName,
+                                    lastchat: new Date().getTime(),
+                                    optouts: [false, false],
+                                    isprivate: false,
+                                    forcelogs: false
+                                };
+                                privaterooms.push(newroom);
+                                socket.emit('information', "[INFO] Room named \""+roomName +"\" created.");
+                                socket.emit('openroom', { roomtoken: newroom.token, usertoken: user.token });
+                            }
+                        }
+                    }
+                    else if (message.lastIndexOf('/roominv ', 0) === 0)
+                    {
+                        socket.emit('chat message', alterMessage(message, user, socket, null, users));
+                        var roomArgs = message.substring(9).split(' ');
+                        var roomName = roomArgs[0];
+                        
+                        var usersWanted = [];
+                        
+                        if (roomArgs[1] != "all")
+                        {
+                            for (var i = 1; i < roomArgs.length; i++)
+                            {
+                                var userWanted = getUserByNick(roomArgs[i]).replace(',', '');
+                                if (userWanted)
+                                {
+                                   usersWanted.push(userWanted); 
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for (var i = 0; i < users.length; i++)
+                            {
+                                if (users[i].inBigChat && users[i] != user)
+                                {
+                                    usersWanted.push(users[i]);
+                                }
+                            }
+                        }
+                        if(roomName.length < 3)
+                        {
+                            socket.emit('information', "[INFO] Public room names must be 3 characters or longer.");
+                        }
+                        else if(usersWanted.length < 1)
+                        {
+                            socket.emit('information', "[INFO] There are no other users to invite.");
+                        }
+                        else if(!usersWanted[0])
+                        {
+                            socket.emit('information', "[INFO] That user was not found.");
+                        }
+                        else if(usersWanted[0] === user)
+                        {
+                            socket.emit('information', "[INFO] You can't invite yourself!");
+                        }
+                        else
+                        {
+                            var roomfound = null;
+                            for(var x = 0; x < privaterooms.length; x++)
+                            {
+                                if (privaterooms[x].token == roomName)
+                                {
+                                    roomfound = privaterooms[x];
+                                }
+                            }
+                            if(roomfound)
+                            {
+                                if (roomfound.users.indexOf(user) != -1)
+                                {
+                                    socket.emit('information', "[INFO] Inviting "+(usersWanted.length > 1 ? "users" : usersWanted[0].nick)+" to \""+roomName+"\"...");
+                                    
+                                    for (var j = 0; j < usersWanted.length; j++)
+                                    {
+                                        usersWanted[j].socket.emit('information', "[INFO] You've been invited by "+user.nick+" to the "+roomName+" public room!");
+                                        usersWanted[j].socket.emit('openroom', { roomtoken: roomfound.token, usertoken: usersWanted[j].token });
+                                        if (roomfound.users.indexOf(usersWanted[j]) == -1)
+                                        {
+                                            roomfound.users.push(usersWanted[j]);
+                                            console.log(roomfound.users);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    socket.emit('information', "[INFO] You can't invite people to a room you're not invited to!");
+                                }
+                            }
+                            else
+                            {
+                                socket.emit('information', "[INFO] That room was not found.");
                             }
                         }
                     }
@@ -712,10 +835,6 @@ io.on('connection', function(socket)
                             socket.emit('information', "[INFO] That command is reserved for administrators and moderators, sorry.");
                         }
                     }
-                    else if (message.lastIndexOf('/mytoken', 0) === 0) // <-------TEST FUNCTION
-                    {
-                        socket.emit('information', user.token);
-                    }
                     else if (message.lastIndexOf('/objection', 0) === 0)
                     {
                         if (user.admin || user.mod)
@@ -742,7 +861,7 @@ io.on('connection', function(socket)
                     {
                         var command = '/kick ';
                         var tokick = getUserByNick(message.substring(command.length));
-                        if (!tokick.admin)
+                        if (!tokick.admin || user.admin)
                         {
                             io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been kicked by "+user.nick+".");
                             tokick.socket.leave('bigroom');
