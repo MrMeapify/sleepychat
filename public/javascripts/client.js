@@ -1207,14 +1207,9 @@ function randomAdjective(){
 	return adjs[Math.floor(Math.random()*adjs.length)]
 }
 
-$("#bugsandfeatures").click(function()
+$("#about").click(function()
 {
-	window.location = "https://github.com/MrMeapify/sleepychat/issues";
-});
-
-$("#legalities").click(function()
-{
-	window.location = window.location.protocol + "//" + window.location.host + "/legal";
+	window.open('/about');
 });
 
 $('#randomnick').click(function()

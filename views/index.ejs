@@ -40,11 +40,12 @@
 			<div class="modal-dialog modal-md">
 				<div class="modal-content">
 					<div class="modal-header">
-						<button type="button" class="close" onclick="window.history.back()">
-							<span aria-hidden="true">×</span>
-							<span class="sr-only">Close</span>
+						<button type="button" class="close" onclick="window.open('/about');">
+							<span aria-hidden="true">?</span>
+							<span class="sr-only">About</span>
 						</button>
-						<h3 class="modal-title" id="myLargeModalLabel"><img src="/images/sleepylogo.png"/> <%= version %></h3>
+                        <img style="display: block; margin: auto;" src="/images/sleepylogo.png"/>
+						<h3 class="modal-title" id="myLargeModalLabel"><%= version %></h3>
 						Created by MrMeapify, operated by ElysianTail-Senpai
 					</div>
 					<div class="modal-body">
@@ -123,8 +124,7 @@
 								<br/>
 								<button id="loginsubmit" type="button" disabled class="btn btn-default btn-block">Connecting...</button>
 								<button id="bigchatsubmit" type="submit" disabled class="btn btn-default btn-block">Connecting...</button>
-								<button id="bugsandfeatures" type="button" class="btn btn-danger btn-block">Feature Requests &amp; Bug Reports</button>
-								<button id="legalities" type="button" class="btn btn-default btn-block" style="color: #000000">Legalities</button>
+                                <button id="about" type="button" class="btn btn-danger btn-block">About Sleepychat</label>
 							</span>
 						</form>
 					</div>
