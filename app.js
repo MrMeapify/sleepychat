@@ -614,7 +614,7 @@ io.on('connection', function(socket)
                             }
                         }
                     }
-                    else if (message.lastIndexOf('/publicroom ', 0) === 0)
+                    else if (message.lastIndexOf('/createroom ', 0) === 0)
                     {
                         socket.emit('chat message', alterMessage(message, user, socket, null, users));
                         var roomName = message.substring(12);
@@ -654,7 +654,7 @@ io.on('connection', function(socket)
                             }
                         }
                     }
-                    else if (message.lastIndexOf('/roominv ', 0) === 0)
+                    else if (message.lastIndexOf('/invite ', 0) === 0)
                     {
                         socket.emit('chat message', alterMessage(message, user, socket, null, users));
                         var roomArgs = message.substring(9).split(' ');
