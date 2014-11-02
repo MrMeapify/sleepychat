@@ -642,6 +642,7 @@ io.on('connection', function(socket)
                                 var newroom =
                                 {
                                     users: [user],
+                                    roomAdmin: user,
                                     token: roomName,
                                     lastchat: new Date().getTime(),
                                     optouts: [false, false],
@@ -651,13 +652,14 @@ io.on('connection', function(socket)
                                 privaterooms.push(newroom);
                                 socket.emit('information', "[INFO] Room named \""+roomName +"\" created.");
                                 socket.emit('openroom', { roomtoken: newroom.token, usertoken: user.token });
+                                console.log("New room created by "+user.nick+": "+roomName);
                             }
                         }
                     }
                     else if (message.lastIndexOf('/invite ', 0) === 0)
                     {
                         socket.emit('chat message', alterMessage(message, user, socket, null, users));
-                        var roomArgs = message.substring(9).split(' ');
+                        var roomArgs = message.substring(8).split(' ');
                         var roomName = roomArgs[0];
                         
                         var usersWanted = [];
@@ -715,16 +717,19 @@ io.on('connection', function(socket)
                                 {
                                     socket.emit('information', "[INFO] Inviting "+(usersWanted.length > 1 ? "users" : usersWanted[0].nick)+" to \""+roomName+"\"...");
                                     
+                                    var usersInvited = "";
                                     for (var j = 0; j < usersWanted.length; j++)
                                     {
                                         usersWanted[j].socket.emit('information', "[INFO] You've been invited by "+user.nick+" to the "+roomName+" public room!");
                                         usersWanted[j].socket.emit('openroom', { roomtoken: roomfound.token, usertoken: usersWanted[j].token });
                                         if (roomfound.users.indexOf(usersWanted[j]) == -1)
                                         {
+                                            usersInvited += usersWanted[j].nick + ", ";
                                             roomfound.users.push(usersWanted[j]);
-                                            console.log(roomfound.users);
                                         }
                                     }
+                                    usersInvited = usersInvited.substring(0, usersInvited.length - 2);
+                                    console.log("Users invited to room \""+roomName+"\" by "+user.nick+": "+(roomArgs[1] == "all" ? "all users" : usersInvited));
                                 }
                                 else
                                 {
@@ -735,6 +740,33 @@ io.on('connection', function(socket)
                             {
                                 socket.emit('information', "[INFO] That room was not found.");
                             }
+                        }
+                    }
+                    else if (message.lastIndexOf('/kick ', 0) === 0 && room)
+                    {
+                        if (room.roomAdmin != 'undefined')
+                        {
+                            if (room.roomAdmin == user)
+                            {
+                                var toKick = getUserByNick(message.substring(5));
+                                if (!toKick)
+                                {
+                                    socket.emit('information', "[INFO] User not found.");
+                                }
+                                else
+                                {
+                                    toKick.socket.leave(room.token);
+                                    room.user.remove(toKick);
+                                }
+                            }
+                            else
+                            {
+                                socket.emit('information', "[INFO] You're not the room admin!");
+                            }
+                        }
+                        else
+                        {
+                            socket.emit('information', "[INFO] You can't kick people from a private room!");
                         }
                     }
                     else if (message.lastIndexOf('/private', 0) === 0 && room)
@@ -797,6 +829,10 @@ io.on('connection', function(socket)
                             {
                                 privaterooms.remove(room);
                                 io.to(room.token).emit('information', "[INFO] " + nick + " has closed the room.");
+                                for (var i = 0; i < room.users.length; i++)
+                                {
+                                    room.users[i].socket.leave(room.token);
+                                }
                             }
                             catch(e) 
                             {
@@ -859,8 +895,7 @@ io.on('connection', function(socket)
                     }
                     else if (message.lastIndexOf('/kick ', 0) === 0 && (user.admin || user.mod))
                     {
-                        var command = '/kick ';
-                        var tokick = getUserByNick(message.substring(command.length));
+                        var tokick = getUserByNick(message.substring(6));
                         if (!tokick.admin || user.admin)
                         {
                             io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been kicked by "+user.nick+".");
@@ -874,8 +909,7 @@ io.on('connection', function(socket)
                     }
                     else if (message.lastIndexOf('/ban ', 0) === 0 && (user.admin || user.mod))
                     {
-                        var command = '/ban ';
-                        var postpass = message.substring(command.length).split(' ');
+                        var postpass = message.substring(5).split(' ');
                         var tokick = getUserByNick(postpass[0]);
 
                         if (!tokick.admin)
@@ -928,8 +962,7 @@ io.on('connection', function(socket)
                     }
                     else if (message.lastIndexOf('/banname ', 0) === 0 && (user.admin || user.mod))
                     {
-                        var command = '/banname ';
-                        var postpass = message.substring(command.length).split(' ');
+                        var postpass = message.substring(9).split(' ');
                         var tokick = getUserByNick(postpass[0]);
 
                         if (!tokick.admin)
@@ -982,8 +1015,7 @@ io.on('connection', function(socket)
                     }
                     else if (message.lastIndexOf('/banip ', 0) === 0 && (user.admin || user.mod))
                     {
-                        var command = '/banip ';
-                        var postpass = message.substring(command.length).split(' ');
+                        var postpass = message.substring(7).split(' ');
                         var tokick = getUserByIP(postpass[0]);
 
                         if (tokick == null)
