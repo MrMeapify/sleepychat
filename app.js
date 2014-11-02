@@ -20,7 +20,7 @@ var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "2"));
 // Admin/Mod stuff
 var administrator = "ElysianTail-Senpai";
 var administratorCaps = administrator.toUpperCase();
-var moderators = ['MrMeapify', 'ScottB', 'Amburo', 'Coyote_D_Lawgiver', 'Anonymoususer2', 'Hypnonymoose', 'BurntPenny'];
+var moderators = ['MrMeapify', 'ScottB', 'Amburo', 'Coyote_D_Lawgiver', 'Anonymoususer2', 'Hypnonymoose', 'BurntPenny', 'Gaige'];
 var moderatorsCaps = moderators.reduce(function(previousValue, currentValue, index, array) 
 {
 	return previousValue.concat([currentValue.toUpperCase()])
@@ -668,7 +668,7 @@ io.on('connection', function(socket)
                         {
                             for (var i = 1; i < roomArgs.length; i++)
                             {
-                                var userWanted = getUserByNick(roomArgs[i]).replace(',', '');
+                                var userWanted = getUserByNick(roomArgs[i].replace(',', ''));
                                 if (userWanted)
                                 {
                                    usersWanted.push(userWanted); 
