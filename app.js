@@ -668,7 +668,7 @@ io.on('connection', function(socket)
                         {
                             for (var i = 1; i < roomArgs.length; i++)
                             {
-                                var userWanted = getUserByNick(roomArgs[i]).replace(',', '');
+                                var userWanted = getUserByNick(roomArgs[i].replace(',', ''));
                                 if (userWanted)
                                 {
                                    usersWanted.push(userWanted); 
