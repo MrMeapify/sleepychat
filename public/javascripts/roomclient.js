@@ -9,6 +9,9 @@ var soundMesg = true;
 var soundSite = true;
 var denied = false;
 
+var msgFrame = null;
+var msgList = null;
+
 var isDay = true;
 
 var args = window.location.pathname.split('/');
@@ -48,6 +51,23 @@ var isMobile = {
 
 $(document).ready(function()
 {
+    msgFrame = $("#msgframe");
+    msgFrame.css("height", (window.innerHeight-40).toString()+"px");
+    msgFrame.html("<div class='body'><ul id='messages'></ul></div>");
+    msgList = msgFrame.contents().find("ul#messages");
+    
+    if (!isMobile.any())
+    {
+        window.onresize = function(event) {
+
+            msgFrame.css("height", (window.innerHeight-(newsTicker ? 70 : 40)).toString()+"px");
+        };
+    }
+    else
+    {
+        mobileInitHeight = window.innerHeight;
+    }
+    
     if (!isMobile.any())
     {
         $('#m').focus();
@@ -116,7 +136,7 @@ $(document).ready(function()
 		socket.on('denial', function()
 		{
 			denied = true;
-			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Your connection was refused. There are too many users with your IP address at this time.</span>"));
+			msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Your connection was refused. There are too many users with your IP address at this time.</span>"));
 		});
 		
 		socket.on('chat message', function(msg, who)
@@ -140,7 +160,7 @@ $(document).ready(function()
                     requestYouTubeEmbed(videoId);
                 }
                 
-				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
+				msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
 				if (who === "me")
 				{
 					$('#messages > li').filter(':last').addClass('self');
@@ -171,7 +191,7 @@ $(document).ready(function()
 					clearInterval(interval);
 					interval = setInterval(changeTitle, 1000);
 				}
-				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information blocking\">" + msg + "</span>"));
+				msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information blocking\">" + msg + "</span>"));
 				scrollDown();
 			}
 		});
@@ -188,7 +208,7 @@ $(document).ready(function()
 			}
             if (!denied)
 			{
-				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information blocking\">" + "[INFO] Sorry! You seem to have been disconnected from the server. Please reload the page to resume chatting.</span>"));
+				msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information blocking\">" + "[INFO] Sorry! You seem to have been disconnected from the server. Please reload the page to resume chatting.</span>"));
 			}
 			scrollDown();
 		});
@@ -278,10 +298,9 @@ var stop = function(){
 	} catch (e) {}
 }
 
-
 function scrollDown()
 {
-	$('body,html').stop(true,true).animate({ scrollTop: $('body,html')[0].scrollHeight}, 500);
+	msgFrame.stop(true,true).animate({ scrollTop: msgFrame[0].scrollHeight}, 500);
 }
 
 function loadGif(id, url)
