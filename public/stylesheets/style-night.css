@@ -1,10 +1,12 @@
-.body { margin: 0; padding: 0; box-sizing: border-box; font: 1.11em Roboto, Helvetica, Arial; }
+.page { margin: 0; padding: 0; box-sizing: border-box; }
 
-.body form { background: #afafaf; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+.page form { background: #afafaf; padding: 3px; position: fixed; bottom: 0; width: 100%; font: 1.11em Roboto, Helvetica, Arial; }
 
-.body .form-group { margin-bottom: 0; }
+.page .form-group { margin-bottom: 0; }
 
-.body #messages { list-style-type: none; margin: 0; padding: 0; padding-bottom: 74px;}
+.body { font: 1.11em Roboto, Helvetica, Arial }
+
+.body #messages { list-style-type: none; height: 100%; margin: 0; padding: 0; }
 
 .body #messages li { padding: 5px 10px; font-size: 1.4rem;}
 

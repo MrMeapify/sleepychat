@@ -19,6 +19,9 @@ var soundSite = true;
 var denied = false;
 var isDCd = false;
 
+var msgFrame = null;
+var msgList = null;
+
 //For cookies!!!
 var cookies = [];
 
@@ -55,6 +58,8 @@ var tcOptions = {
 	minLength: 2
 };
 
+//For mobile detection
+var mobileInitHeight = -1;
 var isMobile = {
     Android: function() {
         return navigator.userAgent.match(/Android/i);
@@ -76,8 +81,25 @@ var isMobile = {
     }
 };
 
-$.getScript('/javascripts/tabcomplete.js', function()
+$(document).ready(function()
 {
+    msgFrame = $("#msgframe");
+    msgFrame.css("height", (window.innerHeight-(newsTicker ? 70 : 40)).toString()+"px");
+    msgFrame.html("<div class='body'><ul id='messages'></ul></div>");
+    msgList = msgFrame.contents().find("ul#messages");
+    
+    if (!isMobile.any())
+    {
+        window.onresize = function(event) {
+
+            msgFrame.css("height", (window.innerHeight-(newsTicker ? 70 : 40)).toString()+"px");
+        };
+    }
+    else
+    {
+        mobileInitHeight = window.innerHeight;
+    }
+    
     // Cookies!!!
     parseCookies();
     
@@ -296,12 +318,12 @@ $.getScript('/javascripts/tabcomplete.js', function()
 		socket.on('denial', function()
 		{
 			denied = true;
-			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Your connection was refused. There are too many users with your IP address at this time.</span>"));
+			msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Your connection was refused. There are too many users with your IP address at this time.</span>"));
 		});
         
         socket.on('newsmod', function(newsData)
         {
-            $('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\" id=\"newsspan"+newsData.id.toString()+"\">" + "<textarea class='form-control' id='newsmod"+newsData.id.toString()+"' rows='5' style='width: 500px;'>"+newsData.currentVal+"</textarea>Password: <input type='password' class='' id='newsmodpass"+newsData.id.toString()+"' /><button id='newsmodsubmit"+newsData.id.toString()+"'>Submit</button><button id='newsmodcancel"+newsData.id.toString()+"'>Cancel</button></span>"));
+            msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\" id=\"newsspan"+newsData.id.toString()+"\">" + "<textarea class='form-control' id='newsmod"+newsData.id.toString()+"' rows='5' style='width: 500px;'>"+newsData.currentVal+"</textarea>Password: <input type='password' class='' id='newsmodpass"+newsData.id.toString()+"' /><button id='newsmodsubmit"+newsData.id.toString()+"'>Submit</button><button id='newsmodcancel"+newsData.id.toString()+"'>Cancel</button></span>"));
             
             $('#newsmodsubmit'+newsData.id.toString()).click(function() {
                 
@@ -311,14 +333,14 @@ $.getScript('/javascripts/tabcomplete.js', function()
                 
                 var parentItem = document.getElementById('newsspan'+newsData.id.toString()).parentElement;
                 parentItem.parentElement.removeChild(parentItem);
-                $('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] News changed.</span>"));
+                msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] News changed.</span>"));
             });
             
             $('#newsmodcancel'+newsData.id.toString()).click(function() {
                 
                 var parentItem = document.getElementById('newsspan'+newsData.id.toString()).parentElement;
                 parentItem.parentElement.removeChild(parentItem);
-                $('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] News mod cancelled.</span>"));
+                msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] News mod cancelled.</span>"));
             });
         });
         
@@ -341,7 +363,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
             
             if (initialNews)
             {
-                $('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] The news was updated!"+(newsTicker? "" : " Use \"/news\" to see it.")+"</span>"));
+                msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] The news was updated!"+(newsTicker? "" : " Use \"/news\" to see it.")+"</span>"));
             }
             else
             {
@@ -368,7 +390,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 		socket.on('openroom', function(data)
 		{
 			var url = window.location.protocol + "//" + window.location.host + "/room/" + data.roomtoken + "/" + data.usertoken;
-			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] <a id="toclick" href="' + url + '" target="_blank">Click here to enter the room.</a>' + "</span>"));
+			msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] <a id="toclick" href="' + url + '" target="_blank">Click here to enter the room.</a>' + "</span>"));
 			setTimeout(function() { $('#toclick').click(); $('#toclick').attr("id","clicked"); }, 500);
 		});
 		
@@ -400,13 +422,11 @@ $.getScript('/javascripts/tabcomplete.js', function()
 				{
 					lastMessenger = sender;
 			
-					$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": *" + sender + " whispers: " + msg.substring(6 + msg.split(' ')[1].length) + "*"));
-					$('#messages > li').filter(':last').addClass('highlight');
+					msgList.append($('<li class="highlight">').html(moment().format('h:mm:ss a') + ": *" + sender + " whispers: " + msg.substring(6 + msg.split(' ')[1].length) + "*"));
 				}
 				else
 				{
-					$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": *You whisper to " + receiver + ": " + msg.substring(6 + msg.split(' ')[1].length) + "*"));
-					$('#messages > li').filter(':last').addClass('self');
+					msgList.append($('<li class="self">').html(moment().format('h:mm:ss a') + ": *You whisper to " + receiver + ": " + msg.substring(6 + msg.split(' ')[1].length) + "*"));
 				}
 				
 				scrollDown(scroll_down);
@@ -431,22 +451,22 @@ $.getScript('/javascripts/tabcomplete.js', function()
                 
                 var isMention = false;
 
-				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
+				var msgClass = "";
 				var user = msg.match(/&lt;(.+)&gt;/);
 				if(who === "me")
 				{
-					$('#messages > li').filter(':last').addClass('self');
+					msgClass+= 'self';
 				}
 				else if(who === "eval" && msg.lastIndexOf('&lt;' + nick + '&gt;', 0) === 0)
 				{
-					$('#messages > li').filter(':last').addClass('self');
+					msgClass+= 'self';
 				}
 				
 				try
 				{
 					if(bigchat && msg.split('&gt;')[1].substring(1).indexOf(nick) != -1)
 					{
-						$('#messages > li').filter(':last').addClass('mention');
+						msgClass+= (msgClass != "" ? " " : "")+'mention';
                         isMention = true;
 					}
 				}
@@ -454,8 +474,11 @@ $.getScript('/javascripts/tabcomplete.js', function()
 				
 				if (userFrom && ignore_list.indexOf(userFrom) != -1)
 				{
-					$('#messages > li').filter(':last').hide();
 				}
+                else
+                {
+                    msgList.append($('<li class="'+msgClass+'">').html(moment().format('h:mm:ss a') + ": " + msg));
+                }
 
 				if(notify)
 				{
@@ -505,7 +528,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 				var scroll_down = isWithinScrollThreshold();
 				if (!(userFrom && ignore_list.indexOf(userFrom) != -1))
 				{
-					$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information blocking\">" + msg + "</span>"));
+					msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information blocking\">" + msg + "</span>"));
 					scrollDown(scroll_down);
 				}
 
@@ -523,7 +546,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 			$('#sendbutton').attr('disabled', true);
 			var themsg = '[INFO] ' + nick + ' has disconnected from you.';
 			var scroll_down = isWithinScrollThreshold();
-			$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information blocking\">" + themsg + "</span>"));
+			msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information blocking\">" + themsg + "</span>"));
 			scrollDown(scroll_down);
 		});
 
@@ -540,7 +563,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 			var scroll_down = isWithinScrollThreshold();
 			if (!denied)
 			{
-				$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information blocking\">" + "[INFO] Sorry! You seem to have been disconnected from the server. Please reload the page and try again.</span>"));
+				msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information blocking\">" + "[INFO] Sorry! You seem to have been disconnected from the server. Please reload the page and try again.</span>"));
 			}
 			scrollDown(scroll_down);
             isDCd = true;
@@ -631,7 +654,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
 				{
 					var msg = "[INFO] You have disconnected from " + lastChat + ".";
 					var scroll_down = isWithinScrollThreshold();
-					$('#messages').append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
+					msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
 					scrollDown(scroll_down);
 				}
 				chatting = false;
@@ -655,7 +678,7 @@ $.getScript('/javascripts/tabcomplete.js', function()
             {
                 if (!newsTicker)
                 {
-                    scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
+                    replaceTicker();
                 }
             }
             else if (msgInBox == "/dialog")
@@ -806,14 +829,14 @@ var stop = function(){
 
 function isWithinScrollThreshold() {
     
-    return ($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight);
+    return (msgFrame.scrollTop() + msgFrame.height() + 300 >= msgFrame[0].scrollHeight);
 }
 
 function scrollDown(scroll_down)
 {
 	if (scroll_down)
 	{
-		$('body,html').stop(true,true).animate({ scrollTop: $('body,html')[0].scrollHeight}, 500);
+		msgFrame.stop(true,true).animate({ scrollTop: msgFrame[0].scrollHeight}, 500);
 	}
 }
 
@@ -845,10 +868,7 @@ function testNick(nickToTest)
 
 function replaceTicker()
 {
-    $('.body').append('<div class="ticker-bg" style="position: fixed; bottom: 40px; width: 100%; height: 34px; padding: 3px;">\n<button id="ticker-x" type="button" class="btn btn-default" style="padding-top: 3px; padding-bottom: 3px; color: #000000; float: right;">X</button>\n<div class="ticker-parent" style="position: relative; width: 97.5%;">\n<div id="sc-news" class="ticker" style="font: 1em Roboto, Helvetica, Arial;">\n<ul id="news-container">\n</ul>\n</div>\n</div>\n</div>');
-    
-    var messagesSection = document.getElementById('messages');
-    messagesSection.style.paddingBottom = "74px";
+    $('.page').append('<div class="ticker-bg" style="position: fixed; bottom: 40px; width: 100%; height: 34px; padding: 3px;">\n<button id="ticker-x" type="button" class="btn btn-default" style="padding-top: 3px; padding-bottom: 3px; color: #000000; float: right;">X</button>\n<div class="ticker-parent" style="position: relative; width: 97.5%;">\n<div id="sc-news" class="ticker" style="font: 1em Roboto, Helvetica, Arial;">\n<ul id="news-container">\n</ul>\n</div>\n</div>\n</div>');
     
     for (var i = 0; i < currentNews.length; i++)
     {
@@ -858,6 +878,7 @@ function replaceTicker()
     $('#ticker-x').click(removeTicker);
     $('#sc-news').vTicker('init');
     newsTicker = true;
+    msgFrame.css("height", ((isMobile.any() ? mobileInitHeight : window.innerHeight)-(newsTicker ? 70 : 40)).toString()+"px");
 }
 
 function removeTicker()
@@ -865,9 +886,8 @@ function removeTicker()
     $('#sc-news').vTicker('stop');
     var tickerDiv = document.getElementById('ticker-x').parentElement;
     tickerDiv.parentElement.removeChild(tickerDiv);
-    var messagesSection = document.getElementById('messages');
-    messagesSection.style.paddingBottom = "40px";
     newsTicker = false;
+    msgFrame.css("height", ((isMobile.any() ? mobileInitHeight : window.innerHeight)-(newsTicker ? 70 : 40)).toString()+"px");
 }
 
 function loadGif(id, url)
@@ -906,7 +926,7 @@ function toggleDayNight ()
     var mainTextBox = document.getElementById('m');
     var hintTextBox = document.getElementById('mhint');
     
-    var scrollValue = (isWithinScrollThreshold() ? -1 : $(window).scrollTop());
+    var scrollValue = (isWithinScrollThreshold() ? -1 : msgFrame.scrollTop());
 
     if (isDay)
     {
@@ -922,7 +942,7 @@ function toggleDayNight ()
         }
         else
         {
-            $(window).scrollTop(scrollValue);
+            msgFrame.scrollTop(scrollValue);
         }
     }
     else
@@ -939,7 +959,7 @@ function toggleDayNight ()
         }
         else
         {
-            $(window).scrollTop(scrollValue);
+            msgFrame.scrollTop(scrollValue);
         }
     }
 }
