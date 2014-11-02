@@ -324,15 +324,14 @@ function toggleDayNight ()
     var dayNightImage = document.getElementById('daynimage');
     //Text box
     var mainTextBox = document.getElementById('m');
-    var hintTextBox = document.getElementById('mhint');
 
     if (isDay)
     {
         stylesheet1.setAttribute('href', '/stylesheets/bootstrap-night.min.css');
         stylesheet2.setAttribute('href', '/stylesheets/style-night.css');
         dayNightImage.setAttribute('src', '/images/day.png');
-        hintTextBox.style.backgroundColor = '#222222';
         mainTextBox.style.color = '#ffffff';
+        mainTextBox.style.backgroundColor = '#222222';
         isDay = false;
     }
     else
@@ -340,8 +339,8 @@ function toggleDayNight ()
         stylesheet1.setAttribute('href', '/stylesheets/bootstrap.min.css');
         stylesheet2.setAttribute('href', '/stylesheets/style.css');
         dayNightImage.setAttribute('src', '/images/night.png');
-        hintTextBox.style.backgroundColor = '#ffffff';
         mainTextBox.style.color = '#000000';
+        mainTextBox.style.backgroundColor = '#ffffff';
         isDay = true;
     }
 }
