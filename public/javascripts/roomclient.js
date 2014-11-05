@@ -1,6 +1,6 @@
 var socket = null;
 var isOldTitle = true;
-var oldTitle = "Hypnochat - Private Room";
+var oldTitle = "Sleepychat - ";
 var newTitle = "*** New message! ***";
 var interval = null;
 var notify = false;
@@ -9,15 +9,21 @@ var soundMesg = true;
 var soundSite = true;
 var denied = false;
 
+//For chat section
 var msgFrame = null;
 var msgList = null;
+var cutoff = 40;
 
+//For day/night mode
 var isDay = true;
 
+//For tokens
 var args = window.location.pathname.split('/');
 var roomtoken = args[2];
 var usertoken = args[3];
+oldTitle += (roomtoken == "modroom" ? "Mod Room" : "Private Room");
 
+//For room cleanup
 var date = new Date();
 var timeSinceLastMessage = Date.now();
 var isAFK = false;
@@ -52,7 +58,7 @@ var isMobile = {
 $(document).ready(function()
 {
     msgFrame = $("#msgframe");
-    msgFrame.css("height", (window.innerHeight-40).toString()+"px");
+    msgFrame.css("height", (window.innerHeight-cutoff).toString()+"px");
     msgFrame.html("<div class='body'><ul id='messages'></ul></div>");
     msgList = msgFrame.contents().find("ul#messages");
     
@@ -60,17 +66,14 @@ $(document).ready(function()
     {
         window.onresize = function(event) {
 
-            msgFrame.css("height", (window.innerHeight-(newsTicker ? 70 : 40)).toString()+"px");
+            msgFrame.css("height", (window.innerHeight-cutoff).toString()+"px");
         };
+        
+        $('#m').focus();
     }
     else
     {
         mobileInitHeight = window.innerHeight;
-    }
-    
-    if (!isMobile.any())
-    {
-        $('#m').focus();
     }
     
     $('#mesg-alerts').click(function () {

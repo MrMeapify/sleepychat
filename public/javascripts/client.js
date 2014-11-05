@@ -19,8 +19,11 @@ var soundSite = true;
 var denied = false;
 var isDCd = false;
 
+//For chat section
 var msgFrame = null;
 var msgList = null;
+var cutoffWithTicker = 74;
+var cutoffWithoutTicker = 40;
 
 //For cookies!!!
 var cookies = [];
@@ -84,7 +87,7 @@ var isMobile = {
 $(document).ready(function()
 {
     msgFrame = $("#msgframe");
-    msgFrame.css("height", (window.innerHeight-(newsTicker ? 70 : 40)).toString()+"px");
+    msgFrame.css("height", (window.innerHeight-(newsTicker ? cutoffWithTicker : cutoffWithoutTicker)).toString()+"px");
     msgFrame.html("<div class='body'><ul id='messages'></ul></div>");
     msgList = msgFrame.contents().find("ul#messages");
     
@@ -92,7 +95,7 @@ $(document).ready(function()
     {
         window.onresize = function(event) {
 
-            msgFrame.css("height", (window.innerHeight-(newsTicker ? 70 : 40)).toString()+"px");
+            msgFrame.css("height", (window.innerHeight-(newsTicker ? cutoffWithTicker : cutoffWithoutTicker)).toString()+"px");
         };
     }
     else
@@ -878,7 +881,7 @@ function replaceTicker()
     $('#ticker-x').click(removeTicker);
     $('#sc-news').vTicker('init');
     newsTicker = true;
-    msgFrame.css("height", ((isMobile.any() ? mobileInitHeight : window.innerHeight)-(newsTicker ? 70 : 40)).toString()+"px");
+    msgFrame.css("height", ((isMobile.any() ? mobileInitHeight : window.innerHeight)-(newsTicker ? cutoffWithTicker : cutoffWithoutTicker)).toString()+"px");
 }
 
 function removeTicker()
@@ -887,7 +890,7 @@ function removeTicker()
     var tickerDiv = document.getElementById('ticker-x').parentElement;
     tickerDiv.parentElement.removeChild(tickerDiv);
     newsTicker = false;
-    msgFrame.css("height", ((isMobile.any() ? mobileInitHeight : window.innerHeight)-(newsTicker ? 70 : 40)).toString()+"px");
+    msgFrame.css("height", ((isMobile.any() ? mobileInitHeight : window.innerHeight)-(newsTicker ? cutoffWithTicker : cutoffWithoutTicker)).toString()+"px");
 }
 
 function loadGif(id, url)
