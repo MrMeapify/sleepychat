@@ -388,7 +388,7 @@ function removeNameList()
 
 function updateNameList()
 {
-    var sidebarHtml = '<button id="sidebar-x" type="button" class="btn btn-default" style="position: fixed; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px; color: #000000;" onclick="removeNameList()">X</button><h4>Users:</h4><ul>';
+    var sidebarHtml = '<button id="sidebar-x" type="button" class="btn btn-default" style="position: fixed; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px; color: #000000;" onclick="removeNameList()">X</button><h4>Users: '+users.names.length+'</h4><ul>';
     for (var i = 0; i < users.names.length; i++)
     {
         sidebarHtml += "<li>"+users.authority[i]+users.genders[i]+users.roles[i]+users.names[i]+"</li>";

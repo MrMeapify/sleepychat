@@ -539,9 +539,9 @@ $(document).ready(function()
 			{
 				if(notify)
 				{
-                    if (msg.indexOf("has joined.") == -1 && msg.indexOf("has left.") == -1 && msg.indexOf("is AFK.") == -1)
+                    if (msg.indexOf("has joined.") != -1 && msg.indexOf("has left.") != -1 && msg.indexOf("is AFK.") != -1)
                     {
-                        if (soundSite)
+                        if (soundJnLv)
                             snd.play();
                     }
                     else if (msg.indexOf("[COINFLIP]") != -1 || msg.indexOf("ROLL") != -1)
@@ -551,7 +551,7 @@ $(document).ready(function()
                     }
                     else
                     {
-                        if (soundJnLv)
+                        if (soundSite)
                             snd.play();
                     }
                     
@@ -645,7 +645,6 @@ $(document).ready(function()
                 else
                 {
                     socket.emit('chat message', { message: msgInBox });
-                    timeSinceLastMessage = Date.now();
                     scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
                     
                 }
@@ -748,7 +747,6 @@ $(document).ready(function()
             else
             {
                 socket.emit('chat message', { message: msgInBox });
-                timeSinceLastMessage = Date.now();
                 scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
             }
             
@@ -801,23 +799,31 @@ $(document).ready(function()
 		if(bigchat)
 		{
 			timenow = Date.now()
-			if ((!isAFK) && (timenow - timeSinceLastMessage > afkTime)) // If we're not AFK, but we haven't said anything in 2 seconds, then mark ourselves as afk
+			if ((!isAFK) && (timenow - timeSinceLastMessage > afkTime)) // If we're not AFK, but we haven't said anything in 30 minutes, mark us AFK.
 		    {
-		    	socket.emit('AFK', {isAFK: true, nick: nick, time: timenow - timeSinceLastMessage, inPrivate: false})
+		    	socket.emit('AFK', {isAFK: true, nick: nick })
 		    	isAFK = true;
-		    }
-		    else if(isAFK && (timenow - timeSinceLastMessage <= afkTime)) // If we're AFK, but we have said something in the last 2 seconds, then mark ourselves as not afk
-		    {
-		    	socket.emit('AFK', {isAFK: false, nick: nick, time: timenow - timeSinceLastMessage, inPrivate: false})
-		    	isAFK = false;
 		    }
 		}
 
-	}, 250);
-	socket.on('afk', function()
+	}, 1000);
+    
+	socket.on('afk', function(data)
 	{
-		if(bigchat)
-			timeSinceLastMessage = Date.now() - (afkTime+1000); // simulate the user not having typed something for 8 seconds
+		if(bigchat && data.nick == nick)
+        {
+            isAFK = data.isAFK;
+			timeSinceLastMessage = Date.now();
+        }
+        
+        for (var i = 0; i < users.names.length; i++)
+        {
+            if (users.names[i] == data.nick)
+            {
+                users.afk[i] = data.isAFK;
+                updateNameList();
+            }
+        }
 	});
 
 	//binaural beat setup
@@ -1004,10 +1010,10 @@ function removeNameList()
 
 function updateNameList()
 {
-    var sidebarHtml = '<button id="sidebar-x" type="button" class="btn btn-default" style="position: fixed; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px; color: #000000;" onclick="removeNameList()">X</button><h4>Users:</h4><ul>';
+    var sidebarHtml = '<button id="sidebar-x" type="button" class="btn btn-default" style="position: fixed; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px; color: #000000;" onclick="removeNameList()">X</button><h4>Users: '+users.names.length+'</h4><ul>';
     for (var i = 0; i < users.names.length; i++)
     {
-        sidebarHtml += "<li>"+users.authority[i]+users.genders[i]+users.roles[i]+users.names[i]+"</li>";
+        sidebarHtml += "<li>"+users.authority[i]+"<span  style='color: "+(users.afk[i] ? "#777777;" : (isDay ? "black;" : "white;"))+"'>"+users.genders[i]+users.roles[i]+users.names[i]+"</span></li>";
     }
     sidebarHtml += "</ul>";
 

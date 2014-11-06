@@ -1188,6 +1188,11 @@ io.on('connection', function(socket)
                     {
                         try
                         {
+                            if (user.isAFK)
+                            {
+                                user.isAFK = false;
+                                io.to('bigroom').emit('afk', { nick: user.nick, isAFK: false });
+                            }
                             io.to('bigroom').emit('chat message', alterMessage(message, user, socket, null, users), "eval", user.nick);
                         }
                         catch(e)
@@ -1215,7 +1220,6 @@ io.on('connection', function(socket)
             {
                 console.log("@ " + ip + ": " + e.message);
             }
-
         });
 
         socket.on('disconnect', function()
@@ -1270,6 +1274,7 @@ io.on('connection', function(socket)
                         users[x].AFK = data.isAFK
                     }
                 }
+                io.to('bigroom').emit('afk', { nick: data.nick, isAFK: data.isAFK });
             }
         });
         
@@ -1426,6 +1431,7 @@ function generateRoster (from)
     var genders = [];
     var roles = [];
     var authority = [];
+    var afk = [];
     for (var i = 0; i < from.length; i++)
     {
         if (from[i].inBigChat)
@@ -1434,10 +1440,11 @@ function generateRoster (from)
             genders.push(getGenderSymbol(from[i].gender));
             roles.push(getRoleSymbol(from[i].role));
             authority.push(getAuthority(from[i]));
+            afk.push(from[i].isAFK);
         }
     }
     
-    return {names: nicks, genders: genders, roles: roles, authority: authority };
+    return {names: nicks, genders: genders, roles: roles, authority: authority, afk: afk };
 }
 
 // ==================================
@@ -1773,9 +1780,10 @@ function alterForCommands(str, user, socket, room, users)
 		{
 			if (!user.isAFK)
 			{
-				io.to('bigroom').emit('information', "[INFO] " + user.nick + " is AFK.");
+                user.isAFK = true;
+                io.to('bigroom').emit('afk', { nick: user.nick, isAFK: user.isAFK });
+				io.to('bigroom').emit('information', "[INFO] " + user.nick + " is AFK.", user.nick);
 			}
-			socket.emit('afk');
 		}
 		else
 		{
@@ -1800,22 +1808,20 @@ function alterForCommands(str, user, socket, room, users)
 		}
 	}
 	return ans;
-		
 }
 
 
 function alterMessage(str, user, socket, room, users, dontLog)
 {
-	var ans = str; // Copies the variable so V8 can do it's optimizations.
     if (dontLog != true)
     {
         if (room == null)
         {
-            console.log("BC: " + user.nick + ": " + ans);
+            console.log("BC: " + user.nick + ": " + str);
         }
         else if (!room.isprivate)
         {
-            console.log((room.token == "modroom" ? "MR: " : "PR: ") + user.nick + ": " + ans);
+            console.log((room.token == "modroom" ? "MR: " : "PR: ") + user.nick + ": " + str);
         }
     }
 	var formatted = alterForFormatting(str, user);
