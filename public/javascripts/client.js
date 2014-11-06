@@ -541,12 +541,17 @@ $(document).ready(function()
 				{
                     if (msg.indexOf("has joined.") == -1 && msg.indexOf("has left.") == -1 && msg.indexOf("is AFK.") == -1)
                     {
-                        if(soundSite)
+                        if (soundSite)
+                            snd.play();
+                    }
+                    else if (msg.indexOf("[COINFLIP]") != -1 || msg.indexOf("ROLL") != -1)
+                    {
+                        if (soundMesg)
                             snd.play();
                     }
                     else
                     {
-                        if(soundJnLv)
+                        if (soundJnLv)
                             snd.play();
                     }
                     
@@ -557,7 +562,7 @@ $(document).ready(function()
 				var scroll_down = isWithinScrollThreshold();
 				if (!(userFrom && ignore_list.indexOf(userFrom) != -1))
 				{
-					msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information blocking\">" + msg + "</span>"));
+					msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information"+(msg.indexOf("ROLL") == -1 ? " blocking" : "")+"\">" + msg + "</span>"));
 					scrollDown(scroll_down);
 				}
 

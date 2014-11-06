@@ -1562,7 +1562,7 @@ function giveBanana()
 
 function roll(){
 	num = (Math.floor(Math.random() * (7 - 1)) + 1).toString()
-    return "<img src='http://www.random.org/dice/dice" + num + ".png'/>";;
+    return "<img class='embedded_image' src='http://www.random.org/dice/dice" + num + ".png'/>";;
 }
 
 function rollx(times){
