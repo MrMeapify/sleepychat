@@ -1388,6 +1388,7 @@ function getAuthority(user){
 
 function nameAppend(name, gender, role)
 {
+    name += " ";
 	name += getGenderSymbol(gender); // put a gender symbol by the name
 	name += getRoleSymbol(role); // put an arrow for subs and tists
 	return name
