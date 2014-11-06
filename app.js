@@ -1486,7 +1486,7 @@ var helpPage3 = [['information', "[INFO] ~~~"],
                 ['information', "[INFO] Help Page 3:"],
                 ['information', "[INFO] -- /coinflip -- Publicly flips a coin."],
                 ['information', "[INFO] -- /roll &lt;number (optional)&gt; -- Publicly rolls up to 10 dice."],
-                ['information', "[INFO] -- /mmsg &lt;message&gt; -- Sends a massage to males only."],
+                ['information', "[INFO] -- /mmsg &lt;message&gt; -- Sends a message to males only."],
                 ['information', "[INFO] -- /fmsg &lt;message&gt; -- Sends a message to females only."],
                 ['information', "[INFO] ~~~"]];
 
