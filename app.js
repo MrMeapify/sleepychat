@@ -1465,7 +1465,7 @@ var helpPage1 = 	[['information', "[INFO] ~~~"],
 					['information', "[INFO] -- /formatting -- Shows formatting tips."],
 					['information', "[INFO] -- /news -- Re-opens the news ticker if it was closed."],
 					['information', "[INFO] -- /ignore user -- Ignores all messages for a user."],
-					['information', "[INFO] -- /names OR /list -- While in the big chatroom, this will list the names of every current user in the chatroom with you."],
+					['information', "[INFO] -- /names OR /list -- Toggles the username sidebar on PC, or prints a list of users in the room on mobile."],
 					['information', "[INFO] -- /help 2 -- Shows page 2 of help."],
 					['information', "[INFO] ~~~"]];
 

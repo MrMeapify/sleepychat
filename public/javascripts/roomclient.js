@@ -21,7 +21,7 @@ var isDay = true;
 
 //For name section
 var nameList = null;
-var nameListWidthInit = 200;
+var nameListWidthInit = 250;
 var nameListWidth = nameListWidthInit;
 var nameSidebar = true;
 
@@ -391,7 +391,7 @@ function updateNameList()
     var sidebarHtml = '<button id="sidebar-x" type="button" class="btn btn-default" style="position: fixed; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px; color: #000000;" onclick="removeNameList()">X</button><h4>Users:</h4><ul>';
     for (var i = 0; i < users.names.length; i++)
     {
-        sidebarHtml += "<li>"+users.authority[i]+users.names[i]+users.genders[i]+users.roles[i]+"</li>";
+        sidebarHtml += "<li>"+users.authority[i]+users.genders[i]+users.roles[i]+users.names[i]+"</li>";
     }
     sidebarHtml += "</ul>";
 
