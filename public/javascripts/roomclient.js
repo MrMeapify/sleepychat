@@ -419,10 +419,10 @@ function updateNameList()
 {
     if (users != null)
     {
-        var sidebarHtml = '<div class="btn-group"  style="position: absolute; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px; color: #000000;"><label id="sidebar-move" type="button" class="btn btn-default" onclick="moveNameList()">'+(isOnRight ? "&lt;" : "&gt;")+'</label><label id="sidebar-x" type="button" class="btn btn-default" onclick="removeNameList()">X</label></div><h4>Users: '+users.names.length+'</h4><ul>';
+        var sidebarHtml = '<div class="btn-group"  style="position: absolute; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px; color: #000000;"><label id="sidebar-move" type="button" class="btn btn-default" style="color: #000;" onclick="moveNameList()">'+(isOnRight ? "&lt;" : "&gt;")+'</label><label id="sidebar-x" type="button" class="btn btn-default" style="color: #000;" onclick="removeNameList()">X</label></div><h4>Users: '+users.names.length+'</h4><ul>';
         for (var i = 0; i < users.names.length; i++)
         {
-            sidebarHtml += "<li>"+users.authority[i]+"<span  style='color: "+(users.afk[i] ? "#777777;" : (isDay ? "black;" : "white;"))+"'>"+users.genders[i]+users.roles[i]+users.names[i]+"</span></li>";
+            sidebarHtml += "<li>"+users.authority[i]+"<span  style='"+(users.afk[i] ? "color: #777777;" : "")+"'>"+users.genders[i]+users.roles[i]+users.names[i]+"</span></li>";
         }
         sidebarHtml += "</ul>";
 
