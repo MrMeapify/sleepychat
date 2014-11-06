@@ -50,7 +50,23 @@ router.get('/*', function(req, res)
 			}
 			else
 			{
-				res.render('privateroom', { title: 'Sleepychat - Private Room ' + room.token.substring(6), nick: nick });
+                var alreadyHere = false;
+                for (var y = 0; y < room.here.length; y++)
+                {
+                    if (room.here[y].token == chatterToken)
+                    {
+                        alreadyHere = true;
+                    }
+                }
+                
+                if (alreadyHere)
+                {
+                    res.send('You\'re already in this room.');
+                }
+                else
+                {
+				    res.render('privateroom', { title: 'Sleepychat - Private Room ' + room.token.substring(6), nick: nick });
+                }
 			}
 		}
 	}

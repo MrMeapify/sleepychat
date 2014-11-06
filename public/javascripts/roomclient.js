@@ -8,14 +8,22 @@ var snd = new Audio("/sounds/notify.ogg");
 var soundMesg = true;
 var soundSite = true;
 var denied = false;
+var users = null;
 
 //For chat section
 var msgFrame = null;
 var msgList = null;
 var cutoff = 40;
+var resizeInterval = -1;
 
 //For day/night mode
 var isDay = true;
+
+//For name section
+var nameList = null;
+var nameListWidthInit = 200;
+var nameListWidth = nameListWidthInit;
+var nameSidebar = true;
 
 //For tokens
 var args = window.location.pathname.split('/');
@@ -58,15 +66,13 @@ var isMobile = {
 $(document).ready(function()
 {
     msgFrame = $("#msgframe");
-    msgFrame.css("height", (window.innerHeight-cutoff).toString()+"px");
-    msgFrame.html("<div class='body'><ul id='messages'></ul></div>");
-    msgList = msgFrame.contents().find("ul#messages");
+    nameList = $("#namelist");
     
     if (!isMobile.any())
     {
         window.onresize = function(event) {
 
-            msgFrame.css("height", (window.innerHeight-cutoff).toString()+"px");
+            doResize();
         };
         
         $('#m').focus();
@@ -74,6 +80,21 @@ $(document).ready(function()
     else
     {
         mobileInitHeight = window.innerHeight;
+        nameListWidth = 0;
+        nameList.remove();
+        nameList = null;
+        nameSidebar = false;
+    }
+    
+    msgFrame.css("height", (window.innerHeight-cutoff).toString()+"px");
+    msgFrame.css("width", (window.innerWidth-nameListWidth).toString()+"px");
+    msgFrame.html("<div class='body'><ul id='messages'></ul></div>");
+    msgList = msgFrame.contents().find("ul#messages");
+    
+    if (nameList != null)
+    {
+        nameList.css("height", (window.innerHeight-cutoff).toString()+"px");
+        nameList.css("width", (nameListWidth).toString()+"px");
     }
     
     $('#mesg-alerts').click(function () {
@@ -109,6 +130,13 @@ $(document).ready(function()
             if (msgInBox == "/dialog")
             {
                 $('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
+            }
+            else if (msgInBox == "/sidebar")
+            {
+                if (!isMobile.any() && !nameSidebar)
+                {
+                    replaceNameList();
+                }
             }
             else
             {
@@ -175,6 +203,15 @@ $(document).ready(function()
 				
 				scrollDown();
 			}
+		});
+        
+        socket.on('rosterupdate', function(newInfo)
+		{
+			users = newInfo;
+            if (!isMobile.any())
+            {
+                updateNameList();
+            }
 		});
 		
 		socket.on('nickupdate', function(newnick)
@@ -301,9 +338,64 @@ var stop = function(){
 	} catch (e) {}
 }
 
+function doResize() {
+    
+    msgFrame.css("height", (window.innerHeight-cutoff).toString()+"px");
+    if (nameList != null)
+    {
+        nameList.css("height", (window.innerHeight-cutoff).toString()+"px");
+    }
+    msgFrame.css("width", (window.innerWidth-nameListWidth-32).toString()+"px");
+    
+    if (resizeInterval != -1)
+    {
+        clearInterval(resizeInterval);
+    }
+    resizeInterval = setInterval(function() {
+        
+        msgFrame.css("width", (window.innerWidth-nameListWidth).toString()+"px");
+        
+        clearInterval(resizeInterval);
+        resizeInterval = -1;
+    }, 500);
+}
+
 function scrollDown()
 {
 	msgFrame.stop(true,true).animate({ scrollTop: msgFrame[0].scrollHeight}, 500);
+}
+
+function replaceNameList()
+{
+    msgFrame.before("<div id='namelist'></div>");
+    nameListWidth = nameListWidthInit;
+    msgFrame.css("width", (window.innerWidth-nameListWidth).toString()+"px");
+    nameList = $("#namelist");
+    nameList.css("height", (window.innerHeight-cutoff).toString()+"px");
+    nameList.css("width", (nameListWidth).toString()+"px");
+    updateNameList();
+    nameSidebar = true;
+}
+
+function removeNameList()
+{
+    nameListWidth = 0;
+    nameList.remove();
+    nameList = null;
+    msgFrame.css("width", (window.innerWidth-nameListWidth).toString()+"px");
+    nameSidebar = false;
+}
+
+function updateNameList()
+{
+    var sidebarHtml = '<button id="sidebar-x" type="button" class="btn btn-default" style="position: fixed; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px; color: #000000;" onclick="removeNameList()">X</button><h4>Users:</h4><ul>';
+    for (var i = 0; i < users.names.length; i++)
+    {
+        sidebarHtml += "<li>"+users.authority[i]+users.names[i]+users.genders[i]+users.roles[i]+"</li>";
+    }
+    sidebarHtml += "</ul>";
+
+    nameList.html(sidebarHtml);
 }
 
 function loadGif(id, url)

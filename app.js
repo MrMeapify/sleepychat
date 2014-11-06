@@ -107,6 +107,7 @@ var privaterooms = [];
 var modroom =
 {
     users: [],
+    here: [],
     token: 'modroom',
     lastchat: new Date().getTime(),
     optouts: [false, false],
@@ -267,14 +268,9 @@ io.on('connection', function(socket)
                     {
                         socket.join('bigroom');
                         io.to('bigroom').emit('information', "[INFO] " + getAuthority(user) + nameAppend(user.nick, user.gender, user.role) + " has joined.");
-                        var nicks = new Array(users.length);
-                        for (var i = 0; i < nicks.length; i++)
-                        {
-                            nicks[i] = users[i].nick;
-                        }
-                        io.to('bigroom').emit('rosterupdate', nicks);
+                        io.to('bigroom').emit('rosterupdate', generateRoster(users));
                         if (!user.mod && !user.admin) { socket.emit('information', "[INFO] If you're new, type \"/help\" and hit enter to see a list of commands."); }
-                        socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users) + " ]");
+                        socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users, room) + " ]");
                     }
                     else
                     {
@@ -312,6 +308,8 @@ io.on('connection', function(socket)
                         if (finduser.mod || finduser.admin)
                         {
                             socket.join(room.token);
+                            room.here.push(finduser);
+                            io.to(room.token).emit('rosterupdate', generateRoster(room.here));
                             io.to(room.token).emit('information', "[INFO] " + nick + " has joined.");
                         }
                         else
@@ -322,6 +320,8 @@ io.on('connection', function(socket)
                     else
                     {
                         socket.join(room.token);
+                        room.here.push(finduser);
+                        io.to(room.token).emit('rosterupdate', generateRoster(room.here));
                         socket.emit('information', "[INFO] For your safety, private rooms are logged and viewable only by the Admin. The room can opt out of logging if <strong>all</strong> users opt out.<br />You can opt out by typing \"/private\" into chat. You can also force logging for complete safety by typing \"/private never\" into chat.<br />Please only opt out if you trust your hypnotist.");
                         io.to(room.token).emit('information', "[INFO] " + nick + " has joined.");
                     }
@@ -600,6 +600,7 @@ io.on('connection', function(socket)
                                 var newroom =
                                 {
                                     users: [user, userWanted],
+                                    here: [],
                                     token: hasher.digest('hex'),
                                     lastchat: new Date().getTime(),
                                     optouts: [false, false],
@@ -642,6 +643,7 @@ io.on('connection', function(socket)
                                 var newroom =
                                 {
                                     users: [user],
+                                    here: [],
                                     roomAdmin: user,
                                     token: roomName,
                                     lastchat: new Date().getTime(),
@@ -1221,12 +1223,22 @@ io.on('connection', function(socket)
             if(room)
             {
                 io.to(room.token).emit('information', "[INFO] " + nick + " has left.");
+                for (var i = 0; i < room.here.length; i++)
+                {
+                    if (room.here[i].nick == nick)
+                    {
+                        room.here.remove(room.here[i]);
+                        break;
+                    }
+                }
+                io.to(room.token).emit('rosterupdate', generateRoster(room.here));
             }
             else
             {
                 var user = getUserByNick(nick);
                 if(user)
                 {
+                    users.remove(user);
                     if(user.partner)
                     {
                         users.remove(user.partner);
@@ -1237,14 +1249,8 @@ io.on('connection', function(socket)
                     if(user.inBigChat)
                     {
                         io.to('bigroom').emit('information', "[INFO] " + nick + " has left.");
-                        var nicks = new Array(users.length);
-                        for (var i = 0; i < nicks.length; i++)
-                        {
-                            nicks[i] = users[i].nick;
-                        }
-                        io.to('bigroom').emit('rosterupdate', nicks);
+                        io.to('bigroom').emit('rosterupdate', generateRoster(users));
                     }
-                    users.remove(user);
                 }
             }
 
@@ -1372,15 +1378,30 @@ function getAuthority(user){
     return toRet;
 }
 
-function nameAppend(name, gender, role){
-	name += (gender=="male") ? "♂" : ((gender=="female") ? "♀" : ""); // put a gender symbol by the name
-	name += (role=="tist") ? "↑" : ((role=="sub") ? "↓" : "↕"); // put an arrow for subs and tists
+function nameAppend(name, gender, role)
+{
+	name += getGenderSymbol(gender); // put a gender symbol by the name
+	name += getRoleSymbol(role); // put an arrow for subs and tists
 	return name
 }
 
+function getGenderSymbol(gender)
+{
+    return (gender=="male") ? "♂" : ((gender=="female") ? "♀" : "");
+}
 
-function getUsers(users){
+function getRoleSymbol(role)
+{
+    return (role=="tist") ? "↑" : ((role=="sub") ? "↓" : "↕");
+}
+
+function getUsers(users, room)
+{
 	var usercopy = users;
+    if (room)
+    {
+        usercopy = room.users;
+    }
 	var list = "";
 	for(var x = 0; x < usercopy.length; x++)
 	{
@@ -1399,6 +1420,25 @@ function getUsers(users){
 	return list;
 }
 
+function generateRoster (from)
+{
+    var nicks = [];
+    var genders = [];
+    var roles = [];
+    var authority = [];
+    for (var i = 0; i < from.length; i++)
+    {
+        if (from[i].inBigChat)
+        {
+            nicks.push(from[i].nick);
+            genders.push(getGenderSymbol(from[i].gender));
+            roles.push(getRoleSymbol(from[i].role));
+            authority.push(getAuthority(from[i]));
+        }
+    }
+    
+    return {names: nicks, genders: genders, roles: roles, authority: authority };
+}
 
 // ==================================
 // ==================================
@@ -1699,7 +1739,7 @@ function alterForCommands(str, user, socket, room, users)
 	else if (ans == "/names" || ans == "/list")
 	{
 		socket.emit('chat message', "&lt;"+user.nick+"&gt; "+ans, "me");
-		socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users) + "]");
+		socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users, room) + "]");
 		return null;
 	}
 	else if (ans.substring(0, 5) == "/help" || ans == "/formatting")

@@ -24,6 +24,13 @@ var msgFrame = null;
 var msgList = null;
 var cutoffWithTicker = 74;
 var cutoffWithoutTicker = 40;
+var resizeInterval = -1;
+
+//For name section
+var nameList = null;
+var nameListWidthInit = 200;
+var nameListWidth = nameListWidthInit;
+var nameSidebar = true;
 
 //For cookies!!!
 var cookies = [];
@@ -56,7 +63,7 @@ var newsTicker = true;
 var initialNews = false;
 
 //For Autocomplete
-var users = [];
+var users = null;
 var tcOptions = {
 	minLength: 2
 };
@@ -87,20 +94,33 @@ var isMobile = {
 $(document).ready(function()
 {
     msgFrame = $("#msgframe");
-    msgFrame.css("height", (window.innerHeight-(newsTicker ? cutoffWithTicker : cutoffWithoutTicker)).toString()+"px");
-    msgFrame.html("<div class='body'><ul id='messages'></ul></div>");
-    msgList = msgFrame.contents().find("ul#messages");
+    nameList = $("#namelist");
     
     if (!isMobile.any())
     {
         window.onresize = function(event) {
 
-            msgFrame.css("height", (window.innerHeight-(newsTicker ? cutoffWithTicker : cutoffWithoutTicker)).toString()+"px");
+            doResize();
         };
     }
     else
     {
         mobileInitHeight = window.innerHeight;
+        nameListWidth = 0;
+        nameList.remove();
+        nameList = null;
+        nameSidebar = false;
+    }
+    
+    msgFrame.css("height", (window.innerHeight-(newsTicker ? cutoffWithTicker : cutoffWithoutTicker)).toString()+"px");
+    msgFrame.css("width", (window.innerWidth-nameListWidth).toString()+"px");
+    msgFrame.html("<div class='body'><ul id='messages'></ul></div>");
+    msgList = msgFrame.contents().find("ul#messages");
+    
+    if (nameList != null)
+    {
+        nameList.css("height", (window.innerHeight-(newsTicker ? cutoffWithTicker : cutoffWithoutTicker)).toString()+"px");
+        nameList.css("width", (nameListWidth).toString()+"px");
     }
     
     // Cookies!!!
@@ -233,6 +253,8 @@ $(document).ready(function()
 			socket.emit('login', { nick: nick, pass: pass, gender: gender, role: role, chatwith: chatwith, type: type });
             
             saveModal();
+            
+            removeNameList();
 			
 			timeSinceLastMessage = Date.now();
 			$('#login-modal').modal('hide');
@@ -374,13 +396,15 @@ $(document).ready(function()
             }
         });
 		
-		socket.on('rosterupdate', function(newList)
+		socket.on('rosterupdate', function(newInfo)
 		{
-			users = newList;
+			users = newInfo;
             if (!isMobile.any())
             {
+                updateNameList();
+                
                 var hadFocus = $("#m").is(":focus")
-                $('#m').tabcomplete(users, tcOptions);
+                $('#m').tabcomplete(users.names, tcOptions);
                 if (hadFocus) { $('#m').focus(); }
             }
 		});
@@ -596,6 +620,13 @@ $(document).ready(function()
                         replaceTicker();
                     }
                 }
+                else if (msgInBox == "/sidebar")
+                {
+                    if (!isMobile.any() && !nameSidebar)
+                    {
+                        replaceNameList();
+                    }
+                }
                 else if (msgInBox == "/dialog")
                 {
                     $('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
@@ -682,6 +713,13 @@ $(document).ready(function()
                 if (!newsTicker)
                 {
                     replaceTicker();
+                }
+            }
+            if (msgInBox == "/sidebar")
+            {
+                if (!isMobile.any() && !nameSidebar)
+                {
+                    replaceNameList();
                 }
             }
             else if (msgInBox == "/dialog")
@@ -830,6 +868,28 @@ var stop = function(){
 	} catch (e) {}
 }
 
+function doResize() {
+    
+    msgFrame.css("height", (window.innerHeight-(newsTicker ? cutoffWithTicker : cutoffWithoutTicker)).toString()+"px");
+    if (nameList != null)
+    {
+        nameList.css("height", (window.innerHeight-(newsTicker ? cutoffWithTicker : cutoffWithoutTicker)).toString()+"px");
+    }
+    msgFrame.css("width", (window.innerWidth-nameListWidth-32).toString()+"px");
+    
+    if (resizeInterval != -1)
+    {
+        clearInterval(resizeInterval);
+    }
+    resizeInterval = setInterval(function() {
+        
+        msgFrame.css("width", (window.innerWidth-nameListWidth).toString()+"px");
+        
+        clearInterval(resizeInterval);
+        resizeInterval = -1;
+    }, 500);
+}
+
 function isWithinScrollThreshold() {
     
     return (msgFrame.scrollTop() + msgFrame.height() + 300 >= msgFrame[0].scrollHeight);
@@ -882,6 +942,7 @@ function replaceTicker()
     $('#sc-news').vTicker('init');
     newsTicker = true;
     msgFrame.css("height", ((isMobile.any() ? mobileInitHeight : window.innerHeight)-(newsTicker ? cutoffWithTicker : cutoffWithoutTicker)).toString()+"px");
+    if (nameList != null) { nameList.css("height", ((isMobile.any() ? mobileInitHeight : window.innerHeight)-(newsTicker ? cutoffWithTicker : cutoffWithoutTicker)).toString()+"px"); }
 }
 
 function removeTicker()
@@ -891,6 +952,40 @@ function removeTicker()
     tickerDiv.parentElement.removeChild(tickerDiv);
     newsTicker = false;
     msgFrame.css("height", ((isMobile.any() ? mobileInitHeight : window.innerHeight)-(newsTicker ? cutoffWithTicker : cutoffWithoutTicker)).toString()+"px");
+    if (nameList != null) { nameList.css("height", ((isMobile.any() ? mobileInitHeight : window.innerHeight)-(newsTicker ? cutoffWithTicker : cutoffWithoutTicker)).toString()+"px"); }
+}
+
+function replaceNameList()
+{
+    msgFrame.before("<div id='namelist'></div>");
+    nameListWidth = nameListWidthInit;
+    msgFrame.css("width", (window.innerWidth-nameListWidth).toString()+"px");
+    nameList = $("#namelist");
+    nameList.css("height", (window.innerHeight-(newsTicker ? cutoffWithTicker : cutoffWithoutTicker)).toString()+"px");
+    nameList.css("width", (nameListWidth).toString()+"px");
+    updateNameList();
+    nameSidebar = true;
+}
+
+function removeNameList()
+{
+    nameListWidth = 0;
+    nameList.remove();
+    nameList = null;
+    msgFrame.css("width", (window.innerWidth-nameListWidth).toString()+"px");
+    nameSidebar = false;
+}
+
+function updateNameList()
+{
+    var sidebarHtml = '<button id="sidebar-x" type="button" class="btn btn-default" style="position: fixed; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px; color: #000000;" onclick="removeNameList()">X</button><h4>Users:</h4><ul>';
+    for (var i = 0; i < users.names.length; i++)
+    {
+        sidebarHtml += "<li>"+users.authority[i]+users.names[i]+users.genders[i]+users.roles[i]+"</li>";
+    }
+    sidebarHtml += "</ul>";
+
+    nameList.html(sidebarHtml);
 }
 
 function loadGif(id, url)
@@ -931,40 +1026,22 @@ function toggleDayNight ()
     
     var scrollValue = (isWithinScrollThreshold() ? -1 : msgFrame.scrollTop());
 
-    if (isDay)
+    stylesheet1.setAttribute('href', '/stylesheets/bootstrap'+(isDay ? "-night" : "")+'.min.css');
+    stylesheet2.setAttribute('href', '/stylesheets/style'+(isDay ? "-night" : "")+'.css');
+    dayNightImage.setAttribute('src', '/images/'+(isDay ? "day" : "night")+'.png');
+    hintTextBox.style.backgroundColor = (isDay ? "#222222" : "#ffffff");
+    mainTextBox.style.color = (isDay ? "#ffffff" : "#000000");
+    isDay = !isDay;
+    if (scrollValue == -1)
     {
-        stylesheet1.setAttribute('href', '/stylesheets/bootstrap-night.min.css');
-        stylesheet2.setAttribute('href', '/stylesheets/style-night.css');
-        dayNightImage.setAttribute('src', '/images/day.png');
-        hintTextBox.style.backgroundColor = '#222222';
-        mainTextBox.style.color = '#ffffff';
-        isDay = false;
-        if (scrollValue == -1)
-        {
-            scrollDown(true);
-        }
-        else
-        {
-            msgFrame.scrollTop(scrollValue);
-        }
+        scrollDown(true);
     }
     else
     {
-        stylesheet1.setAttribute('href', '/stylesheets/bootstrap.min.css');
-        stylesheet2.setAttribute('href', '/stylesheets/style.css');
-        dayNightImage.setAttribute('src', '/images/night.png');
-        hintTextBox.style.backgroundColor = '#ffffff';
-        mainTextBox.style.color = '#000000';
-        isDay = true;
-        if (scrollValue == -1)
-        {
-            scrollDown(true);
-        }
-        else
-        {
-            msgFrame.scrollTop(scrollValue);
-        }
+        msgFrame.scrollTop(scrollValue);
     }
+    
+    doResize();
 }
 
 // ----------
