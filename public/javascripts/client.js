@@ -1043,7 +1043,7 @@ function togglePasswordField ()
 function toggleDayNight ()
 {
     var stylesheet1 = document.getElementById('stylesheet1');
-    var stylesheet2 = document.getElementById('stylesheet2');
+    var stylesheet2 = $('#stylesheet2');
     var dayNightToggle = document.getElementById('daynbutton');
     var dayNightImage = document.getElementById('daynimage');
     //Text box
@@ -1053,7 +1053,15 @@ function toggleDayNight ()
     var scrollValue = (isWithinScrollThreshold() ? -1 : msgFrame.scrollTop());
 
     stylesheet1.setAttribute('href', '/stylesheets/bootstrap'+(isDay ? "-night" : "")+'.min.css');
-    stylesheet2.setAttribute('href', '/stylesheets/style'+(isDay ? "-night" : "")+'.css');
+    if (isDay)
+    {
+        stylesheet2.after("<link rel='stylesheet' type='text/css' href='/stylesheets/style-night.css' id='stylesheet3' />");
+    }
+    else
+    {
+        $('#stylesheet3').remove();
+        
+    };
     dayNightImage.setAttribute('src', '/images/'+(isDay ? "day" : "night")+'.png');
     hintTextBox.style.backgroundColor = (isDay ? "#222222" : "#ffffff");
     mainTextBox.style.color = (isDay ? "#ffffff" : "#000000");
