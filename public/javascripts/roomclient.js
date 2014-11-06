@@ -143,7 +143,7 @@ $(document).ready(function()
             {
                 $('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
             }
-            else if (msgInBox == "/list" && !isMobile.any())
+            else if ((msgInBox == "/list" || msgInBox == "/names") && !isMobile.any())
             {
                 if (!nameSidebar)
                 {
@@ -379,7 +379,7 @@ function scrollDown()
 
 function replaceNameList()
 {
-    msgFrame.before("<div id='namelist'></div>");
+    msgFrame.before("<div class='list-"+(isOnRight ? "right" : "left")+"' id='namelist'></div>");
     nameListWidth = nameListWidthInit;
     msgFrame.css("width", (window.innerWidth-nameListWidth).toString()+"px");
     nameList = $("#namelist");
@@ -387,6 +387,7 @@ function replaceNameList()
     nameList.css("width", (nameListWidth).toString()+"px");
     updateNameList();
     nameSidebar = true;
+    scrollDown();
 }
 
 function removeNameList()
@@ -419,10 +420,10 @@ function updateNameList()
 {
     if (users != null)
     {
-        var sidebarHtml = '<div class="btn-group"  style="position: absolute; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px; color: #000000;"><label id="sidebar-move" type="button" class="btn btn-default" style="color: #000;" onclick="moveNameList()">'+(isOnRight ? "&lt;" : "&gt;")+'</label><label id="sidebar-x" type="button" class="btn btn-default" style="color: #000;" onclick="removeNameList()">X</label></div><h4>Users: '+users.names.length+'</h4><ul>';
+        var sidebarHtml = '<div class="btn-group"  style="position: absolute; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px; color: #000000;"><label id="sidebar-move" type="button" class="btn btn-default" style="color: #000;" onclick="moveNameList()">'+(isOnRight ? "&lt;" : "&gt;")+'</label><label id="sidebar-x" type="button" class="btn btn-default" style="color: #000;" onclick="removeNameList()">X</label></div><h3 style="margin-top: 10px;">Users: '+users.names.length+'</h3><br/><ul id="names">';
         for (var i = 0; i < users.names.length; i++)
         {
-            sidebarHtml += "<li>"+users.authority[i]+"<span  style='"+(users.afk[i] ? "color: #777777;" : "")+"'>"+users.genders[i]+users.roles[i]+users.names[i]+"</span></li>";
+            sidebarHtml += "<li>"+"<span class='authority-tag'>"+users.authority[i]+"</span><span  style='"+(users.afk[i] ? "color: #777777;" : "")+"'>"+"<span class='gender-role-tags'>"+users.genders[i]+users.roles[i]+"</span>"+users.names[i]+"</span></li>";
         }
         sidebarHtml += "</ul>";
 

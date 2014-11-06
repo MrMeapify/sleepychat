@@ -257,7 +257,7 @@ $(document).ready(function()
 			else
 				var type = 'either';
 
-			socket.emit('login', { nick: nick, pass: pass, gender: gender, role: role, chatwith: chatwith, type: type });
+			socket.emit('login', { nick: nick, pass: pass, gender: gender, role: role, chatwith: chatwith, type: type, isMobile: isMobile.any() });
             
             saveModal();
             
@@ -314,7 +314,7 @@ $(document).ready(function()
 
 			nick = nick2;
 
-			socket.emit('login', { nick: nick2, pass: pass2, gender: gender, role: role, chatwith: chatwith, type: type, inBigChat: bigchat });
+			socket.emit('login', { nick: nick2, pass: pass2, gender: gender, role: role, chatwith: chatwith, type: type, inBigChat: bigchat, isMobile: isMobile.any() });
             
             saveModal();
 
@@ -637,7 +637,7 @@ $(document).ready(function()
                 {
                     $('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
                 }
-                else if (msgInBox == "/list" && !isMobile.any() && bigchat)
+                else if ((msgInBox == "/list" || msgInBox == "/names") && !isMobile.any() && bigchat)
                 {
                     if (!nameSidebar)
                     {
@@ -739,7 +739,7 @@ $(document).ready(function()
             {
                 $('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
             }
-            if (msgInBox == "/list" && !isMobile.any() && bigchat)
+            if ((msgInBox == "/list" || msgInBox == "/names") && !isMobile.any() && bigchat)
             {
                 if (!nameSidebar)
                 {
@@ -995,6 +995,7 @@ function removeTicker()
 
 function replaceNameList()
 {
+    var scroll_down = isWithinScrollThreshold();
     msgFrame.before("<div class='list-"+(isOnRight ? "right" : "left")+"' id='namelist'></div>");
     nameListWidth = nameListWidthInit;
     msgFrame.css("width", (window.innerWidth-nameListWidth).toString()+"px");
@@ -1003,6 +1004,7 @@ function replaceNameList()
     nameList.css("width", (nameListWidth).toString()+"px");
     updateNameList();
     nameSidebar = true;
+    scrollDown(scroll_down);
 }
 
 function removeNameList()
@@ -1035,10 +1037,10 @@ function updateNameList()
 {
     if (users != null)
     {
-        var sidebarHtml = '<div class="btn-group"  style="position: absolute; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px; color: #000000;"><label id="sidebar-move" type="button" class="btn btn-default" style="color: #000;" onclick="moveNameList()">'+(isOnRight ? "&lt;" : "&gt;")+'</label><label id="sidebar-x" type="button" class="btn btn-default" style="color: #000;" onclick="removeNameList()">X</label></div><h4>Users: '+users.names.length+'</h4><ul>';
+        var sidebarHtml = '<div class="btn-group"  style="position: absolute; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px; color: #000000;"><label id="sidebar-move" type="button" class="btn btn-default" style="color: #000;" onclick="moveNameList()">'+(isOnRight ? "&lt;" : "&gt;")+'</label><label id="sidebar-x" type="button" class="btn btn-default" style="color: #000;" onclick="removeNameList()">X</label></div><h3 style="margin-top: 10px;">Users: '+users.names.length+'</h3><br/><ul id="names">';
         for (var i = 0; i < users.names.length; i++)
         {
-            sidebarHtml += "<li>"+users.authority[i]+"<span  style='"+(users.afk[i] ? "color: #777777;" : "")+"'>"+users.genders[i]+users.roles[i]+users.names[i]+"</span></li>";
+            sidebarHtml += "<li>"+"<span class='authority-tag'>"+users.authority[i]+"</span><span  style='"+(users.afk[i] ? "color: #777777;" : "")+"'>"+"<span class='gender-role-tags'>"+users.genders[i]+users.roles[i]+"</span>"+users.names[i]+"</span></li>";
         }
         sidebarHtml += "</ul>";
 

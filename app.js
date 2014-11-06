@@ -270,7 +270,10 @@ io.on('connection', function(socket)
                         io.to('bigroom').emit('information', "[INFO] " + getAuthority(user) + nameAppend(user.nick, user.gender, user.role) + " has joined.");
                         io.to('bigroom').emit('rosterupdate', generateRoster(users));
                         if (!user.mod && !user.admin) { socket.emit('information', "[INFO] If you're new, type \"/help\" and hit enter to see a list of commands."); }
-                        socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users, room) + " ]");
+                        if (data.isMobile)
+                        {
+                            socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users, room) + " ]");
+                        }
                     }
                     else
                     {
@@ -1188,9 +1191,9 @@ io.on('connection', function(socket)
                     {
                         try
                         {
-                            if (user.isAFK)
+                            if (user.AFK)
                             {
-                                user.isAFK = false;
+                                user.AFK = false;
                                 io.to('bigroom').emit('afk', { nick: user.nick, isAFK: false });
                             }
                             io.to('bigroom').emit('chat message', alterMessage(message, user, socket, null, users), "eval", user.nick);
@@ -1392,7 +1395,7 @@ function nameAppend(name, gender, role)
 
 function getGenderSymbol(gender)
 {
-    return (gender=="male") ? "♂" : ((gender=="female") ? "♀" : "");
+    return (gender=="male") ? "♂" : ((gender=="female") ? "♀" : "?");
 }
 
 function getRoleSymbol(role)
@@ -1440,7 +1443,7 @@ function generateRoster (from)
             genders.push(getGenderSymbol(from[i].gender));
             roles.push(getRoleSymbol(from[i].role));
             authority.push(getAuthority(from[i]));
-            afk.push(from[i].isAFK);
+            afk.push(from[i].AFK);
         }
     }
     
@@ -1778,10 +1781,10 @@ function alterForCommands(str, user, socket, room, users)
 			socket.emit('information', "[INFO] You can only do /afk in the public chat");
 		else if (user.inBigChat)
 		{
-			if (!user.isAFK)
+			if (!user.AFK)
 			{
-                user.isAFK = true;
-                io.to('bigroom').emit('afk', { nick: user.nick, isAFK: user.isAFK });
+                user.AFK = true;
+                io.to('bigroom').emit('afk', { nick: user.nick, isAFK: user.AFK });
 				io.to('bigroom').emit('information', "[INFO] " + user.nick + " is AFK.", user.nick);
 			}
 		}

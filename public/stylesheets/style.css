@@ -4,13 +4,13 @@
 
 .page .form-group { margin-bottom: 0; }
 
-.page #namelist { position: relative; overflow-x: hidden; overflow-y: auto; text-overflow: ellipsis; padding-left: 5px; font: 1em Roboto, Helvetica, Arial; }
+.page #namelist { position: relative; overflow-x: hidden; overflow-y: auto; text-overflow: ellipsis; padding-left: 5px; font: 1.11em Roboto, Helvetica, Arial; }
 
 .list-right {  float: right; border-left: 1px solid gray; }
 
 .list-left {  float: left; border-right: 1px solid gray; }
 
-.page #msgframe { position: relative; width: 100%; overflow-x: hidden; overflow-y: auto; word-break: break-all; margin: 0; border: 0; padding: 0; font: 1em Roboto, Helvetica, Arial; }
+.page #msgframe { position: relative; width: 100%; overflow-x: hidden; overflow-y: auto; word-break: normal; margin: 0; border: 0; padding: 0; font: 1em Roboto, Helvetica, Arial; }
 
 .body { font: 1.11em Roboto, Helvetica, Arial }
 
@@ -43,5 +43,11 @@ li.mention { background: #fffca8!important; }
 .ticker-bg { background: #afafaf; }
 
 .ticker { color: #000000; }
+
+#names { list-style-type: none; padding: 0; }
+
+.gender-role-tags { display: inline-block; width: 26px; }
+
+.authority-tag { display: inline-block; width: 16px; }
 
 .yt-video-container { box-shadow: 5px 5px 5px #888; }
