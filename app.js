@@ -161,7 +161,7 @@ io.on('connection', function(socket)
             socket.conn.close();
         }
 
-        socket.emit('allow', {keyString: process.env.YTAPIKEY || "NOKEY"});
+        socket.emit('allow', {keyString: (process.env.YTAPIKEY || "NOKEY"), disallowedNames: disallowedNames });
         socket.emit('newsupdate', { array: currentNews });
         var connection = { realIp: ip };
         connections.push(connection);
@@ -1517,6 +1517,15 @@ var helpFormatting = [['information', "[INFO] ~~~"],
 					['information', "[INFO] -- Text surrounded by double grave accents (``) is <span style='font-family: Georgia, serif'>serif font</span>."],
 					['information', "[INFO] ~~~"]];
 
+var disallowedNames = ["Administrator",
+                       "Admin",
+                      "Moderator",
+                      "Mod",
+                      "Sleepychat",
+                      "SleepyChat",
+                      "Server",
+                      "all"];
+
 
 function giveHelp(str, socket){
 	if (str=="/help" || str=="/help 1")
@@ -1840,6 +1849,13 @@ function testNick(nickToTest)
 	}
 	else
 	{
+        for (var i = 0; i < disallowedNames.length; i++)
+        {
+            if (nickToTest == disallowedNames[i])
+            {
+                return "This name is not allowed by the site.";
+            }
+        }
 		return "";
 	}
 }

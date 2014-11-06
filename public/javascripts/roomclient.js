@@ -131,9 +131,9 @@ $(document).ready(function()
             {
                 $('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
             }
-            else if (msgInBox == "/sidebar")
+            else if (msgInBox == "/list" && !isMobile.any())
             {
-                if (!isMobile.any() && !nameSidebar)
+                if (!nameSidebar)
                 {
                     replaceNameList();
                 }

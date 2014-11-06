@@ -18,6 +18,7 @@ var soundJnLv = true;
 var soundSite = true;
 var denied = false;
 var isDCd = false;
+var disallowedNames = [];
 
 //For chat section
 var msgFrame = null;
@@ -307,7 +308,7 @@ $(document).ready(function()
 
 			nick = nick2;
 
-			socket.emit('login', { nick: nick2, pass: pass2, gender: gender, role: role, chatwith: chatwith, type: type, inBigChat: true });
+			socket.emit('login', { nick: nick2, pass: pass2, gender: gender, role: role, chatwith: chatwith, type: type, inBigChat: bigchat });
             
             saveModal();
 
@@ -315,7 +316,7 @@ $(document).ready(function()
 			return false;
 		});
         
-        socket.on('allow', function(googleApiKey)
+        socket.on('allow', function(connectionInfo)
 		{
 			if (!isOnDisclaimer)
             {
@@ -326,7 +327,8 @@ $(document).ready(function()
                 wasConnectionAllowed = true;
             }
             
-            apiKey = googleApiKey.keyString;
+            disallowedNames = connectionInfo.disallowedNames;
+            apiKey = connectionInfo.keyString;
             if (!isYapiLoaded)
             {
                 if (isGapiLoaded)
@@ -620,16 +622,16 @@ $(document).ready(function()
                         replaceTicker();
                     }
                 }
-                else if (msgInBox == "/sidebar")
-                {
-                    if (!isMobile.any() && !nameSidebar)
-                    {
-                        replaceNameList();
-                    }
-                }
                 else if (msgInBox == "/dialog")
                 {
                     $('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
+                }
+                else if (msgInBox == "/list" && !isMobile.any() && bigchat)
+                {
+                    if (!nameSidebar)
+                    {
+                        replaceNameList();
+                    }
                 }
                 else
                 {
@@ -715,16 +717,16 @@ $(document).ready(function()
                     replaceTicker();
                 }
             }
-            if (msgInBox == "/sidebar")
-            {
-                if (!isMobile.any() && !nameSidebar)
-                {
-                    replaceNameList();
-                }
-            }
             else if (msgInBox == "/dialog")
             {
                 $('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
+            }
+            if (msgInBox == "/list" && !isMobile.any() && bigchat)
+            {
+                if (!nameSidebar)
+                {
+                    replaceNameList();
+                }
             }
             else
             {
@@ -925,6 +927,13 @@ function testNick(nickToTest)
 	}
 	else
 	{
+        for (var i = 0; i < disallowedNames.length; i++)
+        {
+            if (nickToTest == disallowedNames[i])
+            {
+                return "This name is not allowed.";
+            }
+        }
 		return "";
 	}
 }
