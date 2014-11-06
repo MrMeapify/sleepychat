@@ -24,6 +24,10 @@ var nameList = null;
 var nameListWidthInit = 250;
 var nameListWidth = nameListWidthInit;
 var nameSidebar = true;
+var isOnRight = true;
+
+//For cookies!!!
+var cookies = [];
 
 //For tokens
 var args = window.location.pathname.split('/');
@@ -95,6 +99,14 @@ $(document).ready(function()
     {
         nameList.css("height", (window.innerHeight-cutoff).toString()+"px");
         nameList.css("width", (nameListWidth).toString()+"px");
+    }
+    
+    // Cookies!!!
+    parseCookies();
+    
+    if (getCookie("sidebar", "right") == "left" && !isMobile.any())
+    {
+        moveNameList();
     }
     
     $('#mesg-alerts').click(function () {
@@ -386,16 +398,36 @@ function removeNameList()
     nameSidebar = false;
 }
 
+function moveNameList()
+{
+    if (isOnRight)
+    {
+        nameList.removeClass("list-right");
+        nameList.addClass("list-left");
+    }
+    else
+    {
+        nameList.removeClass("list-left");
+        nameList.addClass("list-right");
+    }
+    isOnRight = !isOnRight;
+    updateNameList();
+    setCookie("sidebar", (isOnRight ? "right" : "left"));
+}
+
 function updateNameList()
 {
-    var sidebarHtml = '<button id="sidebar-x" type="button" class="btn btn-default" style="position: fixed; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px; color: #000000;" onclick="removeNameList()">X</button><h4>Users: '+users.names.length+'</h4><ul>';
-    for (var i = 0; i < users.names.length; i++)
+    if (users != null)
     {
-        sidebarHtml += "<li>"+users.authority[i]+users.genders[i]+users.roles[i]+users.names[i]+"</li>";
-    }
-    sidebarHtml += "</ul>";
+        var sidebarHtml = '<div class="btn-group"  style="position: absolute; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px; color: #000000;"><label id="sidebar-move" type="button" class="btn btn-default" onclick="moveNameList()">'+(isOnRight ? "&lt;" : "&gt;")+'</label><label id="sidebar-x" type="button" class="btn btn-default" onclick="removeNameList()">X</label></div><h4>Users: '+users.names.length+'</h4><ul>';
+        for (var i = 0; i < users.names.length; i++)
+        {
+            sidebarHtml += "<li>"+users.authority[i]+"<span  style='color: "+(users.afk[i] ? "#777777;" : (isDay ? "black;" : "white;"))+"'>"+users.genders[i]+users.roles[i]+users.names[i]+"</span></li>";
+        }
+        sidebarHtml += "</ul>";
 
-    nameList.html(sidebarHtml);
+        nameList.html(sidebarHtml);
+    }
 }
 
 function loadGif(id, url)

@@ -4,7 +4,11 @@
 
 .page .form-group { margin-bottom: 0; }
 
-.page #namelist { position: relative; float: right; overflow-x: hidden; overflow-y: auto; text-overflow: ellipsis; border-left: 1px solid gray; padding-left: 5px; font: 1em Roboto, Helvetica, Arial; }
+.page #namelist { position: relative; overflow-x: hidden; overflow-y: auto; text-overflow: ellipsis; padding-left: 5px; font: 1em Roboto, Helvetica, Arial; }
+
+.list-right {  float: right; border-left: 1px solid gray; }
+
+.list-left {  float: left; border-right: 1px solid gray; }
 
 .page #msgframe { position: relative; width: 100%; overflow-x: hidden; overflow-y: auto; word-break: break-all; margin: 0; border: 0; padding: 0; font: 1em Roboto, Helvetica, Arial; }
 
@@ -30,7 +34,7 @@ li.mention { background: #fffca8!important; }
 
 .login-modal { font-family: Roboto, Helvetica, Arial; }
 
-.embedded_image { max-height: 250px; }
+.embedded_image { max-height: 250px; max-width: 600px; }
 
 .image_loader_link { cursor: pointer; }
 

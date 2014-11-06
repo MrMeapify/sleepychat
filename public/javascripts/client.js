@@ -32,6 +32,7 @@ var nameList = null;
 var nameListWidthInit = 250;
 var nameListWidth = nameListWidthInit;
 var nameSidebar = true;
+var isOnRight = true;
 
 //For cookies!!!
 var cookies = [];
@@ -126,6 +127,11 @@ $(document).ready(function()
     
     // Cookies!!!
     parseCookies();
+    
+    if (getCookie("sidebar", "right") == "left" && !isMobile.any())
+    {
+        moveNameList();
+    }
     
     // Disclaimer setup
     if (getCookie("disclaimer", "show") == "show")
@@ -989,7 +995,7 @@ function removeTicker()
 
 function replaceNameList()
 {
-    msgFrame.before("<div id='namelist'></div>");
+    msgFrame.before("<div class='list-"+(isOnRight ? "right" : "left")+"' id='namelist'></div>");
     nameListWidth = nameListWidthInit;
     msgFrame.css("width", (window.innerWidth-nameListWidth).toString()+"px");
     nameList = $("#namelist");
@@ -1008,16 +1014,36 @@ function removeNameList()
     nameSidebar = false;
 }
 
+function moveNameList()
+{
+    if (isOnRight)
+    {
+        nameList.removeClass("list-right");
+        nameList.addClass("list-left");
+    }
+    else
+    {
+        nameList.removeClass("list-left");
+        nameList.addClass("list-right");
+    }
+    isOnRight = !isOnRight;
+    updateNameList();
+    setCookie("sidebar", (isOnRight ? "right" : "left"));
+}
+
 function updateNameList()
 {
-    var sidebarHtml = '<button id="sidebar-x" type="button" class="btn btn-default" style="position: fixed; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px; color: #000000;" onclick="removeNameList()">X</button><h4>Users: '+users.names.length+'</h4><ul>';
-    for (var i = 0; i < users.names.length; i++)
+    if (users != null)
     {
-        sidebarHtml += "<li>"+users.authority[i]+"<span  style='color: "+(users.afk[i] ? "#777777;" : (isDay ? "black;" : "white;"))+"'>"+users.genders[i]+users.roles[i]+users.names[i]+"</span></li>";
-    }
-    sidebarHtml += "</ul>";
+        var sidebarHtml = '<div class="btn-group"  style="position: absolute; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px; color: #000000;"><label id="sidebar-move" type="button" class="btn btn-default" onclick="moveNameList()">'+(isOnRight ? "&lt;" : "&gt;")+'</label><label id="sidebar-x" type="button" class="btn btn-default" onclick="removeNameList()">X</label></div><h4>Users: '+users.names.length+'</h4><ul>';
+        for (var i = 0; i < users.names.length; i++)
+        {
+            sidebarHtml += "<li>"+users.authority[i]+"<span  style='color: "+(users.afk[i] ? "#777777;" : (isDay ? "black;" : "white;"))+"'>"+users.genders[i]+users.roles[i]+users.names[i]+"</span></li>";
+        }
+        sidebarHtml += "</ul>";
 
-    nameList.html(sidebarHtml);
+        nameList.html(sidebarHtml);
+    }
 }
 
 function loadGif(id, url)
@@ -1087,56 +1113,6 @@ function toggleDayNight ()
 // ----------
 // Cookies!!!
 // ----------
-function parseCookies () {
-    
-    var all = document.cookie;
-    
-    if (all == "")
-    {
-        return;
-    }
-    
-    var list = all.split('; ');
-    
-    for (var i = 0; i < list.length; i++)
-    {
-        cookies[i] = list[i].split('=');
-    }
-}
-
-function getCookie (name, defaultVal) {
-    
-    for (var i = 0; i < cookies.length; i++)
-    {
-        if (cookies[i][0] == name)
-        {
-            return cookies[i][1];
-        }
-    }
-    
-    return defaultVal;
-}
-
-function setCookie (name, newValue) {
-    
-    for (var i = 0; i < cookies.length; i++)
-    {
-        if (cookies[i][0] == name)
-        {
-            cookies[i][1] = newValue.toString();
-            var expiry = new Date();
-            expiry.setMonth(expiry.getMonth()+1);
-            document.cookie = name+"="+newValue.toString()+"; expires="+expiry.toUTCString();
-            return;
-        }
-    }
-    
-    var newCookie = [name, newValue.toString()];
-    cookies.push(newCookie);
-    var expiry = new Date();
-    expiry.setMonth(expiry.getMonth()+1);
-    document.cookie = name+"="+newValue.toString()+"; expires="+expiry.toUTCString();
-}
 
 function setUpSound () {
     
