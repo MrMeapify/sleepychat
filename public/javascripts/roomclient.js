@@ -447,30 +447,28 @@ function onGifLoaded(id) {
 function toggleDayNight ()
 {
     var stylesheet1 = document.getElementById('stylesheet1');
-    var stylesheet2 = document.getElementById('stylesheet2');
+    var stylesheet2 = $('#stylesheet2');
     var dayNightToggle = document.getElementById('daynbutton');
     var dayNightImage = document.getElementById('daynimage');
     //Text box
     var mainTextBox = document.getElementById('m');
 
+    stylesheet1.setAttribute('href', '/stylesheets/bootstrap'+(isDay ? "-night" : "")+'.min.css');
     if (isDay)
     {
-        stylesheet1.setAttribute('href', '/stylesheets/bootstrap-night.min.css');
-        stylesheet2.setAttribute('href', '/stylesheets/style-night.css');
-        dayNightImage.setAttribute('src', '/images/day.png');
-        mainTextBox.style.color = '#ffffff';
-        mainTextBox.style.backgroundColor = '#222222';
-        isDay = false;
+        stylesheet2.after("<link rel='stylesheet' type='text/css' href='/stylesheets/style-night.css' id='stylesheet3' />");
     }
     else
     {
-        stylesheet1.setAttribute('href', '/stylesheets/bootstrap.min.css');
-        stylesheet2.setAttribute('href', '/stylesheets/style.css');
-        dayNightImage.setAttribute('src', '/images/night.png');
-        mainTextBox.style.color = '#000000';
-        mainTextBox.style.backgroundColor = '#ffffff';
-        isDay = true;
-    }
+        $('#stylesheet3').remove();
+        
+    };
+    dayNightImage.setAttribute('src', '/images/'+(isDay ? "day" : "night")+'.png');
+    mainTextBox.style.color = (isDay ? "#ffffff" : "#000000");
+    isDay = !isDay;
+    scrollDown();
+    
+    doResize();
 }
 
 // --------------
