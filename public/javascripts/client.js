@@ -1009,11 +1009,14 @@ function replaceNameList()
 
 function removeNameList()
 {
-    nameListWidth = 0;
-    nameList.remove();
-    nameList = null;
-    msgFrame.css("width", (window.innerWidth-nameListWidth).toString()+"px");
-    nameSidebar = false;
+    if (nameList != null)
+    {
+        nameListWidth = 0;
+        nameList.remove();
+        nameList = null;
+        msgFrame.css("width", (window.innerWidth-nameListWidth).toString()+"px");
+        nameSidebar = false;
+    }
 }
 
 function moveNameList()
