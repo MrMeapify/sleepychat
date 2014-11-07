@@ -1123,6 +1123,11 @@ function setUpSound () {
     soundWhsp = getCookie("soundWhsp", "true") == "true";
     soundJnLv = getCookie("soundJnLv", "true") == "true";
     soundSite = getCookie("soundSite", "true") == "true";
+    $('#mesg-alerts').prop('checked', soundMesg);
+    $('#ment-alerts').prop('checked', soundMent);
+    $('#whsp-alerts').prop('checked', soundWhsp);
+    $('#jnlv-alerts').prop('checked', soundJnLv);
+    $('#site-alerts').prop('checked', soundSite);
 }
 
 function setUpModal () {
