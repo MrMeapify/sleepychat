@@ -464,6 +464,7 @@ function toggleDayNight ()
         
     };
     dayNightImage.setAttribute('src', '/images/'+(isDay ? "day" : "night")+'.png');
+    mainTextBox.style.backgroundColor = (isDay ? "#222222" : "#ffffff");
     mainTextBox.style.color = (isDay ? "#ffffff" : "#000000");
     isDay = !isDay;
     scrollDown();
