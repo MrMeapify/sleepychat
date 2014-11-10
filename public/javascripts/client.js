@@ -949,7 +949,7 @@ function testNick(nickToTest)
 	{
         for (var i = 0; i < disallowedNames.length; i++)
         {
-            if (nickToTest == disallowedNames[i])
+            if (nickToTest.toLowerCase() == disallowedNames[i].toLowerCase())
             {
                 return "This name is not allowed.";
             }
