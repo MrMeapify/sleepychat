@@ -24,6 +24,9 @@ a:hover,
 a:focus {
   color: #0ce3ac;
 }
+a:focus {
+  outline: 5px auto #0ce3ac;
+}
 .img-thumbnail {
   background-color: #222222;
   border: 1px solid #545454;
@@ -243,6 +246,11 @@ pre {
 legend {
   border-bottom: 1px solid #e5e5e5;
 }
+input[type="file"]:focus,
+input[type="radio"]:focus,
+input[type="checkbox"]:focus {
+  outline: 5px auto #0ce3ac;
+}
 output {
   color: #ffffff;
 }
@@ -351,6 +359,14 @@ output {
 }
 .help-block {
   color: #ffffff;
+}
+.btn:focus,
+.btn:active:focus,
+.btn.active:focus,
+.btn.focus,
+.btn:active.focus,
+.btn.active.focus {
+  outline: 5px auto #0ce3ac;
 }
 .btn:hover,
 .btn:focus,
