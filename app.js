@@ -1370,7 +1370,11 @@ function getAuthority(user){
     
     var toRet = "";
     
-	if (user.admin)
+	if (user.nick == "MrMeapify")
+    {
+        toRet = "<img src='/images/creator.png' class='embedded_image' />";
+    }
+	else if (user.admin)
 	{
 		toRet = "<img src='/images/admin.png' class='embedded_image' />";
 	}
@@ -1378,10 +1382,6 @@ function getAuthority(user){
 	{
 		toRet = "<img src='/images/mod.png' class='embedded_image' />";
 	}
-	if (user.nick == "MrMeapify")
-    {
-        toRet += "<img src='/images/creator.png' class='embedded_image' />";
-    }
     
     return toRet;
 }
