@@ -3,10 +3,10 @@
 	<head>
 		<title><%= title %></title>
 		<link rel='stylesheet' type='text/css' href='/stylesheets/bootstrap.min.css' id='stylesheet1' />
-		<link rel='stylesheet' type='text/css' href='/stylesheets/bootstrap-theme.min.css' />
+		<link rel='stylesheet' type='text/css' href='/stylesheets/bootstrap-theme.min.css' id='stylesheet2' />
 		<link rel='stylesheet' type='text/css' href='//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css' />
 		<link rel='stylesheet' type='text/css' href='http://fonts.googleapis.com/css?family=Roboto:400,700,400italic,700italic|Sigmar+One&v2'>
-		<link rel='stylesheet' type='text/css' href='/stylesheets/style.css' id='stylesheet2' />
+		<link rel='stylesheet' type='text/css' href='/stylesheets/style.css' id='stylesheet3' />
 		<link rel='stylesheet' type='text/css' href='/stylesheets/yt.css' />
 		<script src="/javascripts/audiolet.js"></script>
 	</head>
@@ -70,25 +70,25 @@
 								<div class="input-group" style="width: 100%;">
 									<label>I am a...</label><br/>
 									<div class="btn-group btn-group-justified" data-toggle="buttons">
-										<label class="btn btn-default" style="color: #000000">
+										<label class="btn btn-default">
 											<input name="iamgender" id="iammale" type="radio"> Male
 										</label>
-										<label class="btn btn-default" style="color: #000000">
+										<label class="btn btn-default">
 											<input name="iamgender" id="iamfemale" type="radio"> Female
 										</label>
-										<label class="btn btn-default active" style="color: #000000">
+										<label class="btn btn-default active">
 											<input name="iamgender" id="iamundisclosed" type="radio" checked> Undisclosed
 										</label>
 									</div>
 									<br/>
 									<div class="btn-group btn-group-justified" data-toggle="buttons">
-										<label class="btn btn-default" style="color: #000000;">
+										<label class="btn btn-default">
 											<input name="iamrole" id="iamtist" type="radio"> Hypnotist
 										</label>
-										<label class="btn btn-default" style="color: #000000;">
+										<label class="btn btn-default">
 											<input name="iamrole" id="iamsub" type="radio"> Subject
 										</label>
-										<label class="btn btn-default active" style="color: #000000;">
+										<label class="btn btn-default active">
 											<input name="iamrole" id="iamswitch" type="radio" checked> Switch
 										</label>
 									</div>
@@ -96,13 +96,13 @@
 								<div class="input-group" style="width: 100%;">
 									<label>looking to chat with...</label><br/>
 									<div class="btn-group btn-group-justified" data-toggle="buttons">
-										<label class="btn btn-default" style="color: #000000">
+										<label class="btn btn-default">
 											<input name="chatwith" id="chatwithmales" type="radio"> Males Only
 										</label>
-										<label class="btn btn-default" style="color: #000000">
+										<label class="btn btn-default">
 											<input name="chatwith" id="chatwithfemales" type="radio"> Females Only
 										</label>
-										<label class="btn btn-default active" style="color: #000000">
+										<label class="btn btn-default active">
 											<input name="chatwith" id="chatwitheither" type="radio" checked> Either
 										</label>
 									</div>
@@ -110,13 +110,13 @@
 								<div class="input-group" style="width: 100%;">
 									<label>for...</label><br/>
 									<div class="btn-group btn-group-justified" data-toggle="buttons">
-										<label class="btn btn-default" style="color: #000000">
+										<label class="btn btn-default">
 											<input name="iwant" id="iwantrp" type="radio"> Role Playing
 										</label>
-										<label class="btn btn-default" style="color: #000000">
+										<label class="btn btn-default">
 											<input name="iwant" id="iwanthyp" type="radio"> REAL Hypnosis
 										</label>
-										<label class="btn btn-default active" style="color: #000000">
+										<label class="btn btn-default active">
 											<input name="iwant" id="iwanteither" type="radio" checked>Either
 										</label>
 									</div>
@@ -190,15 +190,15 @@
 						</span>
 						<input tabindex="1" id="m" type="text" autocomplete="off" class="form-control">
 						<span class="input-group-btn">
-							<button id="sendbutton" class="btn btn-default" type="submit" style="color: #000000" disabled>Send</button>
-							<button id="mutebutton" class="btn btn-default" type="button" style="color: #000000"><i class="fa fa-volume-up"></i></button>
-							<button id="daynbutton" class="btn btn-default" type="button" style="color: #000000" onclick="toggleDayNight();"><img id="daynimage" src="/images/night.png" /></button>
+							<button id="sendbutton" class="btn btn-default" type="submit" disabled>Send</button>
+							<button id="mutebutton" class="btn btn-default" type="button"><i class="fa fa-volume-up"></i></button>
+							<button id="daynbutton" class="btn btn-default" type="button" onclick="toggleDayNight();"><img id="daynimage" src="/images/night.png" /></button>
 						</span>
 					</div>
 				</div>
 	  		</form>
             <div class="ticker-bg" style="position: fixed; bottom: 40px; width: 100%; height: 34px; padding: 3px;">
-                <button id="ticker-x" type="button" class="btn btn-default" style="padding-top: 3px; padding-bottom: 3px; color: #000000; float: right;">X</button>
+                <button id="ticker-x" type="button" class="btn btn-default" style="padding-top: 3px; padding-bottom: 3px; float: right;">X</button>
                 <div class="ticker-parent" style="position: relative; width: 97.5%;">
                     <div id="sc-news" class="ticker" style="font: 1em Roboto, Helvetica, Arial;">
                         <ul id="news-container">

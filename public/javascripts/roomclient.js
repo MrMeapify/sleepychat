@@ -14,7 +14,6 @@ var users = null;
 var msgFrame = null;
 var msgList = null;
 var cutoff = 40;
-var resizeInterval = -1;
 
 //For day/night mode
 var isDay = true;
@@ -357,19 +356,7 @@ function doResize() {
     {
         nameList.css("height", (window.innerHeight-cutoff).toString()+"px");
     }
-    msgFrame.css("width", (window.innerWidth-nameListWidth-32).toString()+"px");
-    
-    if (resizeInterval != -1)
-    {
-        clearInterval(resizeInterval);
-    }
-    resizeInterval = setInterval(function() {
-        
-        msgFrame.css("width", (window.innerWidth-nameListWidth).toString()+"px");
-        
-        clearInterval(resizeInterval);
-        resizeInterval = -1;
-    }, 500);
+    msgFrame.css("width", (window.innerWidth-nameListWidth).toString()+"px");
 }
 
 function scrollDown()
@@ -420,7 +407,7 @@ function updateNameList()
 {
     if (users != null)
     {
-        var sidebarHtml = '<div class="btn-group"  style="position: absolute; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px; color: #000000;"><label id="sidebar-move" type="button" class="btn btn-default" style="color: #000;" onclick="moveNameList()">'+(isOnRight ? "&lt;" : "&gt;")+'</label><label id="sidebar-x" type="button" class="btn btn-default" style="color: #000;" onclick="removeNameList()">X</label></div><h3 style="margin-top: 10px;">Users: '+users.names.length+'</h3><br/><ul id="names">';
+        var sidebarHtml = '<div class="btn-group"  style="position: absolute; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px;"><label id="sidebar-move" type="button" class="btn btn-default" onclick="moveNameList()">'+(isOnRight ? "&lt;" : "&gt;")+'</label><label id="sidebar-x" type="button" class="btn btn-default" onclick="removeNameList()">X</label></div><h3 style="margin-top: 10px;">Users: '+users.names.length+'</h3><br/><ul id="names">';
         for (var i = 0; i < users.names.length; i++)
         {
             sidebarHtml += "<li>"+"<span class='authority-tag'>"+users.authority[i]+"</span><span  style='"+(users.afk[i] ? "color: #777777;" : "")+"'>"+"<span class='gender-role-tags'>"+users.genders[i]+users.roles[i]+"</span>"+users.names[i]+"</span></li>";
@@ -446,21 +433,25 @@ function onGifLoaded(id) {
 
 function toggleDayNight ()
 {
-    var stylesheet1 = document.getElementById('stylesheet1');
+    var stylesheet1 = $('#stylesheet1');
     var stylesheet2 = $('#stylesheet2');
+    var stylesheet3 = $('#stylesheet3');
     var dayNightToggle = document.getElementById('daynbutton');
     var dayNightImage = document.getElementById('daynimage');
     //Text box
     var mainTextBox = document.getElementById('m');
-
-    stylesheet1.setAttribute('href', '/stylesheets/bootstrap'+(isDay ? "-night" : "")+'.min.css');
+    
     if (isDay)
     {
-        stylesheet2.after("<link rel='stylesheet' type='text/css' href='/stylesheets/style-night.css' id='stylesheet3' />");
+        stylesheet1.after("<link rel='stylesheet' type='text/css' href='/stylesheets/night/bootstrap.min.css' id='stylesheet4' />");
+        stylesheet2.after("<link rel='stylesheet' type='text/css' href='/stylesheets/night/bootstrap-theme.min.css' id='stylesheet5' />");
+        stylesheet3.after("<link rel='stylesheet' type='text/css' href='/stylesheets/night/style.css' id='stylesheet6' />");
     }
     else
     {
-        $('#stylesheet3').remove();
+        $('#stylesheet4').remove();
+        $('#stylesheet5').remove();
+        $('#stylesheet6').remove();
         
     };
     dayNightImage.setAttribute('src', '/images/'+(isDay ? "day" : "night")+'.png');
