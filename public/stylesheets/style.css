@@ -52,4 +52,6 @@ li.mention { background: #fffca8!important; }
 
 .authority-tag { display: inline-block; width: 16px; }
 
+.dd-option:hover { cursor: default; background-color: #dddddd; }
+
 .yt-video-container { box-shadow: 5px 5px 5px #888; }

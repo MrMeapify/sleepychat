@@ -1263,6 +1263,11 @@ io.on('connection', function(socket)
 
             connections.remove(connection);
         });
+        
+        socket.on('reqnewroster', function() {
+            
+            socket.emit('rosterupdate', generateRoster(room ? room.here : users));
+        });
 
         socket.on('AFK', function(data)
         {
@@ -1431,24 +1436,16 @@ function getUsers(users, room)
 
 function generateRoster (from)
 {
-    var nicks = [];
-    var genders = [];
-    var roles = [];
-    var authority = [];
-    var afk = [];
+    var roster = [];
     for (var i = 0; i < from.length; i++)
     {
         if (from[i].inBigChat)
         {
-            nicks.push(from[i].nick);
-            genders.push(getGenderSymbol(from[i].gender));
-            roles.push(getRoleSymbol(from[i].role));
-            authority.push(getAuthority(from[i]));
-            afk.push(from[i].AFK);
+            roster.push({ nick: from[i].nick, gender: getGenderSymbol(from[i].gender), role: getRoleSymbol(from[i].role), authority: getAuthority(from[i]), afk: from[i].isAFK });
         }
     }
     
-    return {names: nicks, genders: genders, roles: roles, authority: authority, afk: afk };
+    return roster;
 }
 
 // ==================================

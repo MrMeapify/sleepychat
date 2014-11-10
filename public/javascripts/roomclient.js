@@ -8,7 +8,10 @@ var snd = new Audio("/sounds/notify.ogg");
 var soundMesg = true;
 var soundSite = true;
 var denied = false;
+
+//For name list
 var users = null;
+var sorting = "default";
 
 //For chat section
 var msgFrame = null;
@@ -118,7 +121,7 @@ $(document).ready(function()
         soundSite = this.checked;
     });
     
-	var socket = io("/", { reconnection: false, transport: ['websocket'] });
+	socket = io("/", { reconnection: false, transport: ['websocket'] });
 	
 	$('#chatbar').unbind('submit');
 	$('#chatbar').submit(function()
@@ -407,15 +410,32 @@ function updateNameList()
 {
     if (users != null)
     {
-        var sidebarHtml = '<div class="btn-group"  style="position: absolute; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px;"><label id="sidebar-move" type="button" class="btn btn-default" onclick="moveNameList()">'+(isOnRight ? "&lt;" : "&gt;")+'</label><label id="sidebar-x" type="button" class="btn btn-default" onclick="removeNameList()">X</label></div><h3 style="margin-top: 10px;">Users: '+users.names.length+'</h3><br/><ul id="names">';
-        for (var i = 0; i < users.names.length; i++)
+        if (sorting == "alpha")
         {
-            sidebarHtml += "<li>"+"<span class='authority-tag'>"+users.authority[i]+"</span><span  style='"+(users.afk[i] ? "color: #777777;" : "")+"'>"+"<span class='gender-role-tags'>"+users.genders[i]+users.roles[i]+"</span>"+users.names[i]+"</span></li>";
+            users.sort(function(a, b) {
+                
+                if(a.nick < b.nick) return -1;
+                if(a.nick > b.nick) return 1;
+                return 0;
+            });
+        }
+        
+        var sidebarHtml = '<div class="btn-group"  style="position: absolute; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px;"><label id="sidebar-move" type="button" class="btn btn-default" onclick="moveNameList()">'+(isOnRight ? "&lt;" : "&gt;")+'</label><label id="sidebar-x" type="button" class="btn btn-default" onclick="removeNameList()">X</label></div><h3 style="margin-top: 10px;">Users: '+users.length+'</h3><div class="dropdown"><label id="sidebar-sort" type="button" class="btn btn-default" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Sorting <span class="caret"></span></label><ul class="dropdown-menu" style="padding: 5px;" role="menu aria-labelledby="sidebar-sort"><li class="dd-option" onclick="sortNameList(\'default\');">Join Order</li><li class="dd-option" onclick="sortNameList(\'alpha\');">Alphabetical</li></ul></div><ul id="names">';
+        for (var i = 0; i < users.length; i++)
+        {
+            sidebarHtml += "<li>"+"<span class='authority-tag'>"+users[i].authority+"</span><span class='gender-role-tags'>"+users[i].gender+users[i].role+"</span>"+users[i].nick+"</li>";
         }
         sidebarHtml += "</ul>";
 
         nameList.html(sidebarHtml);
     }
+}
+
+function sortNameList(type)
+{
+    setCookie("sorting", type);
+    socket.emit('reqnewroster');
+    sorting = type;
 }
 
 function loadGif(id, url)

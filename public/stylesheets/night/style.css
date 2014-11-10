@@ -8,4 +8,6 @@ li.mention { background: #006d6d!important; }
 
 .ticker { color: #ffffff; }
 
+.dd-option:hover { background-color: #545454; }
+
 .yt-video-container { box-shadow: 5px 5px 5px #111; }
