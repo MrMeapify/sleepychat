@@ -356,7 +356,7 @@ function doResize() {
     {
         nameList.css("height", (window.innerHeight-cutoff).toString()+"px");
     }
-    msgFrame.css("width", (window.innerWidth-nameListWidth-32).toString()+"px");
+    msgFrame.css("width", (window.innerWidth-nameListWidth).toString()+"px");
 }
 
 function scrollDown()

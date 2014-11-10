@@ -26,7 +26,7 @@ a:focus {
 }
 .img-thumbnail {
   background-color: #222222;
-  border: 1px solid #222222;
+  border: 1px solid #545454;
 }
 mark,
 .mark {
@@ -94,7 +94,7 @@ a.bg-danger:hover {
   background-color: #d62c1a;
 }
 pre {
-  border: 1px solid #222222;
+  border: 1px solid #545454;
 }
 .table > thead > tr > th,
 .table > tbody > tr > th,
@@ -114,7 +114,7 @@ pre {
   background-color: #222222;
 }
 .table-bordered {
-  border: 1px solid #222222;
+  border: 1px solid #545454;
 }
 .table-bordered > thead > tr > th,
 .table-bordered > tbody > tr > th,
@@ -122,7 +122,7 @@ pre {
 .table-bordered > thead > tr > td,
 .table-bordered > tbody > tr > td,
 .table-bordered > tfoot > tr > td {
-  border: 1px solid #222222;
+  border: 1px solid #545454;
 }
 .table-striped > tbody > tr:nth-child(odd) {
   background-color: #303030;
@@ -237,7 +237,7 @@ pre {
 }
 @media screen and (max-width: 767px) {
   .table-responsive {
-    border: 1px solid #222222;
+    border: 1px solid #545454;
   }
 }
 legend {
@@ -249,7 +249,7 @@ output {
 .form-control {
   color: #ffffff;
   background-color: #222222;
-  border: 1px solid #222222;
+  border: 1px solid #545454;
 }
 .form-control:focus {
   border-color: #0ce3ac;
@@ -360,7 +360,7 @@ output {
 .btn-default {
   color: #ffffff;
   background-color: #222222;
-  border-color: #222222;
+  border-color: #545454;
 }
 .btn-default:hover,
 .btn-default:focus,
@@ -370,7 +370,7 @@ output {
 .open > .dropdown-toggle.btn-default {
   color: #ffffff;
   background-color: #2c2c2c;
-  border-color: #030303;
+  border-color: #545454;
 }
 .btn-default.disabled,
 .btn-default[disabled],
@@ -391,7 +391,7 @@ fieldset[disabled] .btn-default:active,
 .btn-default[disabled].active,
 fieldset[disabled] .btn-default.active {
   background-color: #222222;
-  border-color: #222222;
+  border-color: #545454;
 }
 .btn-default .badge {
   color: #222222;
@@ -599,7 +599,7 @@ fieldset[disabled] .btn-link:focus {
 }
 .dropdown-menu {
   background-color: #222222;
-  border: 1px solid #222222;
+  border: 1px solid #545454;
 }
 .dropdown-menu > .active > a,
 .dropdown-menu > .active > a:hover,
@@ -613,7 +613,7 @@ fieldset[disabled] .btn-link:focus {
 }
 .input-group-addon {
   color: #ffffff;
-  border: 1px solid #222222;
+  border: 1px solid #545454;
 }
 .nav .open > a,
 .nav .open > a:hover,
@@ -630,7 +630,7 @@ fieldset[disabled] .btn-link:focus {
 .nav-tabs > li.active > a:hover,
 .nav-tabs > li.active > a:focus {
   background-color: #222222;
-  border: 1px solid #222222;
+  border: 1px solid #545454;
 }
 .nav-tabs.nav-justified > .active > a,
 .nav-tabs.nav-justified > .active > a:hover,
@@ -700,7 +700,7 @@ fieldset[disabled] .btn-link:focus {
   color: #222222;
 }
 .navbar-default .navbar-toggle {
-  border-color: #222222;
+  border-color: #545454;
 }
 .navbar-default .navbar-toggle:hover,
 .navbar-default .navbar-toggle:focus {
@@ -854,14 +854,14 @@ fieldset[disabled] .navbar-inverse .btn-link:focus {
 .pagination > li > span {
   color: #0ce3ac;
   background-color: #00bc8c;
-  border: 1px solid #222222;
+  border: 1px solid #545454;
 }
 .pagination > li > a:hover,
 .pagination > li > span:hover,
 .pagination > li > a:focus,
 .pagination > li > span:focus {
   color: #0ce3ac;
-  border-color: #222222;
+  border-color: #545454;
 }
 .pagination > .active > a,
 .pagination > .active > span,
@@ -878,12 +878,12 @@ fieldset[disabled] .navbar-inverse .btn-link:focus {
 .pagination > .disabled > a,
 .pagination > .disabled > a:hover,
 .pagination > .disabled > a:focus {
-  border-color: #222222;
+  border-color: #545454;
 }
 .pager li > a,
 .pager li > span {
   background-color: #00bc8c;
-  border: 1px solid #222222;
+  border: 1px solid #545454;
 }
 .pager .disabled > a,
 .pager .disabled > a:hover,
@@ -932,7 +932,7 @@ a.list-group-item.active > .badge,
 }
 .thumbnail {
   background-color: #222222;
-  border: 1px solid #222222;
+  border: 1px solid #545454;
 }
 a.thumbnail:hover,
 a.thumbnail:focus,
@@ -1006,7 +1006,7 @@ a.thumbnail.active {
 }
 .list-group-item {
   background-color: #303030;
-  border: 1px solid #222222;
+  border: 1px solid #545454;
 }
 a.list-group-item {
   color: #0ce3ac;
@@ -1123,10 +1123,10 @@ a.list-group-item-danger.active:focus {
   border-bottom: 1px solid #222222;
 }
 .panel-default {
-  border-color: #222222;
+  border-color: #545454;
 }
 .panel-default > .panel-heading {
-  border-color: #222222;
+  border-color: #545454;
 }
 .panel-default > .panel-heading + .panel-collapse > .panel-body {
   border-top-color: #222222;
@@ -1265,7 +1265,7 @@ a.list-group-item-danger.active:focus {
 }
 .popover {
   background-color: #000000;
-  border: 1px solid #222222;
+  border: 1px solid #545454;
 }
 .popover-title {
   background-color: #000000;

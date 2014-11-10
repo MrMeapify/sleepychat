@@ -131,6 +131,10 @@ $(document).ready(function()
     {
         moveNameList();
     }
+    if (getCookie("theme", "day") == "night")
+    {
+        toggleDayNight();
+    }
     
     // Disclaimer setup
     if (getCookie("disclaimer", "show") == "show")
@@ -905,7 +909,7 @@ function doResize() {
     {
         nameList.css("height", (window.innerHeight-(newsTicker ? cutoffWithTicker : cutoffWithoutTicker)).toString()+"px");
     }
-    msgFrame.css("width", (window.innerWidth-nameListWidth-32).toString()+"px");
+    msgFrame.css("width", (window.innerWidth-nameListWidth).toString()+"px");
 }
 
 function isWithinScrollThreshold() {
@@ -1088,9 +1092,10 @@ function toggleDayNight ()
         
     };
     dayNightImage.setAttribute('src', '/images/'+(isDay ? "day" : "night")+'.png');
-    hintTextBox.style.backgroundColor = (isDay ? "#222222" : "#ffffff");
+    if (hintTextBox) { hintTextBox.style.backgroundColor = (isDay ? "#222222" : "#ffffff"); }
     mainTextBox.style.color = (isDay ? "#ffffff" : "#000000");
     isDay = !isDay;
+    setCookie("theme", (isDay ? "day" : "night"));
     if (scrollValue == -1)
     {
         scrollDown(true);

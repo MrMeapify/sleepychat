@@ -54,7 +54,7 @@
   background-image: -o-linear-gradient(top, #464545 0%, #272727 100%);
   background-image: linear-gradient(to bottom, #464545 0%, #272727 100%);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff464545', endColorstr='#ff272727', GradientType=0);
-  border-color: #222222;
+  border-color: #545454;
 }
 .btn-default:hover,
 .btn-default:focus {
@@ -63,7 +63,7 @@
 .btn-default:active,
 .btn-default.active {
   background-color: #272727;
-  border-color: #222222;
+  border-color: #545454;
 }
 .btn-default:disabled,
 .btn-default[disabled] {
