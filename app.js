@@ -277,6 +277,7 @@ io.on('connection', function(socket)
                         socket.join('bigroom');
                         io.to('bigroom').emit('information', "[INFO] " + getAuthority(user) + nameAppend(user.nick, user.gender, user.role) + " has joined.");
                         io.to('bigroom').emit('rosterupdate', generateRoster(users));
+                        socket.emit('information', "[INFO] <span style='color: red;'>IMPORTANT NEWS: </span>Users have been attempting to advertise a dangerous and predatory IRC channel called #coverthypnotism, even going so far as to spam this site. Immediately report <strong>everyone</strong> that mentions this IRC channel to a mod or admin.");
                         if (!user.mod && !user.admin) { socket.emit('information', "[INFO] If you're new, type \"/help\" and hit enter to see a list of commands."); }
                         if (data.isMobile)
                         {
