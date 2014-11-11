@@ -138,6 +138,7 @@ $(document).ready(function()
     {
         toggleDayNight();
     }
+    sorting = getCookie("sorting", "default");
     
     // Disclaimer setup
     if (getCookie("disclaimer", "show") == "show")

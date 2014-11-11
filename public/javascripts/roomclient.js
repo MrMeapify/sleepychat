@@ -110,6 +110,11 @@ $(document).ready(function()
     {
         moveNameList();
     }
+    if (getCookie("theme", "day") == "night")
+    {
+        toggleDayNight();
+    }
+    sorting = getCookie("sorting", "default");
     
     $('#mesg-alerts').click(function () {
         
