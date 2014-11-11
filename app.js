@@ -127,7 +127,7 @@ io.on('connection', function(socket)
 {
 	try
 	{
-		var nick = "";
+        var nick = "";
         var room = null;
 
         var loggedIn = false;
@@ -166,6 +166,14 @@ io.on('connection', function(socket)
         var connection = { realIp: ip };
         connections.push(connection);
 
+        var spamPoints = 0;
+        setInterval(function() {
+            
+            spamPoints--;
+            if (spamPoints < 0) { spamPoints = 0; }
+            else if (spamPoints > 10 && !room) { socket.emit('information', "[INFO] You've been kicked for spamming the chat."); socket.conn.close(); }
+        }, 2000);
+        
         socket.on('login', function(data)
         {
             if (data == null || typeof data == 'undefined')
@@ -478,6 +486,8 @@ io.on('connection', function(socket)
         {
             try
             {
+                spamPoints++;
+                
                 var user = getUserByNick(nick);
                 if(data.message != "" && user)
                 {
