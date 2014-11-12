@@ -1205,7 +1205,7 @@ io.on('connection', function(socket)
                             if (user.AFK)
                             {
                                 user.AFK = false;
-                                io.to('bigroom').emit('afk', { nick: user.nick, isAFK: false });
+                                io.to('bigroom').emit('afk', { nick: user.nick, AFK: false });
                             }
                             io.to('bigroom').emit('chat message', alterMessage(message, user, socket, null, users), "eval", user.nick);
                         }
@@ -1290,10 +1290,10 @@ io.on('connection', function(socket)
                 {
                     if(users[x] === user)
                     {
-                        users[x].AFK = data.isAFK
+                        users[x].AFK = data.AFK
                     }
                 }
-                io.to('bigroom').emit('afk', { nick: data.nick, isAFK: data.isAFK });
+                io.to('bigroom').emit('afk', { nick: data.nick, AFK: data.AFK });
             }
         });
         
@@ -1452,7 +1452,7 @@ function generateRoster (from)
     {
         if (from[i].inBigChat)
         {
-            roster.push({ nick: from[i].nick, gender: getGenderSymbol(from[i].gender), role: getRoleSymbol(from[i].role), authority: getAuthority(from[i]), afk: from[i].isAFK });
+            roster.push({ nick: from[i].nick, gender: getGenderSymbol(from[i].gender), role: getRoleSymbol(from[i].role), authority: getAuthority(from[i]), afk: from[i].AFK });
         }
     }
     
@@ -1799,7 +1799,7 @@ function alterForCommands(str, user, socket, room, users)
 			if (!user.AFK)
 			{
                 user.AFK = true;
-                io.to('bigroom').emit('afk', { nick: user.nick, isAFK: user.AFK });
+                io.to('bigroom').emit('afk', { nick: user.nick, AFK: user.AFK });
 				io.to('bigroom').emit('information', "[INFO] " + user.nick + " is AFK.", user.nick);
 			}
 		}

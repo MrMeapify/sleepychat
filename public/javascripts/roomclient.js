@@ -12,11 +12,13 @@ var denied = false;
 //For name list
 var users = null;
 var sorting = "default";
+var adminModsFirst = false;
 
 //For chat section
 var msgFrame = null;
 var msgList = null;
 var cutoff = 40;
+var resizeInt = -1;
 
 //For day/night mode
 var isDay = true;
@@ -40,7 +42,6 @@ oldTitle += (roomtoken == "modroom" ? "Mod Room" : "Private Room");
 //For room cleanup
 var date = new Date();
 var timeSinceLastMessage = Date.now();
-var isAFK = false;
 
 //For YouTube Embedding
 var apiKey = "NOTLOADED";
@@ -115,6 +116,7 @@ $(document).ready(function()
         toggleDayNight();
     }
     sorting = getCookie("sorting", "default");
+    adminModsFirst = getCookie("sortadminmodsfirst", "false") == "true";
     
     $('#mesg-alerts').click(function () {
         
@@ -364,7 +366,19 @@ function doResize() {
     {
         nameList.css("height", (window.innerHeight-cutoff).toString()+"px");
     }
-    msgFrame.css("width", (window.innerWidth-nameListWidth).toString()+"px");
+    msgFrame.css("width", (window.innerWidth-nameListWidth-32).toString()+"px");
+    
+    if (resizeInt != -1)
+    {
+        clearInterval(resizeInt);
+    }
+    
+    resizeInt = setInterval(function() {
+        
+        msgFrame.css("width", (window.innerWidth-nameListWidth).toString()+"px");
+        clearInterval(resizeInt);
+        resizeInt = -1;
+    }, 100);
 }
 
 function scrollDown()
@@ -424,8 +438,21 @@ function updateNameList()
                 return 0;
             });
         }
+        if (adminModsFirst)
+        {
+            users.sort(function(a, b) {
+                
+                if(a.authority.indexOf("admin.png") != -1 && b.authority.indexOf("admin.png") == -1) return -1;
+                if(a.authority.indexOf("admin.png") == -1 && b.authority.indexOf("admin.png") != -1) return 1;
+                if(a.authority.indexOf("creator.png") != -1 && b.authority.indexOf("creator.png") == -1) return -1;
+                if(a.authority.indexOf("creator.png") == -1 && b.authority.indexOf("creator.png") != -1) return 1;
+                if(a.authority.indexOf("mod.png") != -1 && b.authority.indexOf("mod.png") == -1) return -1;
+                if(a.authority.indexOf("mod.png") == -1 && b.authority.indexOf("mod.png") != -1) return 1;
+                return 0;
+            });
+        }
         
-        var sidebarHtml = '<div class="btn-group"  style="position: absolute; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px;"><label id="sidebar-move" type="button" class="btn btn-default" onclick="moveNameList()">'+(isOnRight ? "&lt;" : "&gt;")+'</label><label id="sidebar-x" type="button" class="btn btn-default" onclick="removeNameList()">X</label></div><h3 style="margin-top: 10px;">Users: '+users.length+'</h3><div class="dropdown"><label id="sidebar-sort" type="button" class="btn btn-default" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Sorting <span class="caret"></span></label><ul class="dropdown-menu" style="padding: 5px;" role="menu aria-labelledby="sidebar-sort"><li class="dd-option" onclick="sortNameList(\'default\');">Join Order</li><li class="dd-option" onclick="sortNameList(\'alpha\');">Alphabetical</li></ul></div><ul id="names">';
+        var sidebarHtml = '<div class="btn-group"  style="position: absolute; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px;"><label id="sidebar-move" type="button" class="btn btn-default" onclick="moveNameList()">'+(isOnRight ? "&lt;" : "&gt;")+'</label><label id="sidebar-x" type="button" class="btn btn-default" onclick="removeNameList()">X</label></div><h3 style="margin-top: 10px;">Users: '+users.length+'</h3><div class="dropdown"><label id="sidebar-sort" type="button" class="btn btn-default" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Sorting <span class="caret"></span></label><ul class="dropdown-menu" style="padding: 5px;" role="menu aria-labelledby="sidebar-sort"><li class="dd-option" onclick="sortNameList(\'default\');">Join Order</li><li class="dd-option" onclick="sortNameList(\'alpha\');">Alphabetical</li><li class="dd-option" onclick="sortNameList(\'adminmodsfirst\');">'+(adminModsFirst ? "&#9745" : "&#9744")+' Admin/Mods First</li></ul></div><ul id="names">';
         for (var i = 0; i < users.length; i++)
         {
             sidebarHtml += "<li>"+"<span class='authority-tag'>"+users[i].authority+"</span><span class='gender-role-tags'>"+users[i].gender+users[i].role+"</span>"+users[i].nick+"</li>";
@@ -438,9 +465,17 @@ function updateNameList()
 
 function sortNameList(type)
 {
-    setCookie("sorting", type);
+    if (type == "adminmodsfirst")
+    {
+        adminModsFirst = !adminModsFirst;
+        setCookie("sortadminmodsfirst", adminModsFirst.toString());
+    }
+    else
+    {
+        setCookie("sorting", type);
+        sorting = type;
+    }
     socket.emit('reqnewroster');
-    sorting = type;
 }
 
 function loadGif(id, url)
