@@ -25,6 +25,7 @@ var msgFrame = null;
 var msgList = null;
 var cutoffWithTicker = 74;
 var cutoffWithoutTicker = 40;
+var resizeInt = -1;
 
 //For name section
 var nameList = null;
@@ -52,7 +53,7 @@ var lastMessenger = "";
 //For AFK
 var date = new Date();
 var timeSinceLastMessage = Date.now();
-var isAFK = false;
+var AFK = false;
 
 //For Day/Night Mode
 var isDay = true;
@@ -66,6 +67,7 @@ var initialNews = false;
 //For Userlist
 var users = null;
 var sorting = "default";
+var adminModsFirst = false;
 
 //For Autocomplete
 var tcOptions = {
@@ -139,6 +141,7 @@ $(document).ready(function()
         toggleDayNight();
     }
     sorting = getCookie("sorting", "default");
+    adminModsFirst = getCookie("sortadminmodsfirst", "false") == "true";
     
     // Disclaimer setup
     if (getCookie("disclaimer", "show") == "show")
@@ -818,10 +821,10 @@ $(document).ready(function()
 		if(bigchat)
 		{
 			timenow = Date.now()
-			if ((!isAFK) && (timenow - timeSinceLastMessage > afkTime)) // If we're not AFK, but we haven't said anything in 30 minutes, mark us AFK.
+			if ((!AFK) && (timenow - timeSinceLastMessage > afkTime)) // If we're not AFK, but we haven't said anything in 30 minutes, mark us AFK.
 		    {
-		    	socket.emit('AFK', {isAFK: true, nick: nick })
-		    	isAFK = true;
+		    	socket.emit('AFK', {AFK: true, nick: nick })
+		    	AFK = true;
 		    }
 		}
 
@@ -831,15 +834,15 @@ $(document).ready(function()
 	{
 		if(bigchat && data.nick == nick)
         {
-            isAFK = data.isAFK;
+            AFK = data.AFK;
 			timeSinceLastMessage = Date.now();
         }
         
-        for (var i = 0; i < users.names.length; i++)
+        for (var i = 0; i < users.length; i++)
         {
-            if (users.names[i] == data.nick)
+            if (users[i].nick == data.nick)
             {
-                users.afk[i] = data.isAFK;
+                users[i].afk = data.AFK;
                 updateNameList();
             }
         }
@@ -919,7 +922,19 @@ function doResize() {
     {
         nameList.css("height", (window.innerHeight-(newsTicker ? cutoffWithTicker : cutoffWithoutTicker)).toString()+"px");
     }
-    msgFrame.css("width", (window.innerWidth-nameListWidth).toString()+"px");
+    msgFrame.css("width", (window.innerWidth-nameListWidth-32).toString()+"px");
+    
+    if (resizeInt != -1)
+    {
+        clearInterval(resizeInt);
+    }
+    
+    resizeInt = setInterval(function() {
+        
+        msgFrame.css("width", (window.innerWidth-nameListWidth).toString()+"px");
+        clearInterval(resizeInt);
+        resizeInt = -1;
+    }, 100);
 }
 
 function isWithinScrollThreshold() {
@@ -1050,8 +1065,21 @@ function updateNameList()
                 return 0;
             });
         }
+        if (adminModsFirst)
+        {
+            users.sort(function(a, b) {
+                
+                if(a.authority.indexOf("admin.png") != -1 && b.authority.indexOf("admin.png") == -1) return -1;
+                if(a.authority.indexOf("admin.png") == -1 && b.authority.indexOf("admin.png") != -1) return 1;
+                if(a.authority.indexOf("creator.png") != -1 && b.authority.indexOf("creator.png") == -1) return -1;
+                if(a.authority.indexOf("creator.png") == -1 && b.authority.indexOf("creator.png") != -1) return 1;
+                if(a.authority.indexOf("mod.png") != -1 && b.authority.indexOf("mod.png") == -1) return -1;
+                if(a.authority.indexOf("mod.png") == -1 && b.authority.indexOf("mod.png") != -1) return 1;
+                return 0;
+            });
+        }
         
-        var sidebarHtml = '<div class="btn-group"  style="position: absolute; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px;"><label id="sidebar-move" type="button" class="btn btn-default" onclick="moveNameList()">'+(isOnRight ? "&lt;" : "&gt;")+'</label><label id="sidebar-x" type="button" class="btn btn-default" onclick="removeNameList()">X</label></div><h3 style="margin-top: 10px;">Users: '+users.length+'</h3><div class="dropdown"><label id="sidebar-sort" type="button" class="btn btn-default" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Sorting <span class="caret"></span></label><ul class="dropdown-menu" style="padding: 5px;" role="menu aria-labelledby="sidebar-sort"><li class="dd-option" onclick="sortNameList(\'default\');">Join Order</li><li class="dd-option" onclick="sortNameList(\'alpha\');">Alphabetical</li></ul></div><ul id="names">';
+        var sidebarHtml = '<div class="btn-group"  style="position: absolute; top: 3px; right: 3px; padding-top: 3px; padding-bottom: 3px;"><label id="sidebar-move" type="button" class="btn btn-default" onclick="moveNameList()">'+(isOnRight ? "&lt;" : "&gt;")+'</label><label id="sidebar-x" type="button" class="btn btn-default" onclick="removeNameList()">X</label></div><h3 style="margin-top: 10px;">Users: '+users.length+'</h3><div class="dropdown"><label id="sidebar-sort" type="button" class="btn btn-default" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Sorting <span class="caret"></span></label><ul class="dropdown-menu" style="padding: 5px;" role="menu aria-labelledby="sidebar-sort"><li class="dd-option" onclick="sortNameList(\'default\');">Join Order</li><li class="dd-option" onclick="sortNameList(\'alpha\');">Alphabetical</li><li><hr></li><li class="dd-option" onclick="sortNameList(\'adminmodsfirst\');">'+(adminModsFirst ? "&#9745" : "&#9744")+' Admin/Mods First</li></ul></div><ul id="names">';
         for (var i = 0; i < users.length; i++)
         {
             sidebarHtml += "<li>"+"<span class='authority-tag'>"+users[i].authority+"</span><span  style='"+(users[i].afk ? "color: #777777;" : "")+"'>"+"<span class='gender-role-tags'>"+users[i].gender+users[i].role+"</span>"+users[i].nick+"</span></li>";
@@ -1064,9 +1092,17 @@ function updateNameList()
 
 function sortNameList(type)
 {
-    setCookie("sorting", type);
+    if (type == "adminmodsfirst")
+    {
+        adminModsFirst = !adminModsFirst;
+        setCookie("sortadminmodsfirst", adminModsFirst.toString());
+    }
+    else
+    {
+        setCookie("sorting", type);
+        sorting = type;
+    }
     socket.emit('reqnewroster');
-    sorting = type;
 }
 
 function loadGif(id, url)
