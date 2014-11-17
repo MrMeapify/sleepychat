@@ -19,20 +19,11 @@ var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "2"));
 
 // Admin/Mod stuff
 var administrator = "ElysianTail-Senpai";
-var administratorCaps = administrator.toUpperCase();
 var moderators = ['MrMeapify', 'ScottB', 'Amburo', 'Coyote_D_Lawgiver', 'Anonymoususer2', 'Hypnonymoose', 'BurntPenny', 'Gaige'];
-var moderatorsCaps = moderators.reduce(function(previousValue, currentValue, index, array) 
-{
-	return previousValue.concat([currentValue.toUpperCase()])
-}, []) // get a list of all the mod's names, in uppercase
-var moderatorsWithPass = moderators.reduce(function(previousValue, currentValue, index, array) 
-{
-	return previousValue.concat([currentValue + moderatorP])
-}, []) // get a list of all the mod's names, plus the mod password
 
 //Acquire the ban list.
 var banList = [];
-fs.readFile("Ban List.blt", function(err, logData) {
+fs.readFile("Ban List.blt", function (err, logData) {
 
 	if (err) throw err;
 	
@@ -100,6 +91,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 var connections = [];
+var recentConns = [];
 var users = [];
 var privaterooms = [];
 
@@ -145,8 +137,8 @@ io.on('connection', function(socket)
             forwardedFor = [ socket.request.connection.remoteAddress ];
         }
 
+        //Connection Capping
         var ip = forwardedFor[forwardedFor.length - 1];
-
         for (var i = 0; i < connections.length; i++)
         {
             if (ip == connections[i].realIp)
@@ -154,14 +146,57 @@ io.on('connection', function(socket)
                 numberOfSimilarIps++;
             }
         }
-
         if (numberOfSimilarIps > maxAllowedSimilarIps)
         {
-            socket.emit('denial');
+            socket.emit('denial', "There are too many users with your IP address at this time.");
             socket.conn.close();
         }
+        
+        //Connection Throttling
+        var recentConn = -1;
+        for (var i = 0; i < recentConns.length; i++)
+        {
+            if (recentConns[i].ip == ip)
+            {
+                recentConn = i; 
+            }
+        }
+        if (recentConn != -1)
+        {
+            var connToTest = recentConns[recentConn];
+            
+            var timeToReset = 15000;
+            
+            if (connToTest.tries > 2)
+            {
+                socket.emit('denial', "This IP is creating too many connections too quickly.");
+                socket.conn.close();
+                timeToReset = 1000*60*10; //10 minutes.
+            }
+            
+            connToTest.tries++;
+            clearInterval(connToTest.interval);
+            var newInterval = setInterval(function() {
 
-        socket.emit('allow', {keyString: (process.env.YTAPIKEY || "NOKEY"), disallowedNames: disallowedNames });
+                recentConns.remove(connToTest);
+                clearInterval(newInterval);
+            }, timeToReset);
+            connToTest.interval = newInterval;
+        }
+        else
+        {
+            
+            var newConn = {ip: ip, tries: 1, interval: -1};
+            var newInterval = setInterval(function() {
+                
+                recentConns.remove(newConn);
+                clearInterval(newInterval);
+            }, 15000);
+            newConn.interval = newInterval;
+            recentConns.push(newConn);
+        }
+
+        socket.emit('allow', {keyString: (process.env.YTAPIKEY || "NOKEY") });
         socket.emit('newsupdate', { array: currentNews });
         var connection = { realIp: ip };
         connections.push(connection);
@@ -487,13 +522,13 @@ io.on('connection', function(socket)
         {
             try
             {
-                spamPoints++;
-                
                 var user = getUserByNick(nick);
-                if(data.message != "" && user)
+                if(data.message != "" && !(/^ +$/.test(data.message)) && user)
                 {
-                    // escape html
+                    spamPoints++;
                     message=data.message;
+                    
+                    // Escape html
                     message = message.replace(/;/g, "&#59;"); 			//escape ;
                     message = message.replace(/&([^#$])/, "&#38;$1");	//escape &
                     message = message.replace(/</g, "&lt;");  			//escape <
@@ -501,6 +536,29 @@ io.on('connection', function(socket)
                     message = message.replace(/"/g, "&quot;");			//escape "
                     message = message.replace(/'/g, "&#39;"); 			//escape '
                     message = message.replace(/^\s+|\s+$/g, '');
+                    
+                    // Check for any disallowed words or phrases.
+                    if (!room)
+                    {
+                        for (var i = 0; i < disallowedPhrases.length; i++)
+                        {
+                            disallowedPhrases[i].lastIndex = 0;
+                            if (disallowedPhrases[i].test(message))
+                            {
+                                //Disallowed word/phrase detected.
+                                for (var j = 0; j < users.length; j++)
+                                {
+                                    if (users[j].admin || users[j].mod)
+                                    {
+                                        users[j].socket.emit('information', "[INFO] User \""+user.nick+"\" @ IP \""+user.realIp+"\" used a banned word/phrase:<br>"+message);
+                                    }
+                                }
+                                console.log(user.nick+" has sent a message with a banned word/phrase.")
+                                socket.conn.close();
+                            }
+                        }
+                    }
+                    
                     if (message.lastIndexOf('/svrmsg ', 0) === 0 && (user.admin || user.mod))
                     {
                         var command = '/svrmsg ';
@@ -1536,20 +1594,26 @@ var helpFormatting = [['information', "[INFO] ~~~"],
 					['information', "[INFO] -- Text surrounded by double grave accents (``) is <span style='font-family: Georgia, serif'>serif font</span>."],
 					['information', "[INFO] ~~~"]];
 
-var disallowedNames = ["Administrator",
-                       "Admin",
-                      "Moderator",
-                      "Mod",
-                      "Sleepychat",
-                      "SleepyChat",
-                      "Server",
-                      "God",
-                      "Jesus",
-                      "Alla",
-                      "Buddha",
-                      "Satan",
-                      "Lucifer",
-                      "all"];
+var disallowedNames = [/(?:a|4)dm(?:i|!|1)n/gi,                             //Admin(istrator)
+                       /(?:s|5)(?:l|i)(?:e|3)(?:e|3)pych(?:a|4)(?:t|7)/gi,  //Sleepychat
+                       /(?:s|5)(?:e|3)rv(?:e|3)r/gi,                        //server
+                       /g(?:o|0)d/gi,                                       //God
+                       /J(?:e|3)(?:s|5)u(?:s|5)/gi,                         //Jesus
+                       /(?:a|4)(?:l|i)(?:l|i)(?:a|4)(?:h)?/gi,              //Alla(h)
+                       /buddh(?:a|4)/gi,                                    //Buddha
+                       /(?:s|5)(?:a|4)(?:t|7)(?:a|4)n/gi,                   //Satan
+                       /(?:l|i)uc(?:i|!|1)f(?:e|3)r/gi,                     //Lucifer
+                       /n(?:i|!|1)gg(?:a|(?:e|3)r)/gi,                      //Nigg(a OR er)
+                       /r(?:a|4)p(?:e|(?:i|!|1)(?:s|5)(?:t|7))/gi,          //Rap(e OR ist)
+                       /r(?:a|4)c(?:i|!|1)(?:s|5)(?:t|7)/gi,                //Racist
+                       /cun(?:t|7)/gi,                                      //Cunt
+                       /all/gi                                              //all
+                      ];
+
+var disallowedPhrases = [/n(?:i|!|1)gg(?:a|(?:e|3)r)/gi,        //Nigg(a OR er)
+                         /cun(?:t|7)/gi,                        //Cunt
+                         /r(?:a|4)p(?:i|!|1)(?:s|5)(?:t|7)/gi,  //Rapist
+                        ];
 
 
 function giveHelp(str, socket){
@@ -1875,7 +1939,8 @@ function testNick(nickToTest)
 	{
         for (var i = 0; i < disallowedNames.length; i++)
         {
-            if (nickToTest.toLowerCase() == disallowedNames[i].toLowerCase())
+            disallowedNames[i].lastIndex = 0;
+            if (disallowedNames[i].test(nickToTest))
             {
                 return "This name is not allowed by the site.";
             }
