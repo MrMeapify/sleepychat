@@ -537,21 +537,24 @@ io.on('connection', function(socket)
                     message = message.replace(/^\s+|\s+$/g, '');
                     
                     // Check for any disallowed words or phrases.
-                    for (var i = 0; i < disallowedPhrases.length; i++)
+                    if (!room)
                     {
-                        disallowedPhrases[i].lastIndex = 0;
-                        if (disallowedPhrases[i].test(message))
+                        for (var i = 0; i < disallowedPhrases.length; i++)
                         {
-                            //Disallowed word/phrase detected.
-                            for (var j = 0; j < users.length; j++)
+                            disallowedPhrases[i].lastIndex = 0;
+                            if (disallowedPhrases[i].test(message))
                             {
-                                if (users[j].admin || users[j].mod)
+                                //Disallowed word/phrase detected.
+                                for (var j = 0; j < users.length; j++)
                                 {
-                                    users[j].socket.emit('information', "[INFO] User \""+user.nick+"\" @ IP \""+user.realIp+"\" used a banned word/phrase:<br>"+message);
+                                    if (users[j].admin || users[j].mod)
+                                    {
+                                        users[j].socket.emit('information', "[INFO] User \""+user.nick+"\" @ IP \""+user.realIp+"\" used a banned word/phrase:<br>"+message);
+                                    }
                                 }
+                                console.log(user.nick+" has sent a message with a banned word/phrase.")
+                                socket.conn.close();
                             }
-                            console.log(user.nick+" has sent a message with a banned word/phrase.")
-                            socket.conn.close();
                         }
                     }
                     
@@ -1606,8 +1609,7 @@ var disallowedNames = [/(?:a|4)dm(?:i|!|1)n/gi,                             //Ad
                        /all/gi                                              //all
                       ];
 
-var disallowedPhrases = [/c(?:(?: |_){1,9})?(?:o|0)(?:(?: |_){1,9})?v(?:(?: |_){1,9})?(?:e|3)(?:(?: |_){1,9})?r(?:(?: |_){1,9})?(?:t|7)(?:(?: |_){1,9})?h(?:(?: |_){1,9})?y(?:(?: |_){1,9})?p(?:(?: |_){1,9})?n(?:(?: |_){1,9})?(?:o|0)(?:(?: |_){1,9})?(?:t|7)(?:(?: |_){1,9})?(?:i|!|1)(?:(?: |_){1,9})?(?:s|5)(?:(?: |_){1,9})?m/gi, //coverthypnotism
-                         /n(?:i|!|1)gg(?:a|(?:e|3)r)/gi,        //Nigg(a OR er)
+var disallowedPhrases = [/n(?:i|!|1)gg(?:a|(?:e|3)r)/gi,        //Nigg(a OR er)
                          /cun(?:t|7)/gi,                        //Cunt
                          /r(?:a|4)p(?:i|!|1)(?:s|5)(?:t|7)/gi,  //Rapist
                         ];
