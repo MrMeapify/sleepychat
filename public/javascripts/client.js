@@ -18,7 +18,20 @@ var soundJnLv = true;
 var soundSite = true;
 var denied = false;
 var isDCd = false;
-var disallowedNames = [];
+
+var disallowedNames = [/(?:a|4)dm(?:i|!|1)n/gi,                                                     //Admin(istrator)
+                      /m(?:o|0)d(?:e|3)r(?:a|4)(?:t|7)(?:o|0)r/gi,                                  //Moderator
+                      /(?:s|5)(?:l|i)(?:e|3)(?:e|3)pych(?:a|4)(?:t|7)/gi,                           //Sleepychat
+                      /(?:s|5)(?:e|3)rv(?:e|3)r/gi,                                                 //server
+                      /g(?:o|0)d/gi,                                                                //God
+                      /J(?:e|3)(?:s|5)u(?:s|5)/gi,                                                  //Jesus
+                      /(?:a|4)(?:l|i)(?:l|i)(?:a|4)(?:h)?/gi,                                       //Alla(h)
+                      /buddh(?:a|4)/gi,                                                             //Buddha
+                      /(?:s|5)(?:a|4)(?:t|7)(?:a|4)n/gi,                                            //Satan
+                      /(?:l|i)uc(?:i|!|1)f(?:e|3)r/gi,                                              //Lucifer
+                      /n(?:i|!|1)gg(?:e|3)r/gi,                                                     //Nigger
+                      /r(?:a|4)p(?:e|(?:i|!|1)(?:s|5)(?:t|7))/gi,                                   //Rap(e OR ist)
+                      /all/gi];                                                                     //all
 
 //For chat section
 var msgFrame = null;
@@ -42,7 +55,7 @@ var wasConnectionAllowed = false;
 var isOnDisclaimer = true;
 
 //For YouTube Embedding
-var apiKey = "NOTLOADED";
+var gapiKey = "NOTLOADED";
 var isGapiLoaded = false;
 var isYapiLoaded = false;
 var youTubeMatcher = /\^~([A-Za-z0-9-_]{11})~\^~(?:([A-Za-z0-9-_]{24}))?~\^?/g; // Matches the video ID between ^~ ~^, and optionally matches the playlist ID between ~ ~^
@@ -68,6 +81,7 @@ var initialNews = false;
 var users = null;
 var sorting = "default";
 var adminModsFirst = false;
+var afkLast = true;
 
 //For Autocomplete
 var tcOptions = {
@@ -142,6 +156,7 @@ $(document).ready(function()
     }
     sorting = getCookie("sorting", "default");
     adminModsFirst = getCookie("sortadminmodsfirst", "false") == "true";
+    afkLast = getCookie("sortafklast", "true") != "false";
     
     // Disclaimer setup
     if (getCookie("disclaimer", "show") == "show")
@@ -343,8 +358,7 @@ $(document).ready(function()
                 wasConnectionAllowed = true;
             }
             
-            disallowedNames = connectionInfo.disallowedNames;
-            apiKey = connectionInfo.keyString;
+            gapiKey = connectionInfo.keyString;
             if (!isYapiLoaded)
             {
                 if (isGapiLoaded)
@@ -358,10 +372,10 @@ $(document).ready(function()
             }
 		});
 		
-		socket.on('denial', function()
+		socket.on('denial', function(reason)
 		{
 			denied = true;
-			msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Your connection was refused. There are too many users with your IP address at this time.</span>"));
+			msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Your connection was refused. "+reason+"</span>"));
 		});
         
         socket.on('newsmod', function(newsData)
@@ -664,7 +678,7 @@ $(document).ready(function()
                         removeNameList();
                     }
                 }
-                else
+                else if (msgInBox != "" && !(/^ +$/.test(msgInBox)))
                 {
                     socket.emit('chat message', { message: msgInBox });
                     scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
@@ -766,7 +780,7 @@ $(document).ready(function()
                     removeNameList();
                 }
             }
-            else
+            else if (msgInBox != "" && !(/^ +$/.test(msgInBox)))
             {
                 socket.emit('chat message', { message: msgInBox });
                 scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
@@ -974,7 +988,8 @@ function testNick(nickToTest)
 	{
         for (var i = 0; i < disallowedNames.length; i++)
         {
-            if (nickToTest.toLowerCase() == disallowedNames[i].toLowerCase())
+            disallowedNames[i].lastIndex = 0;
+            if (disallowedNames[i].test(nickToTest))
             {
                 return "This name is not allowed.";
             }
@@ -1065,21 +1080,30 @@ function updateNameList()
                 return 0;
             });
         }
+        if (afkLast)
+        {
+            users.sort(function(a, b) {
+                
+                if(!a.afk && b.afk) return -1;
+                if(a.afk && !b.afk) return 1;
+                return 0;
+            });
+        }
         if (adminModsFirst)
         {
             users.sort(function(a, b) {
                 
                 if(a.authority.indexOf("admin.png") != -1 && b.authority.indexOf("admin.png") == -1) return -1;
-                if(a.authority.indexOf("admin.png") == -1 && b.authority.indexOf("admin.png") != -1) return 1;
                 if(a.authority.indexOf("creator.png") != -1 && b.authority.indexOf("creator.png") == -1) return -1;
-                if(a.authority.indexOf("creator.png") == -1 && b.authority.indexOf("creator.png") != -1) return 1;
                 if(a.authority.indexOf("mod.png") != -1 && b.authority.indexOf("mod.png") == -1) return -1;
+                if(a.authority.indexOf("admin.png") == -1 && b.authority.indexOf("admin.png") != -1) return 1;
+                if(a.authority.indexOf("creator.png") == -1 && b.authority.indexOf("creator.png") != -1) return 1;
                 if(a.authority.indexOf("mod.png") == -1 && b.authority.indexOf("mod.png") != -1) return 1;
                 return 0;
             });
         }
         
-        var sidebarHtml = '<div class="btn-group" id="sidebar-buttons"><label id="sidebar-move" type="button" class="btn btn-default" onclick="moveNameList()">'+(isOnRight ? "&lt;" : "&gt;")+'</label><label id="sidebar-x" type="button" class="btn btn-default" onclick="removeNameList()">X</label></div><div class="dropdown" id="sidebar-sort-btn"><label id="sidebar-sort" type="button" class="btn btn-default" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Sorting <span class="caret"></span></label><ul class="dropdown-menu" style="padding: 5px;" role="menu aria-labelledby="sidebar-sort"><li class="dd-option" onclick="sortNameList(\'default\');">Join Order</li><li class="dd-option" onclick="sortNameList(\'alpha\');">Alphabetical</li><li><hr></li><li class="dd-option" onclick="sortNameList(\'adminmodsfirst\');">'+(adminModsFirst ? "&#9745" : "&#9744")+' Admin/Mods First</li></ul></div><br/><br/><h3 style="margin-top: 10px;">Users: '+users.length+'</h3><ul id="names">';
+        var sidebarHtml = '<div class="btn-group" id="sidebar-buttons"><label id="sidebar-move" type="button" class="btn btn-default" onclick="moveNameList()">'+(isOnRight ? "&lt;" : "&gt;")+'</label><label id="sidebar-x" type="button" class="btn btn-default" onclick="removeNameList()">X</label></div><div class="dropdown" id="sidebar-sort-btn"><label id="sidebar-sort" type="button" class="btn btn-default" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Sorting <span class="caret"></span></label><ul class="dropdown-menu" style="padding: 5px;" role="menu aria-labelledby="sidebar-sort"><li class="dd-option" onclick="sortNameList(\'default\');">Join Order</li><li class="dd-option" onclick="sortNameList(\'alpha\');">Alphabetical</li><li><hr></li><li class="dd-option" onclick="sortNameList(\'adminmodsfirst\');">'+(adminModsFirst ? "&#9745" : "&#9744")+' Admin/Mods First</li><li class="dd-option" onclick="sortNameList(\'afklast\');">'+(afkLast ? "&#9745" : "&#9744")+' AFK Last</li></ul></div><br/><br/><h3 style="margin-top: 10px;">Users: '+users.length+'</h3><ul id="names">';
         for (var i = 0; i < users.length; i++)
         {
             sidebarHtml += "<li>"+"<span class='authority-tag'>"+users[i].authority+"</span><span  style='"+(users[i].afk ? "color: #777777;" : "")+"'>"+"<span class='gender-role-tags'>"+users[i].gender+users[i].role+"</span>"+users[i].nick+"</span></li>";
@@ -1096,6 +1120,11 @@ function sortNameList(type)
     {
         adminModsFirst = !adminModsFirst;
         setCookie("sortadminmodsfirst", adminModsFirst.toString());
+    }
+    else if (type == "afklast")
+    {
+        afkLast = !afkLast;
+        setCookie("sortafklast", afkLast.toString());
     }
     else
     {
@@ -1274,15 +1303,15 @@ function requestYouTubeEmbed (videoId) {
 function youtubeApiLoad() {
     
     isGapiLoaded = true;
-    if (apiKey != "NOKEY" && apiKey != "NOTLOADED")
+    if (gapiKey != "NOKEY" && gapiKey != "NOTLOADED")
     {
-        gapi.client.setApiKey(apiKey);
+        gapi.client.setApiKey(gapiKey);
         gapi.client.load('youtube', 'v3', function() {
             isYapiLoaded = true;
             console.log('YouTube API v3 Loaded.');
         });
     }
-    else if (apiKey == "NOTLOADED")
+    else if (gapiKey == "NOTLOADED")
     {
         console.log('Warning: YT API Key Not Yet Received. Will reattempt after connection to server.');
     }
@@ -1291,7 +1320,7 @@ function youtubeApiLoad() {
         console.log('ERROR: YT API Key Invalid.');
     }
     
-    apiKey = "";
+    gapiKey = "";
 }
 
 function youtubeRequestSucceeded (resp) {
