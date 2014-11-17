@@ -161,7 +161,7 @@ io.on('connection', function(socket)
             socket.conn.close();
         }
 
-        socket.emit('allow', {keyString: (process.env.YTAPIKEY || "NOKEY"), disallowedNames: disallowedNames });
+        socket.emit('allow', {keyString: (process.env.YTAPIKEY || "NOKEY") });
         socket.emit('newsupdate', { array: currentNews });
         var connection = { realIp: ip };
         connections.push(connection);
@@ -489,10 +489,11 @@ io.on('connection', function(socket)
                 spamPoints++;
                 
                 var user = getUserByNick(nick);
-                if(data.message != "" && user)
+                if(data.message != "" && !(/^ +$/.test(data.message)) && user)
                 {
-                    // escape html
                     message=data.message;
+                    
+                    // Escape html
                     message = message.replace(/;/g, "&#59;"); 			//escape ;
                     message = message.replace(/&([^#$])/, "&#38;$1");	//escape &
                     message = message.replace(/</g, "&lt;");  			//escape <
@@ -500,6 +501,26 @@ io.on('connection', function(socket)
                     message = message.replace(/"/g, "&quot;");			//escape "
                     message = message.replace(/'/g, "&#39;"); 			//escape '
                     message = message.replace(/^\s+|\s+$/g, '');
+                    
+                    // Check for any disallowed words or phrases.
+                    for (var i = 0; i < disallowedPhrases.length; i++)
+                    {
+                        disallowedPhrases[i].lastIndex = 0;
+                        if (disallowedPhrases[i].test(message))
+                        {
+                            //Disallowed word/phrase detected.
+                            for (var j = 0; j < users.length; j++)
+                            {
+                                if (users[j].admin || users[j].mod)
+                                {
+                                    users[j].socket.emit('information', "[INFO] User \""+user.nick+"\" @ IP \""+user.realIp+"\" used a banned word/phrase:<br>"+message);
+                                }
+                            }
+                            console.log(user.nick+" has sent a message with a banned word/phrase.")
+                            socket.conn.close();
+                        }
+                    }
+                    
                     if (message.lastIndexOf('/svrmsg ', 0) === 0 && (user.admin || user.mod))
                     {
                         var command = '/svrmsg ';
@@ -1535,20 +1556,27 @@ var helpFormatting = [['information', "[INFO] ~~~"],
 					['information', "[INFO] -- Text surrounded by double grave accents (``) is <span style='font-family: Georgia, serif'>serif font</span>."],
 					['information', "[INFO] ~~~"]];
 
-var disallowedNames = ["Administrator",
-                       "Admin",
-                      "Moderator",
-                      "Mod",
-                      "Sleepychat",
-                      "SleepyChat",
-                      "Server",
-                      "God",
-                      "Jesus",
-                      "Alla",
-                      "Buddha",
-                      "Satan",
-                      "Lucifer",
-                      "all"];
+var disallowedNames = [/(?:a|4)dm(?:i|!|1)n/gi,                             //Admin(istrator)
+                       /(?:s|5)(?:l|i)(?:e|3)(?:e|3)pych(?:a|4)(?:t|7)/gi,  //Sleepychat
+                       /(?:s|5)(?:e|3)rv(?:e|3)r/gi,                        //server
+                       /g(?:o|0)d/gi,                                       //God
+                       /J(?:e|3)(?:s|5)u(?:s|5)/gi,                         //Jesus
+                       /(?:a|4)(?:l|i)(?:l|i)(?:a|4)(?:h)?/gi,              //Alla(h)
+                       /buddh(?:a|4)/gi,                                    //Buddha
+                       /(?:s|5)(?:a|4)(?:t|7)(?:a|4)n/gi,                   //Satan
+                       /(?:l|i)uc(?:i|!|1)f(?:e|3)r/gi,                     //Lucifer
+                       /n(?:i|!|1)gg(?:a|(?:e|3)r)/gi,                      //Nigg(a OR er)
+                       /r(?:a|4)p(?:e|(?:i|!|1)(?:s|5)(?:t|7))/gi,          //Rap(e OR ist)
+                       /r(?:a|4)c(?:i|!|1)(?:s|5)(?:t|7)/gi,                //Racist
+                       /cun(?:t|7)/gi,                                      //Cunt
+                       /all/gi                                              //all
+                      ];
+
+var disallowedPhrases = [/c(?:(?: |_){1,9})?(?:o|0)(?:(?: |_){1,9})?v(?:(?: |_){1,9})?(?:e|3)(?:(?: |_){1,9})?r(?:(?: |_){1,9})?(?:t|7)(?:(?: |_){1,9})?h(?:(?: |_){1,9})?y(?:(?: |_){1,9})?p(?:(?: |_){1,9})?n(?:(?: |_){1,9})?(?:o|0)(?:(?: |_){1,9})?(?:t|7)(?:(?: |_){1,9})?(?:i|!|1)(?:(?: |_){1,9})?(?:s|5)(?:(?: |_){1,9})?m/gi, //coverthypnotism
+                         /n(?:i|!|1)gg(?:a|(?:e|3)r)/gi,        //Nigg(a OR er)
+                         /cun(?:t|7)/gi,                        //Cunt
+                         /r(?:a|4)p(?:i|!|1)(?:s|5)(?:t|7)/gi,  //Rapist
+                        ];
 
 
 function giveHelp(str, socket){
@@ -1874,7 +1902,8 @@ function testNick(nickToTest)
 	{
         for (var i = 0; i < disallowedNames.length; i++)
         {
-            if (nickToTest.toLowerCase() == disallowedNames[i].toLowerCase())
+            disallowedNames[i].lastIndex = 0;
+            if (disallowedNames[i].test(nickToTest))
             {
                 return "This name is not allowed by the site.";
             }
