@@ -19,20 +19,11 @@ var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "2"));
 
 // Admin/Mod stuff
 var administrator = "ElysianTail-Senpai";
-var administratorCaps = administrator.toUpperCase();
 var moderators = ['MrMeapify', 'ScottB', 'Amburo', 'Coyote_D_Lawgiver', 'Anonymoususer2', 'Hypnonymoose', 'BurntPenny', 'Gaige'];
-var moderatorsCaps = moderators.reduce(function(previousValue, currentValue, index, array) 
-{
-	return previousValue.concat([currentValue.toUpperCase()])
-}, []) // get a list of all the mod's names, in uppercase
-var moderatorsWithPass = moderators.reduce(function(previousValue, currentValue, index, array) 
-{
-	return previousValue.concat([currentValue + moderatorP])
-}, []) // get a list of all the mod's names, plus the mod password
 
 //Acquire the ban list.
 var banList = [];
-fs.readFile("Ban List.blt", function(err, logData) {
+fs.readFile("Ban List.blt", function (err, logData) {
 
 	if (err) throw err;
 	
@@ -100,6 +91,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 var connections = [];
+var recentConns = [];
 var users = [];
 var privaterooms = [];
 
@@ -145,8 +137,8 @@ io.on('connection', function(socket)
             forwardedFor = [ socket.request.connection.remoteAddress ];
         }
 
+        //Connection Capping
         var ip = forwardedFor[forwardedFor.length - 1];
-
         for (var i = 0; i < connections.length; i++)
         {
             if (ip == connections[i].realIp)
@@ -154,11 +146,54 @@ io.on('connection', function(socket)
                 numberOfSimilarIps++;
             }
         }
-
         if (numberOfSimilarIps > maxAllowedSimilarIps)
         {
-            socket.emit('denial');
+            socket.emit('denial', "There are too many users with your IP address at this time.");
             socket.conn.close();
+        }
+        
+        //Connection Throttling
+        var recentConn = -1;
+        for (var i = 0; i < recentConns.length; i++)
+        {
+            if (recentConns[i].ip == ip)
+            {
+                recentConn = i; 
+            }
+        }
+        if (recentConn != -1)
+        {
+            var connToTest = recentConns[recentConn];
+            
+            var timeToReset = 15000;
+            
+            if (connToTest.tries > 2)
+            {
+                socket.emit('denial', "This IP is creating too many connections too quickly.");
+                socket.conn.close();
+                timeToReset = 1000*60*10; //10 minutes.
+            }
+            
+            connToTest.tries++;
+            clearInterval(connToTest.interval);
+            var newInterval = setInterval(function() {
+
+                recentConns.remove(connToTest);
+                clearInterval(newInterval);
+            }, timeToReset);
+            connToTest.interval = newInterval;
+        }
+        else
+        {
+            
+            var newConn = {ip: ip, tries: 1, interval: -1};
+            var newInterval = setInterval(function() {
+                
+                recentConns.remove(newConn);
+                clearInterval(newInterval);
+            }, 15000);
+            newConn.interval = newInterval;
+            recentConns.push(newConn);
         }
 
         socket.emit('allow', {keyString: (process.env.YTAPIKEY || "NOKEY") });
