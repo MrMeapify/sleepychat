@@ -676,7 +676,7 @@ $(document).ready(function()
                         removeNameList();
                     }
                 }
-                else
+                else if (msgInBox != "" && !(/^ +$/.test(msgInBox)))
                 {
                     socket.emit('chat message', { message: msgInBox });
                     scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
@@ -778,7 +778,7 @@ $(document).ready(function()
                     removeNameList();
                 }
             }
-            else
+            else if (msgInBox != "" && !(/^ +$/.test(msgInBox)))
             {
                 socket.emit('chat message', { message: msgInBox });
                 scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));

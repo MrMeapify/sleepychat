@@ -521,11 +521,10 @@ io.on('connection', function(socket)
         {
             try
             {
-                spamPoints++;
-                
                 var user = getUserByNick(nick);
                 if(data.message != "" && !(/^ +$/.test(data.message)) && user)
                 {
+                    spamPoints++;
                     message=data.message;
                     
                     // Escape html
