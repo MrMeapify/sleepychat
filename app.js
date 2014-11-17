@@ -1611,7 +1611,6 @@ var disallowedNames = [/(?:a|4)dm(?:i|!|1)n/gi,                             //Ad
 
 var disallowedPhrases = [/n(?:i|!|1)gg(?:a|(?:e|3)r)/gi,        //Nigg(a OR er)
                          /cun(?:t|7)/gi,                        //Cunt
-                         /r(?:a|4)p(?:i|!|1)(?:s|5)(?:t|7)/gi,  //Rapist
                         ];
 
 
