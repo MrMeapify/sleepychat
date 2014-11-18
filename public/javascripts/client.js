@@ -1075,39 +1075,7 @@ function updateNameList()
 {
     if (users != null)
     {
-        //if (sorting == "alpha")
-        //{
-        //    users.sort(function(a, b) {
-        //        
-        //        if(a.nick < b.nick) return -1;
-        //        if(a.nick > b.nick) return 1;
-        //        return 0;
-        //    });
-        //}
-        //if (afkLast)
-        //{
-        //    users.sort(function(a, b) {
-        //        
-        //        if(!a.afk && b.afk) return -1;
-        //        if(a.afk && !b.afk) return 1;
-        //        return 0;
-        //    });
-        //}
-        //if (adminModsFirst)
-        //{
-        //    users.sort(function(a, b) {
-        //        
-        //        if(a.authority.indexOf("admin.png") != -1 && b.authority.indexOf("admin.png") == -1) return -1;
-        //        if(a.authority.indexOf("creator.png") != -1 && b.authority.indexOf("creator.png") == -1) return -1;
-        //        if(a.authority.indexOf("mod.png") != -1 && b.authority.indexOf("mod.png") == -1) return -1;
-        //        if(a.authority.indexOf("admin.png") == -1 && b.authority.indexOf("admin.png") != -1) return 1;
-        //        if(a.authority.indexOf("creator.png") == -1 && b.authority.indexOf("creator.png") != -1) return 1;
-        //        if(a.authority.indexOf("mod.png") == -1 && b.authority.indexOf("mod.png") != -1) return 1;
-        //        return 0;
-        //    });
-        //}
 
-        //Herrozod's Test code
         users.sort(function(a, b) {
         
             var retVal = 0;
