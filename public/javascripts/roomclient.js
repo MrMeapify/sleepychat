@@ -438,6 +438,15 @@ function updateNameList()
                 return 0;
             });
         }
+        if (afkLast)
+        {
+            users.sort(function(a, b) {
+                
+                if(!a.afk && b.afk) return -1;
+                if(a.afk && !b.afk) return 1;
+                return 0;
+            });
+        }
         if (adminModsFirst)
         {
             users.sort(function(a, b) {
