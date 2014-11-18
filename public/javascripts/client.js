@@ -462,17 +462,8 @@ $(document).ready(function()
 		socket.on('whisper', function(sender, receiver, msg)
 		{
 			if (msg){
-				if(notify)
-				{
-                    if (soundWhsp)
-                        snd.play();
-                    
-					newTitle = "*** " + sender + " messaged you! ***";
-					clearInterval(interval);
-					interval = setInterval(changeTitle, 1000);
-				}
-				
-				var scroll_down = isWithinScrollThreshold();
+                
+                var scroll_down = isWithinScrollThreshold();
                 
                 if (youTubeMatcher.test(msg))
                 {
@@ -485,9 +476,22 @@ $(document).ready(function()
                 
 				if(sender !== nick)
 				{
-					lastMessenger = sender;
-			
-					msgList.append($('<li class="highlight">').html(moment().format('h:mm:ss a') + ": *" + sender + " whispers: " + msg.substring(6 + msg.split(' ')[1].length) + "*"));
+                    if (ignore_list.indexOf(sender) == -1)
+                    {
+                        lastMessenger = sender;
+
+                        msgList.append($('<li class="highlight">').html(moment().format('h:mm:ss a') + ": *" + sender + " whispers: " + msg.substring(6 + msg.split(' ')[1].length) + "*"));
+                        
+                        if(notify)
+                        {
+                            if (soundWhsp)
+                                snd.play();
+
+                            newTitle = "*** " + sender + " messaged you! ***";
+                            clearInterval(interval);
+                            interval = setInterval(changeTitle, 1000);
+                        }
+                    }
 				}
 				else
 				{
