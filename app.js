@@ -19,7 +19,7 @@ var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "2"));
 
 // Admin/Mod stuff
 var administrator = "ElysianTail-Senpai";
-var moderators = ['MrMeapify', 'ScottB', 'Amburo', 'Phobos_D_Lawgiver', 'Anonymoususer2', 'Hypnonymoose', 'BurntPenny', 'Gaige'];
+var moderators = ['MrMeapify', 'ScottB', 'Amburo', 'Phobos_D_Lawgiver', 'Anonymoususer2', 'Hypnonymoose', 'BurntPenny', 'Gaige', "ToHypnoFu"];
 
 //Acquire the ban list.
 var banList = [];
@@ -1571,7 +1571,7 @@ var modCommands = 	[['information', "[INFO] ~~~"],
 					['information', "[INFO] "],
 					['information', "[INFO] As a moderator, you can use several commands:"],
 					['information', "[INFO] -- /modcmd -- Launches this message. Duh"],
-					['information', "[INFO] -- /modroom -- Opens the provate mod/admin-only room."],
+					['information', "[INFO] -- /modroom -- Opens the private mod/admin-only room."],
 					['information', "[INFO] -- /svrmsg &lt;message&gt; -- Displays the specified message to the entire server, including Match Maker and private rooms. This should be rarely used."],
 					['information', "[INFO] -- /rmmsg &lt;message&gt; -- Displays the specified message to the big chat only."],
 					['information', "[INFO] -- /mod &lt;message&gt; -- Sends a message to all moderators online, and the admin."],
