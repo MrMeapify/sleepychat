@@ -1077,13 +1077,13 @@ function updateNameList()
     {
 
         users.sort(function(a, b) {
-        
             var retVal = 0;
         
             if (sorting == "alpha")
             {
-                if(a.nick < b.nick) retVal = -1;
-                if(a.nick > b.nick) retVal = 1;
+                var nickA=a.nick.toLowerCase(), nickB=b.nick.toLowerCase();
+                if(nickA < nickB) retVal = -1;
+                if(nickA > nickB) retVal = 1;
             }
         
             if (afkLast)
@@ -1094,12 +1094,13 @@ function updateNameList()
         
             if (adminModsFirst)
             {
-                if(a.authority.indexOf("admin.png") != -1 && b.authority.indexOf("admin.png") == -1) retVal = -1;
-                if(a.authority.indexOf("creator.png") != -1 && b.authority.indexOf("creator.png") == -1) retVal = -1;
                 if(a.authority.indexOf("mod.png") != -1 && b.authority.indexOf("mod.png") == -1) retVal = -1;
-                if(a.authority.indexOf("admin.png") == -1 && b.authority.indexOf("admin.png") != -1) retVal = 1;
-                if(a.authority.indexOf("creator.png") == -1 && b.authority.indexOf("creator.png") != -1) retVal = 1;
+                if(a.authority.indexOf("creator.png") != -1 && b.authority.indexOf("creator.png") == -1) retVal = -1;
+                if(a.authority.indexOf("admin.png") != -1 && b.authority.indexOf("admin.png") == -1) retVal = -1;
+
                 if(a.authority.indexOf("mod.png") == -1 && b.authority.indexOf("mod.png") != -1) retVal = 1;
+                if(a.authority.indexOf("creator.png") == -1 && b.authority.indexOf("creator.png") != -1) retVal = 1;
+                if(a.authority.indexOf("admin.png") == -1 && b.authority.indexOf("admin.png") != -1) retVal = 1;
             }
             
             return retVal;
