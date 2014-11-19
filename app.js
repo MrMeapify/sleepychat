@@ -526,6 +526,14 @@ io.on('connection', function(socket)
                 if(data.message != "" && !(/^ +$/.test(data.message)) && user)
                 {
                     spamPoints++;
+                    spamPoints += (data.message.length > 1000 ? 1 : 0);
+                    if (data.message.length > 2500)
+                    {
+                        socket.emit('information', "[INFO] Your message was too long.")
+                        console.log(user.nick+" has sent a really long message: "+data.message.length.toString()+" characters.")
+                        socket.conn.close();
+                        return;
+                    }
                     message=data.message;
                     
                     // Escape html
@@ -553,8 +561,10 @@ io.on('connection', function(socket)
                                         users[j].socket.emit('information', "[INFO] User \""+user.nick+"\" @ IP \""+user.realIp+"\" used a banned word/phrase:<br>"+message);
                                     }
                                 }
+                                socket.emit('information', "[INFO] You've said a banned word or phrase.")
                                 console.log(user.nick+" has sent a message with a banned word/phrase.")
                                 socket.conn.close();
+                                return;
                             }
                         }
                     }
