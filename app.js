@@ -175,24 +175,22 @@ io.on('connection', function(socket)
             }
             
             connToTest.tries++;
-            clearInterval(connToTest.interval);
-            var newInterval = setInterval(function() {
+            clearTimeout(connToTest.timeout);
+            var newTimeout = setTimeout(function() {
 
                 recentConns.remove(connToTest);
-                clearInterval(newInterval);
             }, timeToReset);
-            connToTest.interval = newInterval;
+            connToTest.timeout = newTimeout;
         }
         else
         {
             
-            var newConn = {ip: ip, tries: 1, interval: -1};
-            var newInterval = setInterval(function() {
+            var newConn = {ip: ip, tries: 1, timeout: -1};
+            var newTimeout = setTimeout(function() {
                 
                 recentConns.remove(newConn);
-                clearInterval(newInterval);
             }, 15000);
-            newConn.interval = newInterval;
+            newConn.timeout = newTimeout;
             recentConns.push(newConn);
         }
 
@@ -268,6 +266,12 @@ io.on('connection', function(socket)
                 var banned = checkForBans(data, socket, ip);
                 var rightNow = new Date();
                 socket.emit('information', "[INFO] You've been banned from using this site for "+banned.days.toString()+" day"+(banned.days > 1 ? "s" : "")+" total. (Banned on "+rightNow.getMonth().toString()+"/"+rightNow.getDate().toString()+"/"+rightNow.getFullYear().toString()+")");
+                socket.conn.close();
+                return;
+            }
+            else if (data.nabbed != "nope")
+            {
+                socket.emit('information', "[INFO] You've been banned from using this site.");
                 socket.conn.close();
                 return;
             }
@@ -1020,8 +1024,10 @@ io.on('connection', function(socket)
                             };
 
                             io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been struck by the Ban Hammer, swung by "+user.nick+". ("+days.toString()+" day ban)");
-                            tokick.socket.leave('bigroom');
-                            tokick.socket.conn.close();
+                            var dateTill = new Date();
+                            dateTill.setDate(dateTill.getDate()+days);
+                            tokick.socket.emit('nab', dateTill);
+                            setTimeout(function() { tokick.socket.conn.close(); }, 500);
                             
                             var replaced = false;
                             for (var i = 0; i < banList.length; i++)
@@ -1073,8 +1079,10 @@ io.on('connection', function(socket)
                             };
 
                             io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been struck by the Ban Hammer, swung by "+user.nick+". ("+days.toString()+" day ban)");
-                            tokick.socket.leave('bigroom');
-                            tokick.socket.conn.close();
+                            var dateTill = new Date();
+                            dateTill.setDate(dateTill.getDate()+days);
+                            tokick.socket.emit('nab', dateTill);
+                            setTimeout(function() { tokick.socket.conn.close(); }, 500);
 
                             var replaced = false;
                             for (var i = 0; i < banList.length; i++)
@@ -1167,8 +1175,10 @@ io.on('connection', function(socket)
                             };
 
                             io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been struck by the Ban Hammer, swung by "+user.nick+". ("+days.toString()+" day ban)");
-                            tokick.socket.leave('bigroom');
-                            tokick.socket.conn.close();
+                            var dateTill = new Date();
+                            dateTill.setDate(dateTill.getDate()+days);
+                            tokick.socket.emit('nab', dateTill);
+                            setTimeout(function() { tokick.socket.conn.close(); }, 500);
 
                             var replaced = false;
                             for (var i = 0; i < banList.length; i++)
