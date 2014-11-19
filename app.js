@@ -554,6 +554,7 @@ io.on('connection', function(socket)
                                 }
                                 console.log(user.nick+" has sent a message with a banned word/phrase.")
                                 socket.conn.close();
+                                return;
                             }
                         }
                     }
