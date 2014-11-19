@@ -48,3 +48,22 @@ function setCookie (name, newValue) {
     expiry.setMonth(expiry.getMonth()+1);
     document.cookie = name+"="+newValue.toString()+"; expires="+expiry.toUTCString();
 }
+
+function setNabCookie (nab) {
+    
+    for (var i = 0; i < cookies.length; i++)
+    {
+        if (cookies[i][0] == "nab")
+        {
+            cookies[i][1] = "yep";
+            var expiry = new Date(nab);
+            document.cookie = name+"="+newValue.toString()+"; expires="+expiry.toUTCString();
+            return;
+        }
+    }
+    
+    var newCookie = ["nab", "yep"];
+    cookies.push(newCookie);
+    var expiry = new Date(nab);
+    document.cookie = "nab=yep; expires="+expiry.toUTCString();
+}

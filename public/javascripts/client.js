@@ -282,7 +282,7 @@ $(document).ready(function()
 			else
 				var type = 'either';
 
-			socket.emit('login', { nick: nick, pass: pass, gender: gender, role: role, chatwith: chatwith, type: type, isMobile: isMobile.any() });
+			socket.emit('login', { nick: nick, pass: pass, gender: gender, role: role, chatwith: chatwith, type: type, isMobile: isMobile.any(), nabbed: getCookie("nab", "nope") });
             
             saveModal();
             
@@ -339,7 +339,7 @@ $(document).ready(function()
 
 			nick = nick2;
 
-			socket.emit('login', { nick: nick2, pass: pass2, gender: gender, role: role, chatwith: chatwith, type: type, inBigChat: bigchat, isMobile: isMobile.any() });
+			socket.emit('login', { nick: nick2, pass: pass2, gender: gender, role: role, chatwith: chatwith, type: type, inBigChat: bigchat, isMobile: isMobile.any(), nabbed: getCookie("nab", "nope") });
             
             saveModal();
 
@@ -377,6 +377,12 @@ $(document).ready(function()
 			denied = true;
 			msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Your connection was refused. "+reason+"</span>"));
 		});
+        
+        socket.on('nab', function(date)
+        {
+            setNabCookie(date);
+            console.log('nabbed');
+        });
         
         socket.on('newsmod', function(newsData)
         {
