@@ -113,7 +113,10 @@ var uniqueHiddenId = 0;
 
 var MILSEC_PER_DAY = 86400000;
 
-commandsInAM = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mod', '/mmsg', '/fmsg', '/rotate'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
+var commandsInAM = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mod', '/mmsg', '/fmsg', '/rotate'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
+
+var maxMessageLength = 4000; // 4,000 seemed like a good upper bound, I doubt you're going to need more than this. For reference, a page in a book is usually about 2,000 characters. Go ahead and lower this if you want
+
 
 io.on('connection', function(socket)
 {
@@ -522,7 +525,9 @@ io.on('connection', function(socket)
             try
             {
                 var user = getUserByNick(nick);
-                if(data.message != "" && !(/^ +$/.test(data.message)) && user)
+                if(data.message.length > maxMessageLength) 
+                    socket.emit('information', "Sorry, your message <br />'<i>" + data.message.slice(0, maxMessageLength) + '<span style="color: red">' + data.message.slice(maxMessageLength, data.message.length)  + "</span></i>' was " + data.message.length + " characters but the maximum length for a message is " + maxMessageLength + " characters"); // If the message exceeds the maximum message length, then don't send it but tell the sender (with the parts past the limit colored red)
+                else if(data.message != "" && !(/^ +$/.test(data.message)) && user)
                 {
                     spamPoints++;
                     message=data.message;
