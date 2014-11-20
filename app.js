@@ -1265,7 +1265,7 @@ io.on('connection', function(socket)
                                 user.AFK = false;
                                 io.to('bigroom').emit('afk', { nick: user.nick, AFK: false });
                             }
-                            io.to('bigroom').emit('chat message', alterMessage('a' + message, user, socket, null, users), "eval",  user.nick);
+                            io.to('bigroom').emit('chat message', alterMessage(message, user, socket, null, users), "eval",  user.nick);
                         }
                         catch(e)
                         {
