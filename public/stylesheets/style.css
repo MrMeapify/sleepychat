@@ -20,7 +20,7 @@
 
 #sidebar-sort-btn { position: absolute; top: 3px; left: 3px; padding: 3px; }
 
-.body { font: 1.11em Roboto, Helvetica, Arial; overflow:auto}
+.body { font: 1.11em Roboto, Helvetica, Arial; overflow:auto; word-wrap: break-word;}
 
 .body #messages { list-style-type: none; height: 100%; margin: 0; padding: 0; }
 
