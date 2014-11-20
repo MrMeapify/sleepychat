@@ -48,6 +48,7 @@ fs.readFile("Ban List.blt", function (err, logData) {
 			} catch (e)
 			{
 				console.log("Error reading entry: Name = " + entry[0] + ", IP = " + entry[1] + ", Days = " + entry[2] + ", Date (In mil) = " + entry[3]);
+                console.log('Error: ' + e);
 			}
 			
 			banList.push(bannedUser);
