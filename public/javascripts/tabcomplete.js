@@ -11,6 +11,8 @@
 		up: 38,
 		down: 40
 	};
+    
+    var wrappedOnce = false;
 	
 	$.fn.tab = // Alias
 	$.fn.tabcomplete = function(args, options) {
@@ -77,9 +79,8 @@
 			words = [];
 			
 			// Check for matches if the current word is the last word.
-			//if (self[0].selectionStart == input.length
-			//	&& word.length) {
-			if ( /[^ ][^ ][^ ]+$/.test(input) ) {
+			if (self[0].selectionStart == input.length
+				&& word.length) {
 				if (typeof args === "function") {
 					// If the user supplies a function, invoke it
 					// and keep the result.
@@ -213,25 +214,28 @@
 		
 		input.css({
 			backgroundColor: "transparent",
-			color: "black",
+			color: (isDay ? "black" : "white"),
 			position: "relative",
 		});
 		
 		// Lets create a clone of the input if it does
 		// not already exist.
 		if (!clone.length) {
-			input.wrap(
-				$("<div>").css({position: "relative"})
-			);
+            
+            if (!wrappedOnce)
+            {
+                input.wrap($("<div>").css({position: "relative"}));
+                wrappedOnce = true;
+            }
 			clone = input
 				.clone()
 				.attr("tabindex", -1)
-				.attr("id", input.attr("id")+"hint")
 				.removeAttr("id name placeholder")
+				.attr("id", input.attr("id")+"hint")
 				.addClass("hint")
 				.insertBefore(input);
 			clone.css({
-				backgroundColor: "white",
+				backgroundColor: (isDay ? "white" : "#222222"),
 				color: "gray",
 				position: "absolute",
 			});

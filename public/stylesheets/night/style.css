@@ -1,0 +1,13 @@
+li.self { background: #333333; }
+
+li.highlight { background: #008b8b!important; }
+
+li.mention { background: #006d6d!important; }
+
+.ticker-bg { background: #444444; }
+
+.ticker { color: #ffffff; }
+
+.dd-option:hover { background-color: #545454; }
+
+.yt-video-container { box-shadow: 5px 5px 5px #111; }
