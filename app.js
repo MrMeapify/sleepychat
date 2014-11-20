@@ -123,6 +123,9 @@ io.on('connection', function(socket)
 {
 	try
 	{
+
+        socket.join('bigroom'); // While they're logging in, we'll catch the messages from the bigroom but not show them
+
         var nick = "";
         var room = null;
 
@@ -173,7 +176,7 @@ io.on('connection', function(socket)
             
             if (connToTest.tries > 2)
             {
-                socket.emit('denial', "This IP is creating too many connections too quickly.");
+                socket.emit('denial', "This IP is creating too many connections too quickly. Try again in 10 minutes, if you please");
                 socket.conn.close();
                 timeToReset = 1000*60*10; //10 minutes.
             }
@@ -324,6 +327,8 @@ io.on('connection', function(socket)
                     }
                     else
                     {
+
+                        socket.leave('bigroom'); // We know they're not going into the bigroom so we can leave
                         socket.emit('information', "[INFO] Hi there, " + nick + "! You're now connected to the server.");
                     }
                     console.log(nick +" has joined. IP: " + ip);

@@ -1,5 +1,5 @@
 var socket = null;
-var loggedIn = true;
+var loggedIn = false;
 var lastChat = "";
 var chatting = false;
 var nick = '';
@@ -22,7 +22,7 @@ var isDCd = false;
 var ignore_list = new Array()
 
 var disallowedNames = [
-                      /(?:a|4)dm(?:i|!|1)n/gi,                                                     //Admin(istrator)
+                      /(?:a|4)dm(?:i|!|1)n/gi,                                                      //Admin(istrator)
                       /m(?:o|0)d(?:e|3)r(?:a|4)(?:t|7)(?:o|0)r/gi,                                  //Moderator
                       /(?:s|5)(?:l|i)(?:e|3)(?:e|3)pych(?:a|4)(?:t|7)/gi,                           //Sleepychat
                       /(?:s|5)(?:e|3)rv(?:e|3)r/gi,                                                 //server
@@ -229,7 +229,7 @@ $(document).ready(function()
 
 	socket.on('connect', function()
 	{
-        
+        msgList.hide()
         $('#ticker-x').click(removeTicker);
         
         var errorLabel = document.getElementById('error-label');
@@ -246,6 +246,8 @@ $(document).ready(function()
 		
 		$('#loginsubmit').click(function()
 		{
+            $("ul#messages").empty();
+            msgList.show();
 			var nick = $('<div/>').text(($('#nickname').val())).html();
 			
 			if (testNick(nick) != "")
@@ -346,6 +348,7 @@ $(document).ready(function()
             saveModal();
 
 			$('#login-modal').modal('hide');
+            msgList.show(300);
 			return false;
 		});
         
@@ -484,7 +487,7 @@ $(document).ready(function()
 
                         msgList.append($('<li class="highlight">').html(moment().format('h:mm:ss a') + ": *" + sender + " whispers: " + msg.substring(6 + msg.split(' ')[1].length) + "*"));
                         
-                        if(notify)
+                        if(notify && loggedIn)
                         {
                             if (soundWhsp)
                                 snd.play();
@@ -507,7 +510,7 @@ $(document).ready(function()
 		socket.on('chat message', function(msg, who, userFrom)
 		{
 			if(msg)
-			{
+			{  
 				var scroll_down = isWithinScrollThreshold();
                 
                 if (youTubeMatcher.test(msg))
@@ -551,8 +554,9 @@ $(document).ready(function()
                     msgList.append($('<li class="'+msgClass+'">').html(moment().format('h:mm:ss a') + ": " + msg));
                 }
 
-				if(notify)
+				if(notify && loggedIn)
 				{
+                    console.log(loggedIn)
                     if (isMention)
                     {
                         if(soundMent)
@@ -579,7 +583,7 @@ $(document).ready(function()
 		{
 			if (msg)
 			{
-				if(notify)
+				if(notify && loggedIn)
 				{
                     if (msg.indexOf("has joined.") != -1 || msg.indexOf("has left.") != -1 || msg.indexOf("is AFK.") != -1)
                     {
@@ -628,7 +632,7 @@ $(document).ready(function()
 
 		socket.on('disconnect', function()
 		{
-			if(notify)
+			if(notify && loggedIn)
 			{
 				if(soundSite)
 					snd.play();
