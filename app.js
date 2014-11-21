@@ -81,6 +81,7 @@ var index = require('./routes/index');
 var stats = require('./routes/stats');
 var privateroom = require('./routes/privateroom');
 
+
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
@@ -114,7 +115,7 @@ var uniqueHiddenId = 0;
 
 var MILSEC_PER_DAY = 86400000;
 
-var commandsInAM = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mod', '/mmsg', '/fmsg', '/rotate'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
+var commandsInAM = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mod', '/mmsg', '/fmsg', '/rotate', '/commands'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
 
 var maxMessageLength = 4000; // 4,000 seemed like a good upper bound, I doubt you're going to need more than this. For reference, a page in a book is usually about 2,000 characters. Go ahead and lower this if you want
 
@@ -1547,36 +1548,16 @@ var pies = ["http://i.imgur.com/Zb2ZnBF.jpg",
 var helpPage1 = 	[['information', "[INFO] ~~~"],
 					['information', "[INFO] Welcome to Sleepychat!"],
 					['information', "[INFO] Sleepychat was created by MrMeapify, and is now operated by ElysianTail-Senpai."],
-					['information', "[INFO] Help Page 1:"],
-					['information', "[INFO] While in chat, you can use several commands:"],
+					['information', "[INFO] Use can use some commands while in the chat, here are some examples:"],
 					['information', "[INFO] -- /help -- Launches this message. Duh"],
 					['information', "[INFO] -- /formatting -- Shows formatting tips."],
 					['information', "[INFO] -- /news -- Re-opens the news ticker if it was closed."],
 					['information', "[INFO] -- /ignore user -- Ignores all messages for a user."],
 					['information', "[INFO] -- /names OR /list -- Toggles the username sidebar on PC, or prints a list of users in the room on mobile."],
-					['information', "[INFO] -- /help 2 -- Shows page 2 of help."],
+                    ['information', "[INFO] -- /msg &lt;username&gt; &lt;message&gt; -- Sends a private message to the specified user."],
+                    ['information', "[INFO] -- /room &lt;user&gt; -- Requests a private chat with the specified user."],
+					['information', "[INFO] -- To see all the commands you can do, type <a href='/commands'>/commands</a>."],
 					['information', "[INFO] ~~~"]];
-
-var helpPage2 = [['information', "[INFO] ~~~"],
-                ['information', "[INFO] Help Page 2:"],
-                ['information', "[INFO] -- /whois &lt;user&gt; -- Display sex and role information for a user."],
-                ['information', "[INFO] -- /msg &lt;username&gt; &lt;message&gt; -- Sends a private message to the specified user."],
-                ['information', "[INFO] -- /r OR /reply &lt;message&gt; -- Replies to the last user to privately message you."],
-                ['information', "[INFO] -- /room &lt;user&gt; -- Requests a private chat with the specified user."],
-                ['information', "[INFO] -- /createroom &lt;room name&gt; -- Creates a public room which multiple users can be invited to using\"/invite\"."],
-                ['information', "[INFO] -- /invite &lt;room name&gt; &lt;username1 username2 usernameN&gt; -- Invites the specified user(s) to the specified public room."],
-                ['information', "[INFO] -- /me &lt;did a thing&gt; -- Styles your message differently to indicate that you're doing an action."],
-                ['information', "[INFO] -- /banana -- Sends a picture of banana cream pie."],
-                ['information', "[INFO] -- /help 3 -- Shows page 3 of help."],
-                ['information', "[INFO] ~~~"]];
-
-var helpPage3 = [['information', "[INFO] ~~~"],
-                ['information', "[INFO] Help Page 3:"],
-                ['information', "[INFO] -- /coinflip -- Publicly flips a coin."],
-                ['information', "[INFO] -- /roll &lt;number (optional)&gt; -- Publicly rolls up to 10 dice."],
-                ['information', "[INFO] -- /mmsg &lt;message&gt; -- Sends a message to males only."],
-                ['information', "[INFO] -- /fmsg &lt;message&gt; -- Sends a message to females only."],
-                ['information', "[INFO] ~~~"]];
 
 var modCommands = 	[['information', "[INFO] ~~~"],
 					['information', "[INFO] Welcome, moderator!"],
@@ -1603,6 +1584,7 @@ var helpFormatting = [['information', "[INFO] ~~~"],
 					['information', "[INFO] -- Text surrounded by single asterisk (*) is <i>italicized</i>."],
 					['information', "[INFO] -- Text surrounded by single grave accents (`) is <span style='font-family: monospace'>monospaced</span>."],
 					['information', "[INFO] -- Text surrounded by double grave accents (``) is <span style='font-family: Georgia, serif'>serif font</span>."],
+                    ['information', "[INFO] -- /me &lt;does a thing&gt; -- Styles your message differently to indicate that you're doing an action."],
 					['information', "[INFO] ~~~"]];
 
 var disallowedNames = [/(?:a|4)dm(?:i|!|1)n/gi,                             //Admin(istrator)
@@ -1631,16 +1613,6 @@ function giveHelp(str, socket){
 	{
 		for(var x = 0; x < helpPage1.length; x++)
 			socket.emit(helpPage1[x][0], helpPage1[x][1]);
-	}
-    else if (str=="/help 2")
-	{
-		for(var x = 0; x < helpPage2.length; x++)
-			socket.emit(helpPage2[x][0], helpPage2[x][1]);
-	}
-    else if (str=="/help 3")
-	{
-		for(var x = 0; x < helpPage3.length; x++)
-			socket.emit(helpPage3[x][0], helpPage3[x][1]);
 	}
 	else if (str=="/formatting")
 	{
@@ -1813,6 +1785,11 @@ function alterForCommands(str, user, socket, room, users)
 			}
 		return null;
 	}	
+    if (ans == '/commands')
+    {
+        socket.emit('openlink', '/commands')
+        return null
+    }
 	else if (rotate.test(ans))
 	{
         console.log('entered testing')
@@ -2172,6 +2149,10 @@ app.use('/room', privateroom);
 app.use('/about', function(req, res)
 {
 	res.render('about');
+});
+app.use('/commands', function(req, res)
+{
+    res.render('commands');
 });
 
 /// catch 404 and render the 404 page

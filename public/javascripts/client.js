@@ -648,6 +648,13 @@ $(document).ready(function()
 			scrollDown(scroll_down);
             isDCd = true;
 		});
+
+        socket.on('openlink', function(url)
+        {
+            if (url)
+                window.open(url);
+        });
+
 	});
 
 	socket.on('loggedIn', function()
