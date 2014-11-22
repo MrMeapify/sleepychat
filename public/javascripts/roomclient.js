@@ -475,7 +475,7 @@ function updateNameList()
 
                 if(a.authority.indexOf("admin.png") == -1 && b.authority.indexOf("admin.png") != -1) retVal = 1;
                 if(a.authority.indexOf("creator.png") == -1 && b.authority.indexOf("creator.png") != -1) retVal = 1;
-                if(a.authority.indexOf("mod.png") == -1 && b.authority.indexOf("mod.png") != -1) retVal = 1;`
+                if(a.authority.indexOf("mod.png") == -1 && b.authority.indexOf("mod.png") != -1) retVal = 1;
             }
             
             return retVal;

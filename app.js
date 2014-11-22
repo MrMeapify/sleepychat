@@ -15,7 +15,7 @@ require('array.prototype.find');
 var adminP = String(process.env.ADMINPASS || "testpassword");
 var moderatorP = String(process.env.MODPASS || "testpassword");
 
-var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "2"));
+var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "20"));
 
 // Admin/Mod stuff
 var administrator = "ElysianTail-Senpai";
@@ -180,7 +180,7 @@ io.on('connection', function(socket)
             {
                 socket.emit('denial', "This IP is creating too many connections too quickly. Try again in 10 minutes, if you please");
                 socket.conn.close();
-                timeToReset = 1000*60*10; //10 minutes.
+                timeToReset = 10//00*60*10; //10 minutes.
             }
             
             connToTest.tries++;
@@ -660,7 +660,7 @@ io.on('connection', function(socket)
                             var roomfound = null;
                             for(var x = 0; x < privaterooms.length; x++)
                             {
-                                var person1 = false;
+                                /*var person1 = false;
                                 var person2 = false;
                                 for(var y = 0; y < privaterooms[x].users.length; y++)
                                 {
@@ -672,9 +672,11 @@ io.on('connection', function(socket)
                                     {
                                         person2 = true;
                                     }
+
                                 }
-                                if(person1 && person2)
-                                {
+                                //if(person1 && person2)*/
+                                if(  privaterooms[x].users.length == 2 && (privaterooms.lastIndexOf(user, 0) >= 0 && privaterooms.lastIndexOf(userwanted, 0) >= 0)  )
+                                { // Basically we check if there's a room 
                                     roomfound = privaterooms[x];
                                 }
                             }
