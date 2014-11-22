@@ -456,28 +456,30 @@ function updateNameList()
 {
     if (users != null)
     {
-        if (sorting == "alpha")
+        users.sort(function(a, b) 
         {
-            users.sort(function(a, b) {
-                
-                if(a.nick < b.nick) return -1;
-                if(a.nick > b.nick) return 1;
-                return 0;
-            });
-        }
-        if (adminModsFirst)
-        {
-            users.sort(function(a, b) {
-                
-                if(a.authority.indexOf("admin.png") != -1 && b.authority.indexOf("admin.png") == -1) return -1;
-                if(a.authority.indexOf("creator.png") != -1 && b.authority.indexOf("creator.png") == -1) return -1;
-                if(a.authority.indexOf("mod.png") != -1 && b.authority.indexOf("mod.png") == -1) return -1;
-                if(a.authority.indexOf("admin.png") == -1 && b.authority.indexOf("admin.png") != -1) return 1;
-                if(a.authority.indexOf("creator.png") == -1 && b.authority.indexOf("creator.png") != -1) return 1;
-                if(a.authority.indexOf("mod.png") == -1 && b.authority.indexOf("mod.png") != -1) return 1;
-                return 0;
-            });
-        }
+            var retVal = 0;
+        
+            if (sorting == "alpha")
+            {
+                var nickA=a.nick.toLowerCase(), nickB=b.nick.toLowerCase();
+                if(nickA < nickB) retVal = -1;
+                if(nickA > nickB) retVal = 1;
+            }
+        
+            if (adminModsFirst)
+            {
+                if(a.authority.indexOf("mod.png") != -1 && b.authority.indexOf("mod.png") == -1) retVal = -1;
+                if(a.authority.indexOf("creator.png") != -1 && b.authority.indexOf("creator.png") == -1) retVal = -1;
+                if(a.authority.indexOf("admin.png") != -1 && b.authority.indexOf("admin.png") == -1) retVal = -1;
+
+                if(a.authority.indexOf("admin.png") == -1 && b.authority.indexOf("admin.png") != -1) retVal = 1;
+                if(a.authority.indexOf("creator.png") == -1 && b.authority.indexOf("creator.png") != -1) retVal = 1;
+                if(a.authority.indexOf("mod.png") == -1 && b.authority.indexOf("mod.png") != -1) retVal = 1;`
+            }
+            
+            return retVal;
+        });
         
         var sidebarHtml = '<div class="btn-group" id="sidebar-buttons"><label id="sidebar-move" type="button" class="btn btn-default" onclick="moveNameList()">'+(isOnRight ? "&lt;" : "&gt;")+'</label><label id="sidebar-x" type="button" class="btn btn-default" onclick="removeNameList()">X</label></div><div class="dropdown" id="sidebar-sort-btn"><label id="sidebar-sort" type="button" class="btn btn-default" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Sorting <span class="caret"></span></label><ul class="dropdown-menu" style="padding: 5px;" role="menu aria-labelledby="sidebar-sort"><li class="dd-option" onclick="sortNameList(\'default\');">Join Order</li><li class="dd-option" onclick="sortNameList(\'alpha\');">Alphabetical</li><li><hr></li><li class="dd-option" onclick="sortNameList(\'adminmodsfirst\');">'+(adminModsFirst ? "&#9745" : "&#9744")+' Admin/Mods First</li></ul></div><br/><br/><h3 style="margin-top: 10px;">Users: '+users.length+'</h3><ul id="names">';
         for (var i = 0; i < users.length; i++)

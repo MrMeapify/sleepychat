@@ -115,6 +115,7 @@ var uniqueHiddenId = 0;
 
 var MILSEC_PER_DAY = 86400000;
 
+
 var commandsInAM = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mod', '/mmsg', '/fmsg', '/rotate', '/commands'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
 
 var maxMessageLength = 4000; // 4,000 seemed like a good upper bound, I doubt you're going to need more than this. For reference, a page in a book is usually about 2,000 characters. Go ahead and lower this if you want
@@ -328,7 +329,6 @@ io.on('connection', function(socket)
                     }
                     else
                     {
-
                         socket.leave('bigroom'); // We know they're not going into the bigroom so we can leave
                         socket.emit('information', "[INFO] Hi there, " + nick + "! You're now connected to the server.");
                     }
@@ -533,10 +533,15 @@ io.on('connection', function(socket)
             {
                 var user = getUserByNick(nick);
                 if(data.message.length > maxMessageLength) 
+                {
                     socket.emit('information', "Sorry, your message <br />'<i>" + data.message.slice(0, maxMessageLength) + '<span style="color: red">' + data.message.slice(maxMessageLength, data.message.length)  + "</span></i>' was " + data.message.length + " characters but the maximum length for a message is " + maxMessageLength + " characters"); // If the message exceeds the maximum message length, then don't send it but tell the sender (with the parts past the limit colored red)
+                    spamPoints += 3;
+                    console.log(user.nick+" has sent a really long message: "+data.message.length.toString()+" characters.")
+                }
                 else if(data.message != "" && !(/^ +$/.test(data.message)) && user)
                 {
                     spamPoints++;
+                    spamPoints += (data.message.length > 1000 ? 1 : 0);
                     message=data.message;
                     
                     // Escape html
@@ -564,8 +569,10 @@ io.on('connection', function(socket)
                                         users[j].socket.emit('information', "[INFO] User \""+user.nick+"\" @ IP \""+user.realIp+"\" used a banned word/phrase:<br>"+message);
                                     }
                                 }
+                                socket.emit('information', "[INFO] You've said a banned word or phrase.")
                                 console.log(user.nick+" has sent a message with a banned word/phrase.")
                                 socket.conn.close();
+                                return;
                             }
                         }
                     }
@@ -1251,7 +1258,6 @@ io.on('connection', function(socket)
                         if(!inAFC)
                         {
                             socket.emit('information', "[INFO] Command not recognized. Try /help for a list of commands.");
-                            console.log('b')
                         }
                     }
                     else if (room)
@@ -1277,7 +1283,7 @@ io.on('connection', function(socket)
                                 user.AFK = false;
                                 io.to('bigroom').emit('afk', { nick: user.nick, AFK: false });
                             }
-                            io.to('bigroom').emit('chat message', alterMessage(message, user, socket, null, users), "eval",  user.nick);
+                            io.to('bigroom').emit('chat message', alterMessage(message, user, socket, null, users), "eval", user.nick);
                         }
                         catch(e)
                         {
@@ -1583,8 +1589,8 @@ var helpFormatting = [['information', "[INFO] ~~~"],
 					['information', "[INFO] -- Text surrounded by double asterisk (**) is <strong>bolded</strong>."],
 					['information', "[INFO] -- Text surrounded by single asterisk (*) is <i>italicized</i>."],
 					['information', "[INFO] -- Text surrounded by single grave accents (`) is <span style='font-family: monospace'>monospaced</span>."],
-					['information', "[INFO] -- Text surrounded by double grave accents (``) is <span style='font-family: Georgia, serif'>serif font</span>."],
-                    ['information', "[INFO] -- /me &lt;does a thing&gt; -- Styles your message differently to indicate that you're doing an action."],
+					['information', "[INFO] -- Text surrounded by double grave accents (``) is <span style='font-family: Georgia, serif'>serif font</span>."],]
+                    ['information', "[INFO] -- /me &lt;does a thing&gt; -- Styles your message differently to indicate that you're doing an action."],]
 					['information', "[INFO] ~~~"]];
 
 var disallowedNames = [/(?:a|4)dm(?:i|!|1)n/gi,                             //Admin(istrator)
@@ -1672,7 +1678,6 @@ function link_replacer(match, p1, p2, offset, string)
 	}
     return a;
 }
-
 
 function alterForFormatting(str, user)
 {
