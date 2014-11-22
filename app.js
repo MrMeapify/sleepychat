@@ -15,7 +15,7 @@ require('array.prototype.find');
 var adminP = String(process.env.ADMINPASS || "testpassword");
 var moderatorP = String(process.env.MODPASS || "testpassword");
 
-var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "20"));
+var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "2"));
 
 // Admin/Mod stuff
 var administrator = "ElysianTail-Senpai";
@@ -180,7 +180,7 @@ io.on('connection', function(socket)
             {
                 socket.emit('denial', "This IP is creating too many connections too quickly. Try again in 10 minutes, if you please");
                 socket.conn.close();
-                timeToReset = 10//00*60*10; //10 minutes.
+                timeToReset = 1000*60*10; //10 minutes.
             }
             
             connToTest.tries++;
