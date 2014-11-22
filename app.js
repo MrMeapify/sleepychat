@@ -1589,8 +1589,8 @@ var helpFormatting = [['information', "[INFO] ~~~"],
 					['information', "[INFO] -- Text surrounded by double asterisk (**) is <strong>bolded</strong>."],
 					['information', "[INFO] -- Text surrounded by single asterisk (*) is <i>italicized</i>."],
 					['information', "[INFO] -- Text surrounded by single grave accents (`) is <span style='font-family: monospace'>monospaced</span>."],
-					['information', "[INFO] -- Text surrounded by double grave accents (``) is <span style='font-family: Georgia, serif'>serif font</span>."],]
-                    ['information', "[INFO] -- /me &lt;does a thing&gt; -- Styles your message differently to indicate that you're doing an action."],]
+					['information', "[INFO] -- Text surrounded by double grave accents (``) is <span style='font-family: Georgia, serif'>serif font</span>."]
+                    ['information', "[INFO] -- /me &lt;does a thing&gt; -- Styles your message differently to indicate that you're doing an action."],
 					['information', "[INFO] ~~~"]];
 
 var disallowedNames = [/(?:a|4)dm(?:i|!|1)n/gi,                             //Admin(istrator)
