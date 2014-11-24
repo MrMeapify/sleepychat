@@ -827,7 +827,7 @@ $(document).ready(function()
 	});
 
     socket.on('rotate', function(toRotate, userFrom, hash, origintime)
-    { console.log('hooray');
+    { 
         if (userFrom && !ignore_list.indexOf(userFrom) != -1)
         {
             var rotates = toRotate.split(", ");

@@ -56,6 +56,42 @@ fs.readFile("Ban List.blt", function (err, logData) {
 	}
 });
 
+//Acquire the watch list.
+var watchList = [];
+fs.readFile("Watch List.blt", function (err, logData) {
+
+    if (err) throw err;
+    
+    var listString = logData.toString();
+    
+    if (listString != "")
+    {
+        var fileData = listString.split("\n");
+        
+        for (var  i = 0; i < fileData.length; i++)
+        {
+            var entry = fileData[i].split(' ');
+            var watchedUser;
+            try
+            {
+                watchedUser = {
+                    name: entry[0],
+                    ip: entry[1],
+                    days: parseInt(entry[2]),
+                    date: parseInt(entry[3]),
+                    reason: entry.slice(4, entry.length),
+                }
+            } catch (e)
+            {
+                console.log("Error reading entry: Name = " + entry[0] + ", IP = " + entry[1] + ", Days = " + entry[2] + ", Date (In mil) = " + entry[3] + ", Reason = " + entry.slice(4, entry.length));
+                console.log('Error: ' + e);
+            }
+            
+            watchList.push(watchedUser);
+        }
+    }
+});
+
 //Acquire the news
 var currentNews = [];
 fs.readFile("Current News.ndf", function(err, logData) {
@@ -282,6 +318,22 @@ io.on('connection', function(socket)
             }
             else
             {
+                if (checkForWatch(data, socket, ip) != null)
+                {
+                    var watched = checkForWatch(data, socket, ip);
+                    var rightNow = new Date();
+
+                    var userscopy = users;
+                    for(var x = 0; x < userscopy.length; x++)
+                    {
+                        if(userscopy[x].mod)
+                        {
+                            userscopy[x].socket.emit('information', "[INFO] BZZT! A watched user has entered sleepychat!");
+                            userscopy[x].socket.emit('information', "[INFO] User: " + watched.name);
+                            userscopy[x].socket.emit('information', "[INFO] Reason: " + watched.reason);
+                        }
+                    }
+                }
                 data.socket = socket;
                 nick = data.nick;
 
@@ -1217,7 +1269,58 @@ io.on('connection', function(socket)
 
                         socket.emit('information', listString + "]");
                     }
+                    else if (/^\/watch ([a-zA-Z0-9-_~]+) ([0-9]*) ([^|]*)$/.test(message))
+                    {
 
+                        console.log('yog')
+                        var regex = /^\/watch ([a-zA-Z0-9-_~]+) ([0-9]*) ([^|]*)$/; // /watch <name> [days] [why]
+
+                        var info = message.match(regex);
+
+                        var toWatch = getUserByNick(info[1]);
+                        var days = parseInt(info[2]);
+                        var reason = info[3];
+
+                        if (toWatch)
+                            if (!toWatch.admin)
+                            {
+                                var rightNow = new Date();
+                                var nameIpPair = {
+                                    name: toWatch.nick,
+                                    ip: toWatch.realIp,
+                                    days: days,
+                                    date: rightNow.getTime(),
+                                    reason: reason
+                                };
+
+                                socket.emit('information', "[INFO] " + toWatch.nick + " is being watched by our agents.");
+                                
+                                var replaced = false;
+                                for (var i = 0; i < watchList.length; i++)
+                                {
+                                    if (watchList[i].ip == nameIpPair.ip)
+                                    {
+                                        watchList[i] = nameIpPair;
+                                        replaced = true;
+                                        break;
+                                    }
+                                }
+                                
+                                if (!replaced)
+                                    watchList.push(nameIpPair);
+                                
+                                updateWatchList();
+                            }
+                            else
+                            {
+                                socket.emit('information', "[INFO] Senpai is like a ghost in the night, an appiration, a mystery wrapped in an enigma, sometimes you even wonder if he's nothing more than a figment of your imagination. What makes you think you can watch him?");
+                            }
+                        else
+                        {
+                            socket.emit('chat message', message, 'me');
+                            socket.emit('chat message', "[INFO] User '" + info[1] + "' not found :/");
+                        }
+                    }
                     //Admin Only Commands
                     else if (message.lastIndexOf('/newsmod', 0) === 0)
                     {
@@ -2052,6 +2155,53 @@ function checkForBans(user, socket, ip)
 	return null;
 }
 
+function checkForWatch(user, socket, ip) // Just in case someomeone loses their rolex
+{
+    var splice = -1;
+    
+    for (var i = 0; i < watchList.length; i++)
+    {
+        if (user.nick === "?" && ip === watchList[i].ip)
+        {
+            var rightNow = new Date();
+            var dayUnwatched = new Date(watchList[i].date + (MILSEC_PER_DAY * watchList[i].days));
+            
+            if (dayUnwatched > rightNow)
+            {
+                return watchList[i];
+            }
+            else
+            {
+                splice = i;
+                break;
+            }
+        }
+        else if (user.nick === watchList[i].name || ip === watchList[i].ip)
+        {
+            var rightNow = new Date();
+            var dayUnwatched = new Date(watchList[i].date + (MILSEC_PER_DAY * watchList[i].days));
+            
+            if (dayUnwatched > rightNow)
+            {
+                return watchList[i];
+            }
+            else
+            {
+                splice = i;
+                break;
+            }
+        }
+    }
+    
+    if (splice > -1)
+    {
+        watchList.remove(watchList[splice]);
+        updatewatchList();
+    }
+    
+    return null;
+}
+
 function updateBanList()
 {
 	var dataToWrite = "";
@@ -2067,6 +2217,23 @@ function updateBanList()
 	}
     
     updateFile("Ban List.blt", dataToWrite);
+}
+
+function updateWatchList()
+{
+    var dataToWrite = "";
+    
+    for (var i = 0; i < watchList.length; i++)
+    {
+        dataToWrite += watchList[i].name + " " + watchList[i].ip + " " + watchList[i].days.toString() + " " + watchList[i].date.toString();
+        
+        if (i < watchList.length - 1)
+        {
+            dataToWrite += "\n";
+        }
+    }
+    
+    updateFile("Watch List.blt", dataToWrite);
 }
 
 function updateNewsFile()
