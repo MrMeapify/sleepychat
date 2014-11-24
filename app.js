@@ -1046,7 +1046,7 @@ io.on('connection', function(socket)
                             
                             if (!replaced)
                                 banList.push(nameIpPair);
-                            
+
                             updateBanList();
                         }
                         else
@@ -1217,6 +1217,7 @@ io.on('connection', function(socket)
 
                         socket.emit('information', listString + "]");
                     }
+
                     //Admin Only Commands
                     else if (message.lastIndexOf('/newsmod', 0) === 0)
                     {
@@ -1803,20 +1804,16 @@ function alterForCommands(str, user, socket, room, users)
 		var results = ans.match(rotate);
 		var rotates = results[1];
 		var hash = crypto.createHash('md5').update(rotates + new Date().getTime() + "Scott was here" + adminP).digest('hex');
-		console.log(hash);
 		if(room)
 		{
-        console.log('room')
 			io.to(room.token).emit('rotate', rotates, user.nick, hash);
 		}
 		else if(user.inBigChat)
 		{
-        console.log('user.inBigChat')
 			io.to('bigroom').emit('rotate', rotates, user.nick, hash);
 		}
 		else
 		{
-        console.log('else')
 			user.partner.socket.emit('rotate', rotates, user.nick, hash);
 			socket.emit('rotate', rotates, user.nick, hash);
 		}	
