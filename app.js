@@ -326,7 +326,7 @@ io.on('connection', function(socket)
                     var userscopy = users;
                     for(var x = 0; x < userscopy.length; x++)
                     {
-                        if(userscopy[x].mod)
+                        if(userscopy[x].mod || userscopy[x].admin)
                         {
                             userscopy[x].socket.emit('information', "[INFO] BZZT! A watched user has entered sleepychat!");
                             userscopy[x].socket.emit('information', "[INFO] User: " + watched.name);
@@ -1269,7 +1269,7 @@ io.on('connection', function(socket)
 
                         socket.emit('information', listString + "]");
                     }
-                    else if (/^\/watch ([a-zA-Z0-9-_~]+) ([0-9]*) ([^|]*)$/.test(message))
+                    else if (/^\/watch ([a-zA-Z0-9-_~]+) ([0-9]*) ([^|]*)$/.test(message) && (user.admin || user.mod) )
                     {
 
                         console.log('yog')
@@ -1685,6 +1685,7 @@ var modCommands = 	[['information', "[INFO] ~~~"],
 					['information', "[INFO] -- /banname &lt;name&gt; &lt;days&gt; -- Bans the specified user for the specified number of days, based on both name and IP."],
 					['information', "[INFO] -- /banip &lt;IP address&gt; &lt;days&gt; -- Bans the specified IP for the specified number of days, based only on IP."],
 					['information', "[INFO] -- /banlist -- Lists the banned users and their IP addresses."],
+                    ['information', "[INFO] -- /watch &lt;name&gt; &lt;days&gt; &lt;reason&gt; -- Notifies the admins whenever the named user enters (based on name and IP)."],
 					['information', "[INFO] -- /objection -- Displays the Ace Attourney \"Objection!\" gif."],
 					['information', "[INFO] -- /holdit -- Displays the Ace Attourney \"Hold it!\" gif."],
 					['information', "[INFO] ~~~"]];
