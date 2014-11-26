@@ -31,7 +31,7 @@ var disallowedNames = [/(?:a|4)dm(?:i|!|1)n/gi,                                 
                       /(?:l|i)uc(?:i|!|1)f(?:e|3)r/gi,                                              //Lucifer
                       /n(?:i|!|1)gg(?:e|3)r/gi,                                                     //Nigger
                       /r(?:a|4)p(?:e|(?:i|!|1)(?:s|5)(?:t|7))/gi,                                   //Rap(e OR ist)
-                      /all/gi];                                                                     //all
+                      /^all$/gi];                                                                   //all
 
 //For chat section
 var msgFrame = null;
