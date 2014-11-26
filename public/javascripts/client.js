@@ -18,6 +18,7 @@ var soundJnLv = true;
 var soundSite = true;
 var denied = false;
 var isDCd = false;
+var playing = false;
 
 var ignore_list = new Array()
 
@@ -915,7 +916,6 @@ $(document).ready(function()
 	});
 
 	//binaural beat setup
-	var playing = false;
 	var prevBeat = null;
 
 	socket.on('binaural', function(BBeat)
@@ -934,7 +934,7 @@ $(document).ready(function()
 		}
 		else
 		{
-			stop();
+			if (playing) stop();
 			SetupBeat(leftear,rightear);
 			PlayBeat(BBeat,frequency);
 			prevBeat = BBeat
@@ -946,6 +946,8 @@ $(document).ready(function()
 var audiolet = new Audiolet();
 var out = audiolet.output;
 var sine1,sine2,pan1,pan2,gain;
+
+
 
 var SetupBeat = function(leftear,rightear){
 	sine1 = new Sine(audiolet, leftear);
@@ -963,7 +965,9 @@ var PlayBeat = function(beat,frequency){
 	var beat = beat / 2;
 	var leftear = beat + frequency;
 	var rightear = frequency - beat;
-	stop();
+	if (playing)
+        stop();
+    playing = true;
 	SetupBeat(leftear,rightear);
 	start();
 }
@@ -977,8 +981,10 @@ var start = function(){
 var stop = function(){
 	try
 	{
+        console.log('stopping play')
+        playing = false
 		gain.disconnect(out);
-	} catch (e) {}
+	} catch (e) {console.log(e)}
 }
 
 function doResize() {

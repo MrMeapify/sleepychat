@@ -152,7 +152,7 @@ var uniqueHiddenId = 0;
 var MILSEC_PER_DAY = 86400000;
 
 
-var commandsInAM = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mod', '/mmsg', '/fmsg', '/rotate', '/commands'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
+var commandsInAM = ["/binaural", "/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mod', '/mmsg', '/fmsg', '/rotate', '/commands'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
 
 var maxMessageLength = 4000; // 4,000 seemed like a good upper bound, I doubt you're going to need more than this. For reference, a page in a book is usually about 2,000 characters. Go ahead and lower this if you want
 
@@ -1866,15 +1866,15 @@ function alterForCommands(str, user, socket, room, users)
 	
 	female_message = f_msg.test(ans);
 	male_message = m_msg.test(ans);
-	//if (binaural.test(ans))
-	//{
-	//	function trigger(match, p1, p2, offset, string)
-	//	{
-	//		socket.emit('binaural', p1); // All "me" does is highlight the message, so we just use that
-	//		return match
-	//	}
-	//	ans.replace(binaural, trigger);
-	//}
+	if (binaural.test(ans))
+	{
+		function trigger(match, p1, p2, offset, string)
+		{
+			socket.emit('binaural', p1);
+			return match
+		}
+		ans.replace(binaural, trigger);
+	}
 	if (mod_message)
 	{
 		if (user.inBigChat && user.mod)

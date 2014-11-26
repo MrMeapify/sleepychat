@@ -8,6 +8,7 @@ var snd = new Audio("/sounds/notify.ogg");
 var soundMesg = true;
 var soundSite = true;
 var denied = false;
+var playing = false;
 
 //For name list
 var users = null;
@@ -321,30 +322,29 @@ $(document).ready(function()
 	var playing = false;
 	var prevBeat = null;
 
-	socket.on('binaural', function(BBeat)
-	{
-		if(!BBeat)
-			var BBeat = 7;
-			var prevBeat = 7; // If they just did /binaural we want to stop the binaurals if they're playing
-		console.log(BBeat)
-		var frequency = 65;
+    socket.on('binaural', function(BBeat)
+    {
+        if(!BBeat)
+            var BBeat = 7;
+            var prevBeat = 7; // If they just did /binaural we want to stop the binaurals if they're playing
+        var frequency = 65;
 
-		var leftear = (BBeat / 2) + frequency;
-		var rightear = frequency - (BBeat / 2);
-		if (playing && (prevBeat == BBeat))
-		{
-			stop();
-			playing = false;
-		}
-		else
-		{
-			stop();
-			SetupBeat(leftear,rightear);
-			PlayBeat(BBeat,frequency);
-			prevBeat = BBeat
-			playing = true;
-		}
-	});
+        var leftear = (BBeat / 2) + frequency;
+        var rightear = frequency - (BBeat / 2);
+        if (playing && (prevBeat == BBeat))
+        {
+            stop();
+            playing = false;
+        }
+        else
+        {
+            if (playing) stop();
+            SetupBeat(leftear,rightear);
+            PlayBeat(BBeat,frequency);
+            prevBeat = BBeat
+            playing = true;
+        }
+    });
 
 });
 
@@ -363,14 +363,16 @@ var SetupBeat = function(leftear,rightear){
 }
 
 var PlayBeat = function(beat,frequency){
-	beat = parseFloat(beat);
-	frequency = parseFloat(frequency);
-	var beat = beat / 2;
-	var leftear = beat + frequency;
-	var rightear = frequency - beat;
-	stop();
-	SetupBeat(leftear,rightear);
-	start();
+    beat = parseFloat(beat);
+    frequency = parseFloat(frequency);
+    var beat = beat / 2;
+    var leftear = beat + frequency;
+    var rightear = frequency - beat;
+    if (playing)
+        stop();
+    playing = true;
+    SetupBeat(leftear,rightear);
+    start();
 }
 
 var start = function(){
@@ -382,8 +384,10 @@ var start = function(){
 var stop = function(){
 	try
 	{
+        console.log('stopping play')
+        playing = false
 		gain.disconnect(out);
-	} catch (e) {}
+	} catch (e) {console.log(e)}
 }
 
 function doResize() {
