@@ -26,7 +26,7 @@ var isDay = true;
 
 //For name section
 var nameList = null;
-var nameListWidthInit = 100;
+var nameListWidthInit = 250;
 var nameListWidth = nameListWidthInit;
 var nameSidebar = true;
 var isOnRight = true;
