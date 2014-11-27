@@ -561,12 +561,18 @@ $(document).ready(function()
                 
                 if (youTubeMatcher.test(msg))
                 {
-                    console.log(msg);
                     youTubeMatcher.lastIndex = 0;
-                    var videoId = youTubeMatcher.exec(msg)[1];
-                    youTubeMatcher.lastIndex = 0;
-                    msg = msg.replace(youTubeMatcher, "<div class='yt-video-container yt-loader-container' videoid='$1' playlistid='$2'><div style='vertical-align: middle; text-align: center;'>"+(isYapiLoaded ? "Fetching Video Information..." : "YouTube API Not Loaded =/")+"</div></div>");
-                    requestYouTubeEmbed(videoId);
+                    if (isConsole.Xbox360())
+                    {
+                        msg = msg.replace(youTubeMatcher, "<div class='yt-video-container yt-loader-container'><div style='vertical-align: middle; text-align: center;'>YouTube Embedding Not Supported on Xbox 360.<br/><a href='http://youtube.com/watch?v=$1'>Link to Video</a></div></div>");
+                    }
+                    else
+                    {
+                        var videoId = youTubeMatcher.exec(msg)[1];
+                        youTubeMatcher.lastIndex = 0;
+                        msg = msg.replace(youTubeMatcher, "<div class='yt-video-container yt-loader-container' videoid='$1' playlistid='$2'><div style='vertical-align: middle; text-align: center;'>"+(isYapiLoaded ? "Fetching Video Information..." : "YouTube API Not Loaded =/")+"</div></div>");
+                        requestYouTubeEmbed(videoId);
+                    }
                 }
                 
                 var isMention = false;
