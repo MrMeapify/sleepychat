@@ -26,7 +26,7 @@ var isDay = true;
 
 //For name section
 var nameList = null;
-var nameListWidthInit = 250;
+var nameListWidthInit = 100;
 var nameListWidth = nameListWidthInit;
 var nameSidebar = true;
 var isOnRight = true;
@@ -49,6 +49,12 @@ var apiKey = "NOTLOADED";
 var isGapiLoaded = false;
 var isYapiLoaded = false;
 var youTubeMatcher = /\^~([A-Za-z0-9-_]{11})~\^~(?:([A-Za-z0-9-_]{24}))?~\^?/g; // Matches the video ID between ^~ ~^, and optionally matches the playlist ID between ~ ~^
+
+//For realtime
+var realtime = false;                  // This controls if realtime is on
+var realtimeMaxRate = 250;             // How often we should transmit
+var timeOfLastRTTransmit = Date.now(); // We use this to make sure we wait realtimeMaxRate before the next transmit
+var lastRTMessage = "";                // We use this to make sure we don't transmit the same message over and over
 
 var isMobile = {
     Android: function() {
@@ -148,6 +154,7 @@ $(document).ready(function()
 		$('#chatbar').submit(function()
 		{
             var msgInBox = $('#m').val();
+            if (realtime) socket.emit('realtime text', '')
             
             if (msgInBox == "/dialog")
             {
@@ -160,6 +167,21 @@ $(document).ready(function()
                     replaceNameList();
                 }
             }
+            else if (msgInBox == "/realtime on")
+            {
+                msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] Realtime text is activated!' + "</span>"));
+                realtime = true;
+                console.log(realtime);
+                $(".realtimetext").appendTo("#messages"); // Move all realtime messages to the bottom
+            }
+            else if (msgInBox == "/realtime off")
+            {
+                msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] Realtime text is off' + "</span>"));
+                socket.emit('realtime text', '')
+                realtime = false;
+                console.log(realtime);
+                $(".realtimetext").appendTo("#messages"); // Move all realtime messages to the bottom
+            }
             else
             {
                 socket.emit('chat message', { message: msgInBox });
@@ -169,6 +191,9 @@ $(document).ready(function()
 			$('#m').val('');
 			return false;
 		});
+        $('#m').on('input', function(){
+            realtimeTransmit(); // For slightly quicker updating
+        });
         
         socket.on('allow', function(googleApiKey)
 		{
@@ -192,7 +217,7 @@ $(document).ready(function()
 			msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Your connection was refused. "+reason+"</span>"));
 		});
 		
-		socket.on('chat message', function(msg, who)
+		socket.on('chat message', function(msg, who, userFrom)
 		{
 			if(msg)
 			{
@@ -222,6 +247,14 @@ $(document).ready(function()
 				{
 					$('#messages > li').filter(':last').addClass('self');
 				}
+
+
+                $(".realtimetext").appendTo("#messages");
+
+                if (userFrom && $('.realtimetext#' + userFrom).length)
+                {
+                    $('.realtimetext#' + userFrom).remove()
+                }
 				
 				scrollDown();
 			}
@@ -255,6 +288,14 @@ $(document).ready(function()
 				}
 				msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information blocking\">" + msg + "</span>"));
 				scrollDown();
+
+                $(".realtimetext").appendTo("#messages"); // Move all realtime message to the bottom
+                // When someone leaves, remove their realtime messages
+                if (/\[INFO\] (.+?) has left/.test(msg))
+                {
+                    userLeft = /\[INFO\] (.+?) has left/.match(msg)[1];
+                    $('.realtimetext#' + userLeft).remove()
+                }
 			}
 		});
 
@@ -346,7 +387,47 @@ $(document).ready(function()
         }
     });
 
+    socket.on('realtime text', function(msg, fromwho)
+    {
+        if (fromwho != nick)
+        {
+            fromwho = 'realtime' + fromwho
+            if($('.realtimetext#' + fromwho).length)
+            {
+                console.log('Editing rt text')
+                if(msg != "")
+                {
+                    $('.realtimetext#' + fromwho).html(moment().format('h:mm a') + ": " + msg);
+                }
+                else
+                {
+                    $('#' + fromwho).remove()
+                }
+            }
+            else
+            {
+                if(msg != "")
+                {
+                    console.log('creating rt text')
+                    $('#messages').append($('<li class="realtimetext" id="' + fromwho + '">').html(moment().format('h:mm a') + ": " + msg));
+                }
+            }
+        }
+    });
+
 });
+
+var realtimeTransmit = function(){
+    if (realtime && (Date.now() - timeOfLastRTTransmit >= realtimeMaxRate) && ($('#m').val() !== lastRTMessage))
+    {
+        lastRTMessage = $('#m').val();
+        timeOfLastRTTransmit = Date.now();
+        socket.emit('realtime text', $('#m').val())
+        console.log('Transmit!')
+    }
+}
+
+setInterval(realtimeTransmit, 1000);
 
 var audiolet = new Audiolet();
 var out = audiolet.output;

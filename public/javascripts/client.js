@@ -72,6 +72,12 @@ var date = new Date();
 var timeSinceLastMessage = Date.now();
 var AFK = false;
 
+//For realtime
+var realtime = false;                  // This controls if realtime is on
+var realtimeMaxRate = 100;             // How often we should transmit
+var timeOfLastRTTransmit = Date.now(); // We use this to make sure we wait realtimeMaxRate before the next transmit
+var lastRTMessage = "";                // We use this to make sure we don't transmit the same message over and over
+
 //For Day/Night Mode
 var isDay = true;
 
@@ -89,7 +95,7 @@ var afkLast = true;
 
 //For Autocomplete
 var tcOptions = {
-	minLength: 2
+    minLength: 2
 };
 
 //For mobile detection
@@ -118,6 +124,7 @@ var isMobile = {
 $(document).ready(function()
 {
     msgFrame = $("#msgframe");
+    rtmsgFrame = $("#rtmsgframe");
     nameList = $("#namelist");
     
     if (!isMobile.any())
@@ -140,13 +147,20 @@ $(document).ready(function()
     msgFrame.css("width", (window.innerWidth-nameListWidth).toString()+"px");
     msgFrame.html("<div class='body'><ul id='messages'></ul></div>");
     msgList = msgFrame.contents().find("ul#messages");
+
+
+    /*rtmsgFrame.css("height", (window.innerHeight-(newsTicker ? cutoffWithTicker : cutoffWithoutTicker)).toString()+"px");
+    rtmsgFrame.css("width", (window.innerWidth-nameListWidth).toString()+"px");
+    rtmsgFrame.html("<div class='body'><ul id='rtmessages'></ul></div>");
+    rtmsgList = msgFrame.contents().find("ul#rtmessages");*/
     
     if (nameList != null)
     {
         nameList.css("height", (window.innerHeight-(newsTicker ? cutoffWithTicker : cutoffWithoutTicker)).toString()+"px");
         nameList.css("width", (nameListWidth).toString()+"px");
     }
-    
+
+
     // Cookies!!!
     parseCookies();
     
@@ -216,147 +230,147 @@ $(document).ready(function()
     
     setUpModal();
     
-	socket = io("/", { reconnection: false, transport: ['websocket'] });
+    socket = io("/", { reconnection: false, transport: ['websocket'] });
 
-	$('#loginform').submit(function()
-	{
-		return false;
-	});
+    $('#loginform').submit(function()
+    {
+        return false;
+    });
 
-	$('#mutebutton').click(function()
-	{
+    $('#mutebutton').click(function()
+    {
         $('#sound-modal').modal({keyboard: true, backdrop: 'true'});
-	});
+    });
 
-	socket.on('connect', function()
-	{
+    socket.on('connect', function()
+    {
         msgList.hide()
 
         $('#ticker-x').click(removeTicker);
         
         var errorLabel = document.getElementById('error-label');
-		
-		$('#loginsubmit').prop('disabled', false).removeClass('btn-default').addClass('btn-success').text('Start Matchmaking!');
-		$('#bigchatsubmit').prop('disabled', false).removeClass('btn-default').addClass('btn-primary').text('Or join the big group chat!');
-		$('#nickname').on('input', function()
-		{
-			var inputNick = $('<div/>').text(($('#nickname').val())).html();
-			
-			var result = testNick(inputNick);
-			errorLabel.innerHTML = result;
-		});
-		
-		$('#loginsubmit').click(function()
-		{
+        
+        $('#loginsubmit').prop('disabled', false).removeClass('btn-default').addClass('btn-success').text('Start Matchmaking!');
+        $('#bigchatsubmit').prop('disabled', false).removeClass('btn-default').addClass('btn-primary').text('Or join the big group chat!');
+        $('#nickname').on('input', function()
+        {
+            var inputNick = $('<div/>').text(($('#nickname').val())).html();
+            
+            var result = testNick(inputNick);
+            errorLabel.innerHTML = result;
+        });
+        
+        $('#loginsubmit').click(function()
+        {
             $("ul#messages").empty();
             msgList.show();
-			var nick = $('<div/>').text(($('#nickname').val())).html();
-			
-			if (testNick(nick) != "")
-			{
-				console.log("Error: '" + nick + "' is not accepted!");
-				return false;
-			}
-			
-			var pass = $('<div/>').text(($('#passwordfield').val())).html();
+            var nick = $('<div/>').text(($('#nickname').val())).html();
+            
+            if (testNick(nick) != "")
+            {
+                console.log("Error: '" + nick + "' is not accepted!");
+                return false;
+            }
+            
+            var pass = $('<div/>').text(($('#passwordfield').val())).html();
 
-			if($('#iammale').parent().hasClass('active'))
-				var gender = 'male';
-			else if($('#iamfemale').parent().hasClass('active'))
-				var gender = 'female';
-			else
-				var gender = 'undisclosed';
+            if($('#iammale').parent().hasClass('active'))
+                var gender = 'male';
+            else if($('#iamfemale').parent().hasClass('active'))
+                var gender = 'female';
+            else
+                var gender = 'undisclosed';
 
-			if($('#iamtist').parent().hasClass('active'))
-				var role = 'tist';
-			else if($('#iamsub').parent().hasClass('active'))
-				var role = 'sub';
-			else
-				var role = 'switch';
+            if($('#iamtist').parent().hasClass('active'))
+                var role = 'tist';
+            else if($('#iamsub').parent().hasClass('active'))
+                var role = 'sub';
+            else
+                var role = 'switch';
 
-			if($('#chatwithmales').parent().hasClass('active'))
-				var chatwith = 'males';
-			else if($('#chatwithfemales').parent().hasClass('active'))
-				var chatwith = 'females';
-			else
-				var chatwith = 'either';
+            if($('#chatwithmales').parent().hasClass('active'))
+                var chatwith = 'males';
+            else if($('#chatwithfemales').parent().hasClass('active'))
+                var chatwith = 'females';
+            else
+                var chatwith = 'either';
 
-			if($('#iwantrp').parent().hasClass('active'))
-				var type = 'roleplaying';
-			else if($('#iwanthyp').parent().hasClass('active'))
-				var type = 'hypnosis';
-			else
-				var type = 'either';
+            if($('#iwantrp').parent().hasClass('active'))
+                var type = 'roleplaying';
+            else if($('#iwanthyp').parent().hasClass('active'))
+                var type = 'hypnosis';
+            else
+                var type = 'either';
 
-			socket.emit('login', { nick: nick, pass: pass, gender: gender, role: role, chatwith: chatwith, type: type, isMobile: isMobile.any() });
+            socket.emit('login', { nick: nick, pass: pass, gender: gender, role: role, chatwith: chatwith, type: type, isMobile: isMobile.any() });
             
             saveModal();
             
             removeNameList();
-			
-			timeSinceLastMessage = Date.now();
-			$('#login-modal').modal('hide');
-			return false;
-		});
+            
+            timeSinceLastMessage = Date.now();
+            $('#login-modal').modal('hide');
+            return false;
+        });
 
-		$('#loginform').submit(function()
-		{
-			bigchat = true;
+        $('#loginform').submit(function()
+        {
+            bigchat = true;
 
-			var nick2 = $('<div/>').text(($('#nickname').val())).html();
-			
-			if (testNick(nick2) != "")
-			{
-				console.log("Error: '" + nick + "' is not accepted!");
-				return false;
-			}
-			
-			var pass2 = $('<div/>').text(($('#passwordfield').val())).html();
+            var nick2 = $('<div/>').text(($('#nickname').val())).html();
+            
+            if (testNick(nick2) != "")
+            {
+                console.log("Error: '" + nick + "' is not accepted!");
+                return false;
+            }
+            
+            var pass2 = $('<div/>').text(($('#passwordfield').val())).html();
 
-			if($('#iammale').parent().hasClass('active'))
-				var gender = 'male';
-			else if($('#iamfemale').parent().hasClass('active'))
-				var gender = 'female';
-			else
-				var gender = 'undisclosed';
+            if($('#iammale').parent().hasClass('active'))
+                var gender = 'male';
+            else if($('#iamfemale').parent().hasClass('active'))
+                var gender = 'female';
+            else
+                var gender = 'undisclosed';
 
-			if($('#iamtist').parent().hasClass('active'))
-				var role = 'tist';
-			else if($('#iamsub').parent().hasClass('active'))
-				var role = 'sub';
-			else
-				var role = 'switch';
+            if($('#iamtist').parent().hasClass('active'))
+                var role = 'tist';
+            else if($('#iamsub').parent().hasClass('active'))
+                var role = 'sub';
+            else
+                var role = 'switch';
 
-			if($('#chatwithmales').parent().hasClass('active'))
-				var chatwith = 'males';
-			else if($('#chatwithfemales').parent().hasClass('active'))
-				var chatwith = 'females';
-			else
-				var chatwith = 'either';
+            if($('#chatwithmales').parent().hasClass('active'))
+                var chatwith = 'males';
+            else if($('#chatwithfemales').parent().hasClass('active'))
+                var chatwith = 'females';
+            else
+                var chatwith = 'either';
 
-			if($('#iwantrp').parent().hasClass('active'))
-				var type = 'roleplaying';
-			else if($('#iwanthyp').parent().hasClass('active'))
-				var type = 'hypnosis';
-			else if($('#iwantgeneral').parent().hasClass('active'))
-				var type = 'general';
-			else
-				var type = 'either';
+            if($('#iwantrp').parent().hasClass('active'))
+                var type = 'roleplaying';
+            else if($('#iwanthyp').parent().hasClass('active'))
+                var type = 'hypnosis';
+            else if($('#iwantgeneral').parent().hasClass('active'))
+                var type = 'general';
+            else
+                var type = 'either';
 
-			nick = nick2;
+            nick = nick2;
 
-			socket.emit('login', { nick: nick2, pass: pass2, gender: gender, role: role, chatwith: chatwith, type: type, inBigChat: bigchat, isMobile: isMobile.any() });
+            socket.emit('login', { nick: nick2, pass: pass2, gender: gender, role: role, chatwith: chatwith, type: type, inBigChat: bigchat, isMobile: isMobile.any() });
             
             saveModal();
 
-			$('#login-modal').modal('hide');
+            $('#login-modal').modal('hide');
             msgList.show(300);
-			return false;
-		});
+            return false;
+        });
         
         socket.on('allow', function(connectionInfo)
-		{
-			if (!isOnDisclaimer)
+        {
+            if (!isOnDisclaimer)
             {
                 $('#login-modal').modal({keyboard: false, backdrop: 'static'});
             }
@@ -377,13 +391,13 @@ $(document).ready(function()
                     console.log("Warining: Google API Script not yet loaded. Waiting...");
                 }
             }
-		});
-		
-		socket.on('denial', function(reason)
-		{
-			denied = true;
-			msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Your connection was refused. "+reason+"</span>"));
-		});
+        });
+        
+        socket.on('denial', function(reason)
+        {
+            denied = true;
+            msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Your connection was refused. "+reason+"</span>"));
+        });
         
         socket.on('newsmod', function(newsData)
         {
@@ -434,10 +448,10 @@ $(document).ready(function()
                 initialNews = true;
             }
         });
-		
-		socket.on('rosterupdate', function(newInfo)
-		{
-			users = newInfo;
+        
+        socket.on('rosterupdate', function(newInfo)
+        {
+            users = newInfo;
             if (!isMobile.any())
             {
                 updateNameList();
@@ -452,23 +466,23 @@ $(document).ready(function()
                 $('#m').tabcomplete(nicks, tcOptions);
                 if (hadFocus) { $('#m').focus(); }
             }
-		});
-		
-		socket.on('nickupdate', function(newnick)
-		{
-			nick = newnick;
-		});
-		
-		socket.on('openroom', function(data)
-		{
-			var url = window.location.protocol + "//" + window.location.host + "/room/" + data.roomtoken + "/" + data.usertoken;
-			msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] <a id="toclick" href="' + url + '" target="_blank">Click here to enter the room.</a>' + "</span>"));
-			setTimeout(function() { $('#toclick').click(); $('#toclick').attr("id","clicked"); }, 500);
-		});
-		
-		socket.on('whisper', function(sender, receiver, msg)
-		{
-			if (msg){
+        });
+        
+        socket.on('nickupdate', function(newnick)
+        {
+            nick = newnick;
+        });
+        
+        socket.on('openroom', function(data)
+        {
+            var url = window.location.protocol + "//" + window.location.host + "/room/" + data.roomtoken + "/" + data.usertoken;
+            msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] <a id="toclick" href="' + url + '" target="_blank">Click here to enter the room.</a>' + "</span>"));
+            setTimeout(function() { $('#toclick').click(); $('#toclick').attr("id","clicked"); }, 500);
+        });
+        
+        socket.on('whisper', function(sender, receiver, msg)
+        {
+            if (msg){
                 
                 var scroll_down = isWithinScrollThreshold();
                 
@@ -481,8 +495,8 @@ $(document).ready(function()
                     requestYouTubeEmbed(videoId);
                 }
                 
-				if(sender !== nick)
-				{
+                if(sender !== nick)
+                {
                     if (ignore_list.indexOf(sender) == -1)
                     {
                         lastMessenger = sender;
@@ -500,21 +514,21 @@ $(document).ready(function()
                             interval = setInterval(changeTitle, 1000);
                         }
                     }
-				}
-				else
-				{
-					msgList.append($('<li class="self">').html(moment().format('h:mm:ss a') + ": *You whisper to " + receiver + ": " + msg.substring(6 + msg.split(' ')[1].length) + "*"));
-				}
-				
-				scrollDown(scroll_down);
-			}
-		});
+                }
+                else
+                {
+                    msgList.append($('<li class="self">').html(moment().format('h:mm:ss a') + ": *You whisper to " + receiver + ": " + msg.substring(6 + msg.split(' ')[1].length) + "*"));
+                }
+                
+                scrollDown(scroll_down);
+            }
+        });
 
-		socket.on('chat message', function(msg, who, userFrom)
-		{
-			if(msg)
-			{
-				var scroll_down = isWithinScrollThreshold();
+        socket.on('chat message', function(msg, who, userFrom)
+        {
+            if(msg)
+            {
+                var scroll_down = isWithinScrollThreshold();
                 
                 if (youTubeMatcher.test(msg))
                 {
@@ -528,65 +542,72 @@ $(document).ready(function()
                 
                 var isMention = false;
 
-				var msgClass = "";
-				var user = msg.match(/&lt;(.+)&gt;/);
-				if(who === "me")
-				{
-					msgClass+= 'self';
-				}
-				else if(who === "eval" && msg.lastIndexOf('&lt;' + nick + '&gt;', 0) === 0)
-				{
-					msgClass+= 'self';
-				}
-				
-				try
-				{
-					if(bigchat && msg.split('&gt;')[1].substring(1).indexOf(nick) != -1)
-					{
-						msgClass+= (msgClass != "" ? " " : "")+'mention';
+                var msgClass = "";
+                var user = msg.match(/&lt;(.+)&gt;/);
+                if(who === "me")
+                {
+                    msgClass+= 'self';
+                }
+                else if(who === "eval" && msg.lastIndexOf('&lt;' + nick + '&gt;', 0) === 0)
+                {
+                    msgClass+= 'self';
+                }
+                
+                try
+                {
+                    if(bigchat && msg.split('&gt;')[1].substring(1).indexOf(nick) != -1)
+                    {
+                        msgClass+= (msgClass != "" ? " " : "")+'mention';
                         isMention = true;
-					}
-				}
-				catch(e) {}
-				
-				if (userFrom && ignore_list.indexOf(userFrom) != -1)
-				{
-				}
+                    }
+                }
+                catch(e) {}
+                
+                if (userFrom && ignore_list.indexOf(userFrom) != -1)
+                {
+                }
                 else
                 {
                     msgList.append($('<li class="'+msgClass+'">').html(moment().format('h:mm:ss a') + ": " + msg));
                 }
 
-				if(notify && loggedIn)
-				{
+                if(notify && loggedIn)
+                {
                     if (isMention)
                     {
                         if(soundMent)
-					       	snd.play();
+                            snd.play();
                     }
                     else
                     {
                         if(soundMesg)
                             snd.play();
                     }
-					if(bigchat)
-						newTitle = "*** People are talking! ***";
-					else
-						newTitle = "*** " + lastChat + " messaged you! ***";
-					clearInterval(interval);
-					interval = setInterval(changeTitle, 1000);
-				}
+                    if(bigchat)
+                        newTitle = "*** People are talking! ***";
+                    else
+                        newTitle = "*** " + lastChat + " messaged you! ***";
+                    clearInterval(interval);
+                    interval = setInterval(changeTitle, 1000);
+                }
 
-				scrollDown(scroll_down);
-			}
-		});
+                $(".realtimetext").appendTo("#messages"); // Move all realtime messages to the bottom
+
+                if (userFrom && $('.realtimetext#' + userFrom).length)
+                {
+                    $('.realtimetext#' + userFrom).remove()
+                }
+
+                scrollDown(scroll_down);
+            }
+        });
         
-		socket.on('information', function(msg, userFrom)
-		{
-			if (msg)
-			{
-				if(notify && loggedIn)
-				{
+        socket.on('information', function(msg, userFrom)
+        {
+            if (msg)
+            {
+                if(notify && loggedIn)
+                {
                     if (msg.indexOf("has joined.") != -1 || msg.indexOf("has left.") != -1 || msg.indexOf("is AFK.") != -1)
                     {
                         if (soundJnLv)
@@ -603,53 +624,60 @@ $(document).ready(function()
                             snd.play();
                     }
                     
-					newTitle = "*** New message! ***";
-					clearInterval(interval);
-					interval = setInterval(changeTitle, 1000);
-				}
-				var scroll_down = isWithinScrollThreshold();
-				if (!(userFrom && ignore_list.indexOf(userFrom) != -1))
-				{
-					msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information"+(msg.indexOf("ROLL") == -1 ? " blocking" : "")+"\">" + msg + "</span>"));
-					scrollDown(scroll_down);
-				}
+                    newTitle = "*** New message! ***";
+                    clearInterval(interval);
+                    interval = setInterval(changeTitle, 1000);
+                }
+                var scroll_down = isWithinScrollThreshold();
+                if (!(userFrom && ignore_list.indexOf(userFrom) != -1))
+                {
+                    msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information"+(msg.indexOf("ROLL") == -1 ? " blocking" : "")+"\">" + msg + "</span>"));
+                    scrollDown(scroll_down);
+                }
+                $(".realtimetext").appendTo("#messages"); // Move all realtime messages to the bottom
 
-			}
-		});
+            }
+        });
 
-		socket.on('ignore', function(user)
-		{
-			ignore_list.push(user);
-		});
+        socket.on('ignore', function(user)
+        {
+            ignore_list.push(user);
+        });
 
-		socket.on('partnerDC', function(nick)
-		{
-			chatting = false;
-			$('#sendbutton').attr('disabled', true);
-			var themsg = '[INFO] ' + nick + ' has disconnected from you.';
-			var scroll_down = isWithinScrollThreshold();
-			msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information blocking\">" + themsg + "</span>"));
-			scrollDown(scroll_down);
-		});
+        socket.on('partnerDC', function(nick)
+        {
+            chatting = false;
+            $('#sendbutton').attr('disabled', true);
+            var themsg = '[INFO] ' + nick + ' has disconnected from you.';
+            var scroll_down = isWithinScrollThreshold();
+            msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information blocking\">" + themsg + "</span>"));
+            scrollDown(scroll_down);
+            if (realtime) 
+            {
+                realtime = false;
+                msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information blocking\">" + 'Realtime text has been deactivated' + "</span>"));
+            }
+            $('.realtimetext').remove();
+        });
 
-		socket.on('disconnect', function()
-		{
-			if(notify && loggedIn)
-			{
-				if(soundSite)
-					snd.play();
-				newTitle = "*** Alert ***";
-				clearInterval(interval);
-				interval = setInterval(changeTitle, 1000);
-			}
-			var scroll_down = isWithinScrollThreshold();
-			if (!denied)
-			{
-				msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information blocking\">" + "[INFO] Sorry! You seem to have been disconnected from the server. Please reload the page and try again.</span>"));
-			}
-			scrollDown(scroll_down);
+        socket.on('disconnect', function()
+        {
+            if(notify && loggedIn)
+            {
+                if(soundSite)
+                    snd.play();
+                newTitle = "*** Alert ***";
+                clearInterval(interval);
+                interval = setInterval(changeTitle, 1000);
+            }
+            var scroll_down = isWithinScrollThreshold();
+            if (!denied)
+            {
+                msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information blocking\">" + "[INFO] Sorry! You seem to have been disconnected from the server. Please reload the page and try again.</span>"));
+            }
+            scrollDown(scroll_down);
             isDCd = true;
-		});
+        });
 
         socket.on('openlink', function(url)
         {
@@ -657,23 +685,23 @@ $(document).ready(function()
                 window.open(url);
         });
 
-	});
+    });
 
-	socket.on('loggedIn', function()
-	{
-		loggedIn = true;
-		timeSinceLastMessage = Date.now();
-		if(bigchat)
-		{
+    socket.on('loggedIn', function()
+    {
+        loggedIn = true;
+        timeSinceLastMessage = Date.now();
+        if(bigchat)
+        {
             if (!isMobile.any())
             {
                 $('#m').focus();
             }
-			$('#dcbutton').parent().hide();
-			$('#sendbutton').removeAttr('disabled');
-			$('#chatbar').unbind('submit');
-			$('#chatbar').submit(function()
-			{
+            $('#dcbutton').parent().hide();
+            $('#sendbutton').removeAttr('disabled');
+            $('#chatbar').unbind('submit');
+            $('#chatbar').submit(function()
+            {
                 var msgInBox = $('#m').val();
                 if (msgInBox == "/news")
                 {
@@ -703,76 +731,79 @@ $(document).ready(function()
                     scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
                     
                 }
+
                 $('#m').val('');
                 $('#mhint').val('');
-				return false;
-			});
-			
-			$('#m').on('input', function()
-			{
-				var msgInBox = $('#m').val();
-				if (msgInBox.lastIndexOf("/reply ", 0) === 0 && lastMessenger !== "")
-				{
-					$('#m').val(msgInBox.replace("/reply ", "/msg " + lastMessenger + " "));
-				}
-				
-				if (msgInBox.lastIndexOf("/r ", 0) === 0 && lastMessenger !== "")
-				{
-					$('#m').val(msgInBox.replace("/r ", "/msg " + lastMessenger + " "));
-				}
-			});
-		}
-		else
-		{
-			$('#chatbar').submit(function()
-			{
-				return false;
-			});
-			socket.emit('getNewChat', { first: true });
+                return false;
+            });
+            
+            $('#m').on('input', function()
+            {
+                var msgInBox = $('#m').val();
+                if (msgInBox.lastIndexOf("/reply ", 0) === 0 && lastMessenger !== "")
+                {
+                    $('#m').val(msgInBox.replace("/reply ", "/msg " + lastMessenger + " "));
+                }
+                
+                if (msgInBox.lastIndexOf("/r ", 0) === 0 && lastMessenger !== "")
+                {
+                    $('#m').val(msgInBox.replace("/r ", "/msg " + lastMessenger + " "));
+                }
+                realtimeTransmit(); // For slightly quicker updating
+            });
+        }
+        else
+        {
+            $('#chatbar').submit(function()
+            {
+                return false;
+            });
+            socket.emit('getNewChat', { first: true });
 
-		}
-	});
+        }
+    });
 
-	socket.on('newChat', function(nick)
-	{
-		lastChat = nick;
-		chatting = true;
-		$('#sendbutton').removeAttr('disabled');
-		$('#dcbutton').removeAttr('disabled');
-		$('#dcbutton').unbind('click');
-		$('#dcbutton').click(function()
-		{
-			if(newchatclickedonce)
-			{
-				$('#dcbutton').button('reset');
-				newchatclickedonce = false;
-				socket.emit('getNewChat', { first: false, last: lastChat });
-				$('#dcbutton').attr('disabled', true);
-				$('#sendbutton').attr('disabled', true);
-				if(chatting)
-				{
-					var msg = "[INFO] You have disconnected from " + lastChat + ".";
-					var scroll_down = isWithinScrollThreshold();
-					msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
-					scrollDown(scroll_down);
-				}
-				chatting = false;
-			}
-			else
-			{
-				$('#dcbutton').button('really');
-				newchatclickedonce = true;
-				setTimeout(function ()
-				{
-					$('#dcbutton').button('reset');
-					newchatclickedonce = false;
-				}, 3000);
-			}
-		});
-		$('#chatbar').unbind('submit');
-		$('#chatbar').submit(function()
-		{
+    socket.on('newChat', function(nick)
+    {
+        lastChat = nick;
+        chatting = true;
+        $('#sendbutton').removeAttr('disabled');
+        $('#dcbutton').removeAttr('disabled');
+        $('#dcbutton').unbind('click');
+        $('#dcbutton').click(function()
+        {
+            if(newchatclickedonce)
+            {
+                $('#dcbutton').button('reset');
+                newchatclickedonce = false;
+                socket.emit('getNewChat', { first: false, last: lastChat });
+                $('#dcbutton').attr('disabled', true);
+                $('#sendbutton').attr('disabled', true);
+                if(chatting)
+                {
+                    var msg = "[INFO] You have disconnected from " + lastChat + ".";
+                    var scroll_down = isWithinScrollThreshold();
+                    msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + msg + "</span>"));
+                    scrollDown(scroll_down);
+                }
+                chatting = false;
+            }
+            else
+            {
+                $('#dcbutton').button('really');
+                newchatclickedonce = true;
+                setTimeout(function ()
+                {
+                    $('#dcbutton').button('reset');
+                    newchatclickedonce = false;
+                }, 3000);
+            }
+        });
+        $('#chatbar').unbind('submit');
+        $('#chatbar').submit(function()
+        {
             var msgInBox = $('#m').val();
+            if (realtime) socket.emit('realtime text', '')
             if (msgInBox == "/news")
             {
                 if (!newsTicker)
@@ -799,33 +830,59 @@ $(document).ready(function()
                     removeNameList();
                 }
             }
+            else if (msgInBox == "/realtime on")
+            {
+                if (bigchat)
+                    msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] Realtime text is not supported in the bigchat :(' + "</span>"));
+                else
+                {
+                    msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] Realtime text is activated!' + "</span>"));
+                    realtime = true;
+                    $(".realtimetext").appendTo("#messages"); // Move all realtime messages to the bottom
+                }
+                console.log(realtime);
+            }
+            else if (msgInBox == "/realtime off")
+            {
+                if (bigchat)
+                    msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] Realtime text is not supported in the bigchat :(' + "</span>"));
+                else
+                {
+                    msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] Realtime text is off' + "</span>"));
+                    socket.emit('realtime text', '')
+                    realtime = false;
+                    $(".realtimetext").appendTo("#messages"); // Move all realtime messages to the bottom
+                }
+                console.log(realtime);
+            }
             else if (msgInBox != "" && !(/^ +$/.test(msgInBox)))
             {
                 socket.emit('chat message', { message: msgInBox });
                 scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
             }
             
-			$('#m').val('');
-			$('#mhint').val('');
-			return false;
-		});
-		
-		$('#m').on('input', function()
-		{
-			var msgInBox = $('#m').val();
-			if (msgInBox.lastIndexOf("/reply ", 0) === 0 && lastMessenger !== "")
-			{
-				$('#m').val(msgInBox.replace("/reply ", "/msg " + lastMessenger + " "));
-			}
-			
-			if (msgInBox.lastIndexOf("/r ", 0) === 0 && lastMessenger !== "")
-			{
-				$('#m').val(msgInBox.replace("/r ", "/msg " + lastMessenger + " "));
-			}
-		});
+            $('#m').val('');
+            $('#mhint').val('');
+            return false;
+        });
+        
+        $('#m').on('input', function()
+        {
+            var msgInBox = $('#m').val();
+            if (msgInBox.lastIndexOf("/reply ", 0) === 0 && lastMessenger !== "")
+            {
+                $('#m').val(msgInBox.replace("/reply ", "/msg " + lastMessenger + " "));
+            }
+            
+            if (msgInBox.lastIndexOf("/r ", 0) === 0 && lastMessenger !== "")
+            {
+                $('#m').val(msgInBox.replace("/r ", "/msg " + lastMessenger + " "));
+            }
+            realtimeTransmit(); // For slightly quicker updating
+        });
 
 
-	});
+    });
 
     socket.on('rotate', function(toRotate, userFrom, hash, origintime)
     { 
@@ -859,50 +916,50 @@ $(document).ready(function()
             
     });
 
-	socket.on('stats', function(stats)
-	{
-		$('#iammale').parent().html('<input name="iamgender" id="iammale" type="radio"> ' + "Male (" + stats.gender.males + ")");
-		$('#iamfemale').parent().html('<input name="iamgender" id="iamfemale" type="radio"> ' + "Female (" + stats.gender.females + ")");
-		$('#iamundisclosed').parent().html('<input name="iamgender" id="iamundisclosed" type="radio"> ' + "Undisclosed (" + stats.gender.undisclosed + ")");
-		$('#iamtist').parent().html('<input name="iamrole" id="iamtist" type="radio"> ' + "Hypnotist (" + stats.role.tist + ")");
-		$('#iamsub').parent().html('<input name="iamrole" id="iamsub" type="radio"> ' + "Subject (" + stats.role.sub + ")");
-		$('#iamswitch').parent().html('<input name="iamrole" id="iamswitch" type="radio"> ' + "Switch (" + stats.role.switchrole + ")");
-		$('#bigchatsubmit').html('Or join the ' + randomAdjective() + ' public chat! (' + stats.bigroom + ")");
-	});
+    socket.on('stats', function(stats)
+    {
+        $('#iammale').parent().html('<input name="iamgender" id="iammale" type="radio"> ' + "Male (" + stats.gender.males + ")");
+        $('#iamfemale').parent().html('<input name="iamgender" id="iamfemale" type="radio"> ' + "Female (" + stats.gender.females + ")");
+        $('#iamundisclosed').parent().html('<input name="iamgender" id="iamundisclosed" type="radio"> ' + "Undisclosed (" + stats.gender.undisclosed + ")");
+        $('#iamtist').parent().html('<input name="iamrole" id="iamtist" type="radio"> ' + "Hypnotist (" + stats.role.tist + ")");
+        $('#iamsub').parent().html('<input name="iamrole" id="iamsub" type="radio"> ' + "Subject (" + stats.role.sub + ")");
+        $('#iamswitch').parent().html('<input name="iamrole" id="iamswitch" type="radio"> ' + "Switch (" + stats.role.switchrole + ")");
+        $('#bigchatsubmit').html('Or join the ' + randomAdjective() + ' public chat! (' + stats.bigroom + ")");
+    });
 
-	$(window).blur(function()
-	{
-		notify = true;
-	});
+    $(window).blur(function()
+    {
+        notify = true;
+    });
 
-	$(window).focus(function()
-	{
-		notify = false;
-		clearInterval(interval);
-		$("title").text(oldTitle);
-	});
+    $(window).focus(function()
+    {
+        notify = false;
+        clearInterval(interval);
+        $("title").text(oldTitle);
+    });
 
-	var afkTime = 30*60*1000; // 30 minutes in milliseconds
+    var afkTime = 30*60*1000; // 30 minutes in milliseconds
 
-	var afk = setInterval(function(){
-		if(bigchat)
-		{
-			timenow = Date.now()
-			if ((!AFK) && (timenow - timeSinceLastMessage > afkTime)) // If we're not AFK, but we haven't said anything in 30 minutes, mark us AFK.
-		    {
-		    	socket.emit('AFK', {AFK: true, nick: nick })
-		    	AFK = true;
-		    }
-		}
+    var afk = setInterval(function(){
+        if(bigchat)
+        {
+            timenow = Date.now()
+            if ((!AFK) && (timenow - timeSinceLastMessage > afkTime)) // If we're not AFK, but we haven't said anything in 30 minutes, mark us AFK.
+            {
+                socket.emit('AFK', {AFK: true, nick: nick })
+                AFK = true;
+            }
+        }
 
-	}, 1000);
+    }, 1000);
     
-	socket.on('afk', function(data)
-	{
-		if(bigchat && data.nick == nick)
+    socket.on('afk', function(data)
+    {
+        if(bigchat && data.nick == nick)
         {
             AFK = data.AFK;
-			timeSinceLastMessage = Date.now();
+            timeSinceLastMessage = Date.now();
         }
         
         for (var i = 0; i < users.length; i++)
@@ -913,35 +970,78 @@ $(document).ready(function()
                 updateNameList();
             }
         }
-	});
+    });
 
-	//binaural beat setup
-	var prevBeat = null;
+    //binaural beat setup
+    var prevBeat = null;
 
-	socket.on('binaural', function(BBeat)
-	{
-		if(!BBeat)
-			var BBeat = 7;
-			var prevBeat = 7; // If they just did /binaural we want to stop the binaurals if they're playing
-		var frequency = 65;
+    socket.on('binaural', function(BBeat)
+    {
+        if(!BBeat)
+            var BBeat = 7;
+            var prevBeat = 7; // If they just did /binaural we want to stop the binaurals if they're playing
+        var frequency = 65;
 
-		var leftear = (BBeat / 2) + frequency;
-		var rightear = frequency - (BBeat / 2);
-		if (playing && (prevBeat == BBeat))
-		{
-			stop();
-			playing = false;
-		}
-		else
-		{
-			if (playing) stop();
-			SetupBeat(leftear,rightear);
-			PlayBeat(BBeat,frequency);
-			prevBeat = BBeat
-			playing = true;
-		}
-	});
+        var leftear = (BBeat / 2) + frequency;
+        var rightear = frequency - (BBeat / 2);
+        if (playing && (prevBeat == BBeat))
+        {
+            stop();
+            playing = false;
+        }
+        else
+        {
+            if (playing) stop();
+            SetupBeat(leftear,rightear);
+            PlayBeat(BBeat,frequency);
+            prevBeat = BBeat
+            playing = true;
+        }
+    });
+
+    socket.on('realtime text', function(msg, fromwho)
+    {
+        if (fromwho != nick)
+        {
+            fromwho = 'realtime' + fromwho
+            if($('.realtimetext#' + fromwho).length)
+            {
+                console.log('Editing rt text')
+                if(msg != "")
+                {console.log('message: ' + msg)
+                    $('.realtimetext#' + fromwho).html(moment().format('h:mm a') + ": " + msg);
+                }
+                else
+                {
+                    $('#' + fromwho).remove()
+                }
+            }
+            else
+            {
+                if(msg != "")
+                {
+                    console.log('creating rt text')
+                    $('#messages').append($('<li class="realtimetext" id="' + fromwho + '">').html(moment().format('h:mm a') + ": " + msg));
+                }
+            }
+        }
+    });
+
 });
+
+
+var realtimeTransmit = function(){
+    if (realtime && (Date.now() - timeOfLastRTTransmit >= realtimeMaxRate) && (!bigchat) && ($('#m').val() !== lastRTMessage))
+    {
+        lastRTMessage = $('#m').val();
+        timeOfLastRTTransmit = Date.now();
+        socket.emit('realtime text', $('#m').val())
+        console.log('Transmit!')
+    }
+}
+
+setInterval(realtimeTransmit, 1000);
+
 
 var audiolet = new Audiolet();
 var out = audiolet.output;
@@ -950,41 +1050,41 @@ var sine1,sine2,pan1,pan2,gain;
 
 
 var SetupBeat = function(leftear,rightear){
-	sine1 = new Sine(audiolet, leftear);
-	sine2 = new Sine(audiolet, rightear);
-	pan1 = new Pan(audiolet, 1);
-	pan2 = new Pan(audiolet, 2); 
-	gain = new Gain(audiolet, 0.5)
-	sine1.connect(pan1);
-	sine2.connect(pan2);
+    sine1 = new Sine(audiolet, leftear);
+    sine2 = new Sine(audiolet, rightear);
+    pan1 = new Pan(audiolet, 1);
+    pan2 = new Pan(audiolet, 2); 
+    gain = new Gain(audiolet, 0.5)
+    sine1.connect(pan1);
+    sine2.connect(pan2);
 }
 
 var PlayBeat = function(beat,frequency){
-	beat = parseFloat(beat);
-	frequency = parseFloat(frequency);
-	var beat = beat / 2;
-	var leftear = beat + frequency;
-	var rightear = frequency - beat;
-	if (playing)
+    beat = parseFloat(beat);
+    frequency = parseFloat(frequency);
+    var beat = beat / 2;
+    var leftear = beat + frequency;
+    var rightear = frequency - beat;
+    if (playing)
         stop();
     playing = true;
-	SetupBeat(leftear,rightear);
-	start();
+    SetupBeat(leftear,rightear);
+    start();
 }
 
 var start = function(){
-	pan1.connect(gain);
-	pan2.connect(gain);
-	gain.connect(out);
+    pan1.connect(gain);
+    pan2.connect(gain);
+    gain.connect(out);
 }
 
 var stop = function(){
-	try
-	{
+    try
+    {
         console.log('stopping play')
         playing = false
-		gain.disconnect(out);
-	} catch (e) {console.log(e)}
+        gain.disconnect(out);
+    } catch (e) {console.log(e)}
 }
 
 function doResize() {
@@ -1016,34 +1116,34 @@ function isWithinScrollThreshold() {
 
 function scrollDown(scroll_down)
 {
-	if (scroll_down)
-	{
-		msgFrame.stop(true,true).animate({ scrollTop: msgFrame[0].scrollHeight}, 500);
-	}
+    if (scroll_down)
+    {
+        msgFrame.stop(true,true).animate({ scrollTop: msgFrame[0].scrollHeight}, 500);
+    }
 }
 
 function testNick(nickToTest)
 {
-	var regex = /^[a-z0-9-_~]+$/i;
-	
-	if (typeof nickToTest == 'undefined' || nickToTest == null)
-	{
-		return "Undefined nickname!";
-	}
-	else if (nickToTest.length < 1)
-	{
-		return "Please type a nickname!";
-	}
-	else if (nickToTest.length > 64)
-	{
-		return "Nickname too long!";
-	}
-	else if (!regex.test(nickToTest))
-	{
-		return "Only letters, numbers, dash, underscore, and \"~\"!";
-	}
-	else
-	{
+    var regex = /^[a-z0-9-_~]+$/i;
+    
+    if (typeof nickToTest == 'undefined' || nickToTest == null)
+    {
+        return "Undefined nickname!";
+    }
+    else if (nickToTest.length < 1)
+    {
+        return "Please type a nickname!";
+    }
+    else if (nickToTest.length > 64)
+    {
+        return "Nickname too long!";
+    }
+    else if (!regex.test(nickToTest))
+    {
+        return "Only letters, numbers, dash, underscore, and \"~\"!";
+    }
+    else
+    {
         for (var i = 0; i < disallowedNames.length; i++)
         {
             disallowedNames[i].lastIndex = 0;
@@ -1052,8 +1152,8 @@ function testNick(nickToTest)
                 return "This name is not allowed.";
             }
         }
-		return "";
-	}
+        return "";
+    }
 }
 
 function replaceTicker()
@@ -1282,7 +1382,7 @@ function setUpModal () {
     var cookieName = getCookie("username", "");
     if (cookieName == "")
     {
-	   $('#randomnick').click();
+       $('#randomnick').click();
     }
     else
     {
@@ -1470,29 +1570,29 @@ function link_replacer(match, p1, p2, offset, string)
 window.onbeforeunload = confirmExit;
 function confirmExit()
 {
-	if ((chatting || bigchat) && !isDCd)
-		return "Wait, you're still in a chat session!";
+    if ((chatting || bigchat) && !isDCd)
+        return "Wait, you're still in a chat session!";
 }
 
 function changeTitle()
 {
-	document.title = isOldTitle ? oldTitle : newTitle;
-	isOldTitle = !isOldTitle;
+    document.title = isOldTitle ? oldTitle : newTitle;
+    isOldTitle = !isOldTitle;
 }
 
 function randomAdjective(){
-	var adjs = ['adaptable', 'adventurous', 'affable', 'affectionate', 'agreeable', 'ambitious', 'amiable', 'amicable', 'amusing', 'brave', 'bright', 'broad-minded', 'calm', 'charming', 'communicative', 'compassionate ', 'conscientious', 'considerate', 'convivial', 'courageous', 'courteous', 'creative', 'decisive', 'determined', 'diligent', 'diplomatic', 'discreet', 'dynamic', 'easygoing', 'emotional', 'energetic', 'enthusiastic', 'exuberant', 'fair-minded', 'faithful', 'fearless', 'forceful', 'frank', 'friendly', 'funny', 'generous', 'gentle', 'good', 'gregarious', 'hard-working', 'helpful', 'honest', 'humorous', 'imaginative', 'impartial', 'independent', 'intellectual', 'intelligent', 'intuitive', 'inventive', 'kind', 'loving', 'loyal', 'modest', 'neat', 'nice', 'optimistic', 'passionate', 'patient', 'persistent ', 'pioneering', 'philosophical', 'placid', 'plucky', 'polite', 'powerful', 'practical', 'pro-active', 'quick-witted', 'quiet', 'rational', 'reliable', 'reserved', 'resourceful', 'romantic', 'self-confident', 'sensible', 'sensitive', 'sociable', 'straightforward', 'thoughtful', 'unassuming', 'understanding', 'versatile', 'warmhearted', 'willing', 'witty', 'mysterious', 'incredible', 'amazing', 'stupefying', 'unbelieveable', 'mind-blowing'];
-	return adjs[Math.floor(Math.random()*adjs.length)]
+    var adjs = ['adaptable', 'adventurous', 'affable', 'affectionate', 'agreeable', 'ambitious', 'amiable', 'amicable', 'amusing', 'brave', 'bright', 'broad-minded', 'calm', 'charming', 'communicative', 'compassionate ', 'conscientious', 'considerate', 'convivial', 'courageous', 'courteous', 'creative', 'decisive', 'determined', 'diligent', 'diplomatic', 'discreet', 'dynamic', 'easygoing', 'emotional', 'energetic', 'enthusiastic', 'exuberant', 'fair-minded', 'faithful', 'fearless', 'forceful', 'frank', 'friendly', 'funny', 'generous', 'gentle', 'good', 'gregarious', 'hard-working', 'helpful', 'honest', 'humorous', 'imaginative', 'impartial', 'independent', 'intellectual', 'intelligent', 'intuitive', 'inventive', 'kind', 'loving', 'loyal', 'modest', 'neat', 'nice', 'optimistic', 'passionate', 'patient', 'persistent ', 'pioneering', 'philosophical', 'placid', 'plucky', 'polite', 'powerful', 'practical', 'pro-active', 'quick-witted', 'quiet', 'rational', 'reliable', 'reserved', 'resourceful', 'romantic', 'self-confident', 'sensible', 'sensitive', 'sociable', 'straightforward', 'thoughtful', 'unassuming', 'understanding', 'versatile', 'warmhearted', 'willing', 'witty', 'mysterious', 'incredible', 'amazing', 'stupefying', 'unbelieveable', 'mind-blowing'];
+    return adjs[Math.floor(Math.random()*adjs.length)]
 }
 
 $("#about").click(function()
 {
-	window.open('/about');
+    window.open('/about');
 });
 
 $('#randomnick').click(function()
 {
-	var adjs = ['Good', 'Mindless', 'Little', 'Tired', 'Wise', 'Dreamy', 'Sleepy', 'Blank', 'Enchanted', 'Enchanting', 'Entranced', 'Hypnotic', 'Bad', 'The', 'Hypnotized'];
-	var animals = ['Alligator', 'Crocodile', 'Alpaca', 'Ant', 'Antelope', 'Ape', 'Armadillo', 'Donkey', 'Baboon', 'Badger', 'Bat', 'Bear', 'Beaver', 'Bee', 'Beetle', 'Buffalo', 'Butterfly', 'Camel', 'Caribou', 'Cat', 'Cattle', 'Cheetah', 'Chimpanzee', 'Chinchilla', 'Cicada', 'Clam', 'Cockroach', 'Cod', 'Coyote', 'Crab', 'Cricket', 'Crow', 'Raven', 'Deer', 'Dinosaur', 'Dog', 'Dolphin', 'Porpoise', 'Duck', 'Eel', 'Elephant', 'Elk', 'Ferret', 'Fishfly', 'Fox', 'Frog', 'Toad', 'Gerbil', 'Giraffe', 'Gnat', 'Gnu', 'Wildebeest', 'Goat', 'Goldfish', 'Gorilla', 'Grasshopper', 'Hamster', 'Hare', 'Hedgehog', 'Herring', 'Hippopotamus', 'Hornet', 'Horse', 'Hound', 'Hyena', 'Insect', 'Jackal', 'Jellyfish', 'Kangaroo', 'Wallaby', 'Leopard', 'Lion', 'Lizard', 'Llama', 'Locust', 'Moose', 'Mosquito', 'Mouse', 'Rat', 'Mule', 'Muskrat', 'Otter', 'Ox', 'Oyster', 'Panda', 'Pig', 'Hog', 'Platypus', 'Porcupine', 'Pug', 'Rabbit', 'Raccoon', 'Reindeer', 'Rhinoceros', 'Salmon', 'Sardine', 'Shark', 'Sheep', 'Skunk', 'Snail', 'Snake', 'Spider', 'Squirrel', 'Termite', 'Tiger', 'Trout', 'Turtle', 'Tortoise', 'Walrus', 'Weasel', 'Whale', 'Wolf', 'Wombat', 'Woodchuck', 'Worm', 'Yak', 'Zebra'];
-	$('#nickname').val(adjs[Math.floor(Math.random()*adjs.length)] + animals[Math.floor(Math.random()*animals.length)] + (Math.floor(Math.random() * (9 - 1)) + 1) + (Math.floor(Math.random() * (9 - 1)) + 1));
+    var adjs = ['Good', 'Mindless', 'Little', 'Tired', 'Wise', 'Dreamy', 'Sleepy', 'Blank', 'Enchanted', 'Enchanting', 'Entranced', 'Hypnotic', 'Bad', 'The', 'Hypnotized'];
+    var animals = ['Alligator', 'Crocodile', 'Alpaca', 'Ant', 'Antelope', 'Ape', 'Armadillo', 'Donkey', 'Baboon', 'Badger', 'Bat', 'Bear', 'Beaver', 'Bee', 'Beetle', 'Buffalo', 'Butterfly', 'Camel', 'Caribou', 'Cat', 'Cattle', 'Cheetah', 'Chimpanzee', 'Chinchilla', 'Cicada', 'Clam', 'Cockroach', 'Cod', 'Coyote', 'Crab', 'Cricket', 'Crow', 'Raven', 'Deer', 'Dinosaur', 'Dog', 'Dolphin', 'Porpoise', 'Duck', 'Eel', 'Elephant', 'Elk', 'Ferret', 'Fishfly', 'Fox', 'Frog', 'Toad', 'Gerbil', 'Giraffe', 'Gnat', 'Gnu', 'Wildebeest', 'Goat', 'Goldfish', 'Gorilla', 'Grasshopper', 'Hamster', 'Hare', 'Hedgehog', 'Herring', 'Hippopotamus', 'Hornet', 'Horse', 'Hound', 'Hyena', 'Insect', 'Jackal', 'Jellyfish', 'Kangaroo', 'Wallaby', 'Leopard', 'Lion', 'Lizard', 'Llama', 'Locust', 'Moose', 'Mosquito', 'Mouse', 'Rat', 'Mule', 'Muskrat', 'Otter', 'Ox', 'Oyster', 'Panda', 'Pig', 'Hog', 'Platypus', 'Porcupine', 'Pug', 'Rabbit', 'Raccoon', 'Reindeer', 'Rhinoceros', 'Salmon', 'Sardine', 'Shark', 'Sheep', 'Skunk', 'Snail', 'Snake', 'Spider', 'Squirrel', 'Termite', 'Tiger', 'Trout', 'Turtle', 'Tortoise', 'Walrus', 'Weasel', 'Whale', 'Wolf', 'Wombat', 'Woodchuck', 'Worm', 'Yak', 'Zebra'];
+    $('#nickname').val(adjs[Math.floor(Math.random()*adjs.length)] + animals[Math.floor(Math.random()*animals.length)] + (Math.floor(Math.random() * (9 - 1)) + 1) + (Math.floor(Math.random() * (9 - 1)) + 1));
 });

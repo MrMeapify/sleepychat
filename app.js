@@ -15,7 +15,7 @@ require('array.prototype.find');
 var adminP = String(process.env.ADMINPASS || "testpassword");
 var moderatorP = String(process.env.MODPASS || "testpassword");
 
-var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "2"));
+var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "20"));
 
 // Admin/Mod stuff
 var administrator = "ElysianTail-Senpai";
@@ -212,7 +212,7 @@ io.on('connection', function(socket)
             
             var timeToReset = 15000;
             
-            if (connToTest.tries > 2)
+            if (connToTest.tries > 20)
             {
                 socket.emit('denial', "This IP is creating too many connections too quickly. Try again in 10 minutes, if you please");
                 socket.conn.close();
@@ -596,14 +596,7 @@ io.on('connection', function(socket)
                     spamPoints += (data.message.length > 1000 ? 1 : 0);
                     message=data.message;
                     
-                    // Escape html
-                    message = message.replace(/;/g, "&#59;"); 			//escape ;
-                    message = message.replace(/&([^#$])/, "&#38;$1");	//escape &
-                    message = message.replace(/</g, "&lt;");  			//escape <
-                    message = message.replace(/>/g, "&gt;");  			//escape >
-                    message = message.replace(/"/g, "&quot;");			//escape "
-                    message = message.replace(/'/g, "&#39;"); 			//escape '
-                    message = message.replace(/^\s+|\s+$/g, '');
+                    message = escapeHTML(message);
                     
                     // Check for any disallowed words or phrases.
                     if (!room)
@@ -1418,6 +1411,37 @@ io.on('connection', function(socket)
             }
         });
 
+
+        socket.on('realtime text', function(msg)
+        {
+            try
+            {
+                user = getUserByNick(nick);
+                if(room)
+                {
+                    if (msg == "")
+                        io.to(room.token).emit('realtime text', "", user.nick);
+                    else
+                        io.to(room.token).emit('realtime text', '&lt;' + user.nick + '&gt; ' + alterForFormatting(escapeHTML(msg)), user.nick);
+                }
+                else if(user.inBigChat) // the only way this should be able to happen is if they changed the code themselves or if I made a mistake
+                {
+                    socket.emit('information', '[INFO] Cut that out!')
+                }
+                else if (user.partner)
+                {
+                    if (msg == "")
+                        user.partner.socket.emit('realtime text', "", user.nick);
+                    else if (user.partner)
+                        user.partner.socket.emit('realtime text', '&lt;' + user.nick + '&gt; ' + alterForFormatting(escapeHTML(msg)), user.nick);
+                }
+            }
+            catch(e){console.log(e)}
+        });
+
+
+
+
         socket.on('disconnect', function()
         {
             if(room)
@@ -1445,6 +1469,7 @@ io.on('connection', function(socket)
                         delete user.partner.partner;
                         users.push(user.partner);
                         user.partner.socket.emit('partnerDC', user.nick);
+                        user.partner = null;
                     }
                     if(user.inBigChat)
                     {
@@ -1453,6 +1478,7 @@ io.on('connection', function(socket)
                     }
                 }
             }
+
 
             connections.remove(connection);
         });
@@ -1478,6 +1504,7 @@ io.on('connection', function(socket)
                 io.to('bigroom').emit('afk', { nick: data.nick, AFK: data.AFK });
             }
         });
+        
         
         socket.on('newsmodsubmit', function(newsData)
         {
@@ -1513,6 +1540,21 @@ io.on('connection', function(socket)
 	}
 	
 });
+
+
+function escapeHTML(message)
+{
+
+    // Escape html
+    message = message.replace(/;/g, "&#59;");           //escape ;
+    message = message.replace(/&([^#$])/, "&#38;$1");   //escape &
+    message = message.replace(/</g, "&lt;");            //escape <
+    message = message.replace(/>/g, "&gt;");            //escape >
+    message = message.replace(/"/g, "&quot;");          //escape "
+    message = message.replace(/'/g, "&#39;");           //escape '
+    message = message.replace(/^\s+|\s+$/g, '');
+    return message;
+}
 
 
 // ==================================
