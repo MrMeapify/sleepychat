@@ -74,7 +74,7 @@ var AFK = false;
 
 //For realtime
 var realtime = false;                  // This controls if realtime is on
-var realtimeMaxRate = 100;             // How often we should transmit
+var realtimeMaxRate = 250;             // How often we should transmit
 var timeOfLastRTTransmit = Date.now(); // We use this to make sure we wait realtimeMaxRate before the next transmit
 var lastRTMessage = "";                // We use this to make sure we don't transmit the same message over and over
 
@@ -845,6 +845,7 @@ $(document).ready(function()
                     msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] Realtime text is activated!' + "</span>"));
                     realtime = true;
                     $(".realtimetext").appendTo("#messages"); // Move all realtime messages to the bottom
+                    scrollDown(true);
                 }
             }
             else if (msgInBox == "/realtime off")
@@ -857,6 +858,7 @@ $(document).ready(function()
                     socket.emit('realtime text', '')
                     realtime = false;
                     $(".realtimetext").appendTo("#messages"); // Move all realtime messages to the bottom
+                    scrollDown(true);
                 }
             }
             else if (msgInBox != "" && !(/^ +$/.test(msgInBox)))
@@ -914,6 +916,7 @@ $(document).ready(function()
                     prev = current;
                 }, TimeBetweenMsgs);
             })(rotates, userFrom, hash, current); // We do this to create a new scope, so setInterval doesn't forget the vars
+            scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
         }
             
     });

@@ -173,6 +173,7 @@ $(document).ready(function()
                 realtime = true;
                 console.log(realtime);
                 $(".realtimetext").appendTo("#messages"); // Move all realtime messages to the bottom
+                scrollDown(true);
             }
             else if (msgInBox == "/realtime off")
             {
@@ -181,6 +182,7 @@ $(document).ready(function()
                 realtime = false;
                 console.log(realtime);
                 $(".realtimetext").appendTo("#messages"); // Move all realtime messages to the bottom
+                scrollDown(true);
             }
             else
             {
@@ -345,8 +347,7 @@ $(document).ready(function()
                     prev = current;
                 }, TimeBetweenMsgs);
             })(rotates, userFrom, hash, moment().format('h:mm:ss a'), current); // We do this to create a new scope, so setInterval doesn't forget the vars
-            console.log(toRotate.split(", "));
-            console.log(toRotate);
+            scrollDown();
         });
 
 		socket.emit('joinroom', roomtoken, usertoken);
