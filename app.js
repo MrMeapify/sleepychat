@@ -58,7 +58,7 @@ fs.readFile("Ban List.blt", function (err, logData) {
 
 //Acquire the watch list.
 var watchList = [];
-fs.readFile("Watch List.blt", function (err, logData) {
+fs.readFile("Watch list.blt", function (err, logData) {
 
     if (err) throw err;
     
