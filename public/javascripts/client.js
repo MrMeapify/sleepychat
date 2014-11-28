@@ -846,7 +846,6 @@ $(document).ready(function()
                     realtime = true;
                     $(".realtimetext").appendTo("#messages"); // Move all realtime messages to the bottom
                 }
-                console.log(realtime);
             }
             else if (msgInBox == "/realtime off")
             {
@@ -859,7 +858,6 @@ $(document).ready(function()
                     realtime = false;
                     $(".realtimetext").appendTo("#messages"); // Move all realtime messages to the bottom
                 }
-                console.log(realtime);
             }
             else if (msgInBox != "" && !(/^ +$/.test(msgInBox)))
             {
@@ -916,8 +914,6 @@ $(document).ready(function()
                     prev = current;
                 }, TimeBetweenMsgs);
             })(rotates, userFrom, hash, current); // We do this to create a new scope, so setInterval doesn't forget the vars
-            console.log(toRotate.split(", "));
-            console.log(toRotate);
         }
             
     });
@@ -1014,7 +1010,6 @@ $(document).ready(function()
                 fromwho = 'realtime' + fromwho
                 if($('.realtimetext#' + fromwho).length)
                 {
-                    console.log('Editing rt text')
                     if(msg != "")
                     {console.log('message: ' + msg)
                         $('.realtimetext#' + fromwho).html(moment().format('h:mm a') + ": " + msg);
@@ -1028,7 +1023,6 @@ $(document).ready(function()
                 {
                     if(msg != "")
                     {
-                        console.log('creating rt text')
                         $('#messages').append($('<li class="realtimetext" id="' + fromwho + '">').html(moment().format('h:mm a') + ": " + msg));
                     }
                 }
@@ -1046,7 +1040,6 @@ var realtimeTransmit = function(){
         lastRTMessage = $('#m').val();
         timeOfLastRTTransmit = Date.now();
         socket.emit('realtime text', $('#m').val())
-        console.log('Transmit!')
     }
 }
 
