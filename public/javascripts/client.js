@@ -1001,30 +1001,34 @@ $(document).ready(function()
 
     socket.on('realtime text', function(msg, fromwho)
     {
-        if (fromwho != nick)
+        try
         {
-            fromwho = 'realtime' + fromwho
-            if($('.realtimetext#' + fromwho).length)
+            if (fromwho != nick)
             {
-                console.log('Editing rt text')
-                if(msg != "")
-                {console.log('message: ' + msg)
-                    $('.realtimetext#' + fromwho).html(moment().format('h:mm a') + ": " + msg);
+                fromwho = 'realtime' + fromwho
+                if($('.realtimetext#' + fromwho).length)
+                {
+                    console.log('Editing rt text')
+                    if(msg != "")
+                    {console.log('message: ' + msg)
+                        $('.realtimetext#' + fromwho).html(moment().format('h:mm a') + ": " + msg);
+                    }
+                    else
+                    {
+                        $('#' + fromwho).remove()
+                    }
                 }
                 else
                 {
-                    $('#' + fromwho).remove()
-                }
-            }
-            else
-            {
-                if(msg != "")
-                {
-                    console.log('creating rt text')
-                    $('#messages').append($('<li class="realtimetext" id="' + fromwho + '">').html(moment().format('h:mm a') + ": " + msg));
+                    if(msg != "")
+                    {
+                        console.log('creating rt text')
+                        $('#messages').append($('<li class="realtimetext" id="' + fromwho + '">').html(moment().format('h:mm a') + ": " + msg));
+                    }
                 }
             }
         }
+        catch(e){console.log(e)}
     });
 
 });
