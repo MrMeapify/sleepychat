@@ -400,6 +400,8 @@ io.on('connection', function(socket)
 
         socket.on('joinroom', function(roomtoken, usertoken)
         {
+
+            socket.leave('bigroom');
             for(var x = 0; x < privaterooms.length; x++)
             {
                 if(privaterooms[x].token === roomtoken)
