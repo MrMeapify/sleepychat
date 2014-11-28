@@ -316,6 +316,12 @@ $(document).ready(function()
 			scrollDown();
 		});
 
+        socket.on('openlink', function(url)
+        {
+            if (url)
+                window.open(url);
+        });
+
         socket.on('rotate', function(toRotate, userFrom, hash, origintime)
         {
             var rotates = toRotate.split(", ");
