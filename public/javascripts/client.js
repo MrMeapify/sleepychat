@@ -1014,12 +1014,14 @@ $(document).ready(function()
                 if($('.realtimetext#' + fromwho).length)
                 {
                     if(msg != "")
-                    {console.log('message: ' + msg)
+                    {
                         $('.realtimetext#' + fromwho).html(moment().format('h:mm a') + ": " + msg);
+                        scrollDown(isWithinScrollThreshold());
                     }
                     else
                     {
                         $('#' + fromwho).remove()
+                        scrollDown(isWithinScrollThreshold());
                     }
                 }
                 else
@@ -1027,6 +1029,7 @@ $(document).ready(function()
                     if(msg != "")
                     {
                         $('#messages').append($('<li class="realtimetext" id="' + fromwho + '">').html(moment().format('h:mm a') + ": " + msg));
+                        scrollDown(isWithinScrollThreshold());
                     }
                 }
             }

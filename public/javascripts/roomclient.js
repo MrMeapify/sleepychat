@@ -401,22 +401,23 @@ $(document).ready(function()
             fromwho = 'realtime' + fromwho
             if($('.realtimetext#' + fromwho).length)
             {
-                console.log('Editing rt text')
                 if(msg != "")
                 {
                     $('.realtimetext#' + fromwho).html(moment().format('h:mm a') + ": " + msg);
+                    scrollDown();
                 }
                 else
                 {
                     $('#' + fromwho).remove()
+                    scrollDown();
                 }
             }
             else
             {
                 if(msg != "")
                 {
-                    console.log('creating rt text')
                     $('#messages').append($('<li class="realtimetext" id="' + fromwho + '">').html(moment().format('h:mm a') + ": " + msg));
+                    scrollDown();
                 }
             }
         }
