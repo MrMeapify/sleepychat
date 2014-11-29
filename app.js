@@ -521,8 +521,8 @@ io.on('connection', function(socket)
                 }
                 if(user.partner)
                 {
-                    var found1 = "[INFO] Found a chat partner! Say hello to " + user.partner.nick + ", a ";
-                    var found2 = "[INFO] Found a chat partner! Say hello to " + user.nick + ", a ";
+                    var found1 = "[INFO] Found a chat partner! Say hello to " + getAuthority(user.partner) + user.partner.nick + ", a ";
+                    var found2 = "[INFO] Found a chat partner! Say hello to " + getAuthority(user) + user.nick + ", a ";
 
                     if(user.partner.gender != "undisclosed")
                         found1 += user.partner.gender;
@@ -1844,7 +1844,7 @@ function alterForFormatting(str, user)
 	var ans = str; // Copies the variable so V8 can do it's optimizations.
 
 	// regex's
-	var banana = /^\/(?:(?:banana)|(?:banana-cream-pie))$/g; // Matches "/me " followed by anything
+	var banana = /^\/(?:(?:banana)|(?:banana-cream-pie))$/g; 
 	var bold = /\*\*(.+?)\*\*/g; // Matches stuff between ** **
 	var italics = /\*(.+?)\*/g; // Matches stuff between * *
 	var underline = /__(.+?)__/g; // Matches stuff between __ __
@@ -1908,7 +1908,7 @@ function alterForCommands(str, user, socket, room, users)
 	var mod_msg = /^\/mod (.+)/g; // Matches "/fmsg " followed by anything
 	var roll = /^\/roll ?([0-9]*)$/; // Matches "roll' or "roll " followed by a number 
 	var binaural = /^\/binaural ?(\d*)?$/;
-	var me = /^\/me((?:'s)? .*)/g; // Matches "/me " followed by anything
+	var me = /^\/me((?:'s)? .*)$/g; // Matches "/me " followed by anything
 	var rotate = /^\/rotate (.+)$/; // Matches "/rotate " followed by anything
 
 	// implementations
