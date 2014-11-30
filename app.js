@@ -1438,7 +1438,7 @@ io.on('connection', function(socket)
                 }
                 else if(user.inBigChat) // the only way this should be able to happen is if they changed the code themselves or if I made a mistake
                 {
-                    socket.emit('information', '[INFO] Cut that out!')
+                    //socket.emit('information', '[INFO] Cut that out!')
                 }
                 else if (user.partner)
                 {
