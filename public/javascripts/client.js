@@ -73,10 +73,11 @@ var timeSinceLastMessage = Date.now();
 var AFK = false;
 
 //For realtime
-var realtime = false;                  // This controls if realtime is on
+var realtime = false;                  // This controls if realtime is on. Change this with /realtime on and /realtime off
 var realtimeMaxRate = 250;             // How often we should transmit
 var timeOfLastRTTransmit = Date.now(); // We use this to make sure we wait realtimeMaxRate before the next transmit
 var lastRTMessage = "";                // We use this to make sure we don't transmit the same message over and over
+var realtimeEpistasis = true;          // This is required to show realtime messages. Turn this off with /norealtime. Epistasis isn't actually the right word here, but I like it
 
 //For Day/Night Mode
 var isDay = true;
@@ -661,7 +662,7 @@ $(document).ready(function()
             if (realtime) 
             {
                 realtime = false;
-                msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information blocking\">" + 'Realtime text has been deactivated' + "</span>"));
+                msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information blocking\">" + '[INFO] Realtime text has been deactivated' + "</span>"));
             }
             $('.realtimetext').remove();
         });
@@ -836,28 +837,40 @@ $(document).ready(function()
                     removeNameList();
                 }
             }
-            else if (msgInBox == "/realtime on")
+            else if (msgInBox == "/realtime on" || (msgInBox == "/realtime" && realtime == false))
             {
                 if (bigchat)
                     msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] Realtime text is not supported in the bigchat :(' + "</span>"));
                 else
                 {
-                    msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] Realtime text is activated!' + "</span>"));
+                    msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] Realtime text is activated, other users in the room can now see what you type!' + "</span>"));
                     realtime = true;
                     $(".realtimetext").appendTo("#messages"); // Move all realtime messages to the bottom
                     scrollDown(true);
                 }
             }
-            else if (msgInBox == "/realtime off")
+            else if (msgInBox == "/realtime off" || (msgInBox == "/realtime" && realtime == true))
             {
                 if (bigchat)
                     msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] Realtime text is not supported in the bigchat :(' + "</span>"));
                 else
                 {
-                    msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] Realtime text is off' + "</span>"));
+                    msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] Realtime text is off, other users in the room can no longer see what you type' + "</span>"));
                     socket.emit('realtime text', '')
                     realtime = false;
                     $(".realtimetext").appendTo("#messages"); // Move all realtime messages to the bottom
+                    scrollDown(true);
+                }
+            }
+            else if (msgInBox == "/norealtime")
+            {
+                if (bigchat)
+                    msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] Realtime text is not supported in the bigchat :(' + "</span>"));
+                else
+                {
+                    msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] You can no longer see the other users\' realtime text' + "</span>"));
+                    realtimeEpistasis = false;
+                    $('.realtimetext').remove()
                     scrollDown(true);
                 }
             }
@@ -1008,23 +1021,23 @@ $(document).ready(function()
     {
         try
         {
-            if (fromwho != nick)
+            if (fromwho != nick && realtimeEpistasis) // Change existing realtime text
             {
                 fromwho = 'realtime' + fromwho
                 if($('.realtimetext#' + fromwho).length)
                 {
-                    if(msg != "")
+                    if(msg != "") // Edit
                     {
                         $('.realtimetext#' + fromwho).html(moment().format('h:mm a') + ": " + msg);
-                        scrollDown(isWithinScrollThreshold());
+                        //scrollDown(isWithinScrollThreshold());
                     }
-                    else
+                    else          // Delete existing
                     {
                         $('#' + fromwho).remove()
-                        scrollDown(isWithinScrollThreshold());
+                        //scrollDown(isWithinScrollThreshold());
                     }
                 }
-                else
+                else             // Add new realtime text
                 {
                     if(msg != "")
                     {
@@ -1041,11 +1054,17 @@ $(document).ready(function()
 
 
 var realtimeTransmit = function(){
-    if (realtime && (Date.now() - timeOfLastRTTransmit >= realtimeMaxRate) && (!bigchat) && ($('#m').val() !== lastRTMessage))
+    message = $('#m').val();
+    if (realtime && (Date.now() - timeOfLastRTTransmit >= realtimeMaxRate) && (message !== lastRTMessage) && (message.lastIndexOf('/') != 0))
     {
-        lastRTMessage = $('#m').val();
+        lastRTMessage = message;
         timeOfLastRTTransmit = Date.now();
-        socket.emit('realtime text', $('#m').val())
+        socket.emit('realtime text', message);
+    }
+    else if((Date.now() - timeOfLastRTTransmit >= realtimeMaxRate) && (message.lastIndexOf('/') == 0)  && (message !== lastRTMessage))
+    {
+        lastRTMessage = message;
+        socket.emit('realtime text', '');
     }
 }
 

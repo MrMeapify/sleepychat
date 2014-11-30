@@ -51,10 +51,11 @@ var isYapiLoaded = false;
 var youTubeMatcher = /\^~([A-Za-z0-9-_]{11})~\^~(?:([A-Za-z0-9-_]{24}))?~\^?/g; // Matches the video ID between ^~ ~^, and optionally matches the playlist ID between ~ ~^
 
 //For realtime
-var realtime = false;                  // This controls if realtime is on
+var realtime = false;                  // This controls if realtime is on. Change this with /realtime on and /realtime off
 var realtimeMaxRate = 250;             // How often we should transmit
 var timeOfLastRTTransmit = Date.now(); // We use this to make sure we wait realtimeMaxRate before the next transmit
 var lastRTMessage = "";                // We use this to make sure we don't transmit the same message over and over
+var realtimeEpistasis = true;          // This is required to show realtime messages. Turn this off with /norealtime. Epistasis isn't actually the right word here, but I like it
 
 var isMobile = {
     Android: function() {
@@ -167,21 +168,26 @@ $(document).ready(function()
                     replaceNameList();
                 }
             }
-            else if (msgInBox == "/realtime on")
+            else if (msgInBox == "/realtime on" || (msgInBox == "/realtime" && realtime == false))
             {
-                msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] Realtime text is activated!' + "</span>"));
+                msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] Realtime text is activated, other users in the room can now see what you type!' + "</span>"));
                 realtime = true;
-                console.log(realtime);
                 $(".realtimetext").appendTo("#messages"); // Move all realtime messages to the bottom
                 scrollDown(true);
             }
-            else if (msgInBox == "/realtime off")
+            else if (msgInBox == "/realtime off" || (msgInBox == "/realtime" && realtime == true))
             {
-                msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] Realtime text is off' + "</span>"));
+                msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] Realtime text is off, other users in the room can no longer see what you type' + "</span>"));
                 socket.emit('realtime text', '')
                 realtime = false;
-                console.log(realtime);
                 $(".realtimetext").appendTo("#messages"); // Move all realtime messages to the bottom
+                scrollDown(true);
+            }
+            else if (msgInBox == "/norealtime")
+            {
+                msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] You can no longer see the other users\' realtime text' + "</span>"));
+                realtimeEpistasis = false;
+                $('.realtimetext').remove()
                 scrollDown(true);
             }
             else
@@ -396,42 +402,57 @@ $(document).ready(function()
 
     socket.on('realtime text', function(msg, fromwho)
     {
-        if (fromwho != nick)
+        try
         {
-            fromwho = 'realtime' + fromwho
-            if($('.realtimetext#' + fromwho).length)
+            if ((fromwho != nick) && realtimeEpistasis) // Change existing realtime text
             {
-                if(msg != "")
+                fromwho = 'realtime' + fromwho
+                if($('.realtimetext#' + fromwho).length)
                 {
-                    $('.realtimetext#' + fromwho).html(moment().format('h:mm a') + ": " + msg);
-                    scrollDown();
+                    if(msg != "") // Edit
+                    {
+                        $('.realtimetext#' + fromwho).html(moment().format('h:mm a') + ": " + msg);
+                        //scrollDown(isWithinScrollThreshold());
+                    }
+                    else          // Delete existing
+                    {
+                        $('#' + fromwho).remove()
+                        //scrollDown(isWithinScrollThreshold());
+                    }
                 }
-                else
+                else             // Add new realtime text
                 {
-                    $('#' + fromwho).remove()
-                    scrollDown();
+                    if(msg != "")
+                    {
+                        $('#messages').append($('<li class="realtimetext" id="' + fromwho + '">').html(moment().format('h:mm a') + ": " + msg));
+                        scrollDown(isWithinScrollThreshold());
+                    }
                 }
             }
             else
             {
-                if(msg != "")
-                {
-                    $('#messages').append($('<li class="realtimetext" id="' + fromwho + '">').html(moment().format('h:mm a') + ": " + msg));
-                    scrollDown();
-                }
+                console.log(fromwho)
+                console.log(nick)
+                console.log(realtimeEpistasis)
             }
         }
+        catch(e){console.log(e)}
     });
 
 });
 
 var realtimeTransmit = function(){
-    if (realtime && (Date.now() - timeOfLastRTTransmit >= realtimeMaxRate) && ($('#m').val() !== lastRTMessage))
+    message = $('#m').val();
+    if (realtime && (Date.now() - timeOfLastRTTransmit >= realtimeMaxRate) && (message !== lastRTMessage) && (message.lastIndexOf('/') != 0))
     {
-        lastRTMessage = $('#m').val();
+        lastRTMessage = message;
         timeOfLastRTTransmit = Date.now();
-        socket.emit('realtime text', $('#m').val())
-        console.log('Transmit!')
+        socket.emit('realtime text', message);
+    }
+    else if((Date.now() - timeOfLastRTTransmit >= realtimeMaxRate) && (message.lastIndexOf('/') == 0)  && (message !== lastRTMessage))
+    {
+        lastRTMessage = message;
+        socket.emit('realtime text', '');
     }
 }
 
