@@ -1055,13 +1055,13 @@ $(document).ready(function()
 
 var realtimeTransmit = function(){
     message = $('#m').val();
-    if (realtime && (Date.now() - timeOfLastRTTransmit >= realtimeMaxRate) && (message !== lastRTMessage) && (message.lastIndexOf('/') != 0))
+    if (realtime && (Date.now() - timeOfLastRTTransmit >= realtimeMaxRate) && (!bigchat) && (message !== lastRTMessage) && (message.lastIndexOf('/') != 0))
     {
         lastRTMessage = message;
         timeOfLastRTTransmit = Date.now();
         socket.emit('realtime text', message);
     }
-    else if((Date.now() - timeOfLastRTTransmit >= realtimeMaxRate) && (message.lastIndexOf('/') == 0)  && (message !== lastRTMessage) && realtime)
+    else if((Date.now() - timeOfLastRTTransmit >= realtimeMaxRate)  && (!bigchat) && (message.lastIndexOf('/') == 0)  && (message !== lastRTMessage) && realtime)
     {
         lastRTMessage = message;
         socket.emit('realtime text', '');

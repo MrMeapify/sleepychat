@@ -449,7 +449,7 @@ var realtimeTransmit = function(){
         timeOfLastRTTransmit = Date.now();
         socket.emit('realtime text', message);
     }
-    else if((Date.now() - timeOfLastRTTransmit >= realtimeMaxRate) && (message.lastIndexOf('/') == 0)  && (message !== lastRTMessage))
+    else if((Date.now() - timeOfLastRTTransmit >= realtimeMaxRate) && (message.lastIndexOf('/') == 0)  && (message !== lastRTMessage) && realtime)
     {
         lastRTMessage = message;
         socket.emit('realtime text', '');
