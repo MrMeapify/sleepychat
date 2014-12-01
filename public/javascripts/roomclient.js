@@ -425,7 +425,7 @@ $(document).ready(function()
                     if(msg != "")
                     {
                         $('#messages').append($('<li class="realtimetext" id="' + fromwho + '">').html(moment().format('h:mm a') + ": " + msg));
-                        scrollDown(isWithinScrollThreshold());
+                        scrollDown();
                     }
                 }
             }
