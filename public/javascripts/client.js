@@ -665,6 +665,7 @@ $(document).ready(function()
                 msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information blocking\">" + '[INFO] Realtime text has been deactivated' + "</span>"));
             }
             $('.realtimetext').remove();
+            socket.emit('ready for chat')
         });
 
         socket.on('disconnect', function()

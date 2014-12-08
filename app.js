@@ -382,11 +382,13 @@ io.on('connection', function(socket)
                         {
                             socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users, room) + " ]");
                         }
+                        user.readyForChat = false;
                     }
                     else
                     {
                         socket.leave('bigroom'); // We know they're not going into the bigroom so we can leave
                         socket.emit('information', "[INFO] Hi there, " + nick + "! You're now connected to the server.");
+                        user.readyForChat = true;
                     }
                     console.log(nick +" has joined. IP: " + ip);
                 }
@@ -396,6 +398,13 @@ io.on('connection', function(socket)
                     socket.conn.close();
                 }
             }
+        });
+
+        socket.on('ready for chat', function()
+        {
+            var user = getUserByNick(nick);
+            if (!user.inBigChat) 
+                user.readyForChat = true;
         });
 
         socket.on('joinroom', function(roomtoken, usertoken)
@@ -470,7 +479,7 @@ io.on('connection', function(socket)
                 {
                     var potentialPartner = userscopy[x];
                     var good = true;
-                    if(potentialPartner.partner || potentialPartner.nick === data.last || potentialPartner.inBigChat)
+                    if(potentialPartner.partner || potentialPartner.nick === data.last || potentialPartner.inBigChat || potentialPartner.readyForChat == false)
                         good = false;
                     else
                     {
@@ -1681,7 +1690,7 @@ function getUsers(users, room)
 	return list;
 }
 
-function generateRoster (from)
+function generateRoster(from)
 {
     var roster = [];
     for (var i = 0; i < from.length; i++)
@@ -1823,7 +1832,7 @@ function dice_replacer(match, p1, p2, offset, string){
 
 function link_replacer(match, p1, p2, offset, string)
 {
-    if ((p2 == '.jpg') || (p2 == '.jpeg') || (p2 == '.png')) {
+    if (/(?:\.jpg)|(?:\.jpeg)|(?:\.png))/i.test(p2)) {
 		a = "<a tabindex='-1' target='_blank' href='http://"+p1+"'><img src='http://"+p1+"' class='embedded_image'/></a>";
 	}
 	else if ((p2 == '.gif')) {
