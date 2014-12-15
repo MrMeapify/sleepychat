@@ -2156,6 +2156,10 @@ app.use('/about', function(req, res)
 {
 	res.render('about');
 });
+app.use('/commands', function(req, res)
+{
+	res.render('commands');
+});
 
 /// catch 404 and render the 404 page
 app.use(function(req, res, next){

@@ -728,6 +728,10 @@ $(document).ready(function()
                 {
                     $('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
                 }
+                else if (msgInBox == "/help" || msgInBox == "/formatting")
+                {
+                    window.open('/commands');
+                }
                 else if ((msgInBox == "/list" || msgInBox == "/names") && !isMobile.any() && bigchat)
                 {
                     if (!nameSidebar)
@@ -829,6 +833,10 @@ $(document).ready(function()
             else if (msgInBox == "/dialog")
             {
                 $('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
+            }
+            else if (msgInBox == "/help" || msgInBox == "/formatting")
+            {
+                window.open('/commands');
             }
             if ((msgInBox == "/list" || msgInBox == "/names") && !isMobile.any() && bigchat)
             {
