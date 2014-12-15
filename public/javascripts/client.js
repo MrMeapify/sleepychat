@@ -514,7 +514,7 @@ $(document).ready(function()
                     youTubeMatcher.lastIndex = 0;
                     if (isConsole.Xbox360())
                     {
-                        msg = msg.replace(youTubeMatcher, "<div class='yt-video-container yt-loader-container'><div style='vertical-align: middle; text-align: center;'>YouTube Embedding Not Supported on Xbox 360.<br/><a href='http://youtube.com/watch?v=$1'>Link to Video</a></div></div>");
+                        msg = msg.replace(youTubeMatcher, "YouTube Embedding Not Supported on Xbox 360. <a href='http://youtube.com/watch?v=$1' target='_blank' tabindex='-1'>Link to Video</a>");
                     }
                     else
                     {
@@ -564,7 +564,7 @@ $(document).ready(function()
                     youTubeMatcher.lastIndex = 0;
                     if (isConsole.Xbox360())
                     {
-                        msg = msg.replace(youTubeMatcher, "<div class='yt-video-container yt-loader-container'><div style='vertical-align: middle; text-align: center;'>YouTube Embedding Not Supported on Xbox 360.<br/><a href='http://youtube.com/watch?v=$1'>Link to Video</a></div></div>");
+                        msg = msg.replace(youTubeMatcher, "YouTube Embedding Not Supported on Xbox 360. <a href='http://youtube.com/watch?v=$1' target='_blank' tabindex='-1'>Link to Video</a>");
                     }
                     else
                     {
