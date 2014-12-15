@@ -19,7 +19,7 @@ var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "2"));
 
 // Admin/Mod stuff
 var administrator = "ElysianTail-Senpai";
-var moderators = ['MrMeapify', 'ScottB', 'Amburo', 'Phobos_D_Lawgiver', 'Anonymoususer2', 'Hypnonymoose', 'BurntPenny', 'Gaige', "ToHypnoFu", "Atlas"];
+var moderators = ['MrMeapify', 'ScottB', 'Amburo', 'Phobos_D_Lawgiver', 'Anonymoususer2', 'Mushymoose', 'PennyDreadful', 'Gaige', "ToHypnoFu", "Atlas"];
 
 //Acquire the ban list.
 var banList = [];
@@ -1626,10 +1626,12 @@ var disallowedNames = [/(?:a|4)dm(?:i|!|1)n/gi,                             //Ad
                        /r(?:a|4)p(?:e|(?:i|!|1)(?:s|5)(?:t|7))/gi,          //Rap(e OR ist)
                        /r(?:a|4)c(?:i|!|1)(?:s|5)(?:t|7)/gi,                //Racist
                        /cun(?:t|7)/gi,                                      //Cunt
+                       /c(?:_{1,9})?(?:o|0)(?:_{1,9})?v(?:_{1,9})?(?:e|3)(?:_{1,9})?r(?:_{1,9})?(?:t|7)/gi, //Covert
                        /^all$/gi                                            //all
                       ];
 
-var disallowedPhrases = [/n(?:i|!|1|¡)gg(?:a|(?:e|3)r)/gi,        //Nigg(a OR er)
+var disallowedPhrases = [/c(?:(?: |_){1,9})?(?:o|0)(?:(?: |_){1,9})?v(?:(?: |_){1,9})?(?:e|3)(?:(?: |_){1,9})?r(?:(?: |_){1,9})?(?:t|7)(?:(?: |_){1,9})?h(?:(?: |_){1,9})?y(?:(?: |_){1,9})?p(?:(?: |_){1,9})?n(?:(?: |_){1,9})?(?:o|0)(?:(?: |_){1,9})?(?:t|7)(?:(?: |_){1,9})?(?:i|!|1)(?:(?: |_){1,9})?(?:s|5)(?:(?: |_){1,9})?m/gi, //coverthypnotism
+                         /n(?:i|!|1)gg(?:a|(?:e|3)r)/gi,        //Nigg(a OR er)
                         ];
 
 
@@ -2153,6 +2155,10 @@ app.use('/room', privateroom);
 app.use('/about', function(req, res)
 {
 	res.render('about');
+});
+app.use('/commands', function(req, res)
+{
+	res.render('commands');
 });
 
 /// catch 404 and render the 404 page
