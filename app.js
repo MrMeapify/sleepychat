@@ -19,7 +19,7 @@ var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "20"));
 
 // Admin/Mod stuff
 var administrator = "ElysianTail-Senpai";
-var moderators = ['MrMeapify', 'ScottB', 'Amburo', 'Phobos_D_Lawgiver', 'Anonymoususer2', 'Hypnonymoose', 'BurntPenny', 'Gaige', "ToHypnoFu"];
+var moderators = ['MrMeapify', 'ScottB', 'Amburo', 'Phobos_D_Lawgiver', 'Anonymoususer2', 'Mushymoose', 'PennyDreadful', 'Gaige', "ToHypnoFu", "Atlas"];
 
 //Acquire the ban list.
 var banList = [];
@@ -152,7 +152,7 @@ var uniqueHiddenId = 0;
 var MILSEC_PER_DAY = 86400000;
 
 
-var commandsInAM = ["/binaural", "/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mod', '/mmsg', '/fmsg', '/rotate', '/commands'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
+var commandsInAM = ["/binaural", "/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mod', '/mmsg', '/fmsg', '/rotate'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
 
 var maxMessageLength = 4000; // 4,000 seemed like a good upper bound, I doubt you're going to need more than this. For reference, a page in a book is usually about 2,000 characters. Go ahead and lower this if you want
 
@@ -1776,10 +1776,12 @@ var disallowedNames = [/(?:a|4)dm(?:i|!|1)n/gi,                             //Ad
                        /r(?:a|4)p(?:e|(?:i|!|1)(?:s|5)(?:t|7))/gi,          //Rap(e OR ist)
                        /r(?:a|4)c(?:i|!|1)(?:s|5)(?:t|7)/gi,                //Racist
                        /cun(?:t|7)/gi,                                      //Cunt
+                       /c(?:_{1,9})?(?:o|0)(?:_{1,9})?v(?:_{1,9})?(?:e|3)(?:_{1,9})?r(?:_{1,9})?(?:t|7)/gi, //Covert
                        /^all$/gi                                            //all
                       ];
 
-var disallowedPhrases = [/n(?:i|!|1|¡)gg(?:a|(?:e|3)r)/gi,        //Nigg(a OR er)
+var disallowedPhrases = [/c(?:(?: |_){1,9})?(?:o|0)(?:(?: |_){1,9})?v(?:(?: |_){1,9})?(?:e|3)(?:(?: |_){1,9})?r(?:(?: |_){1,9})?(?:t|7)(?:(?: |_){1,9})?h(?:(?: |_){1,9})?y(?:(?: |_){1,9})?p(?:(?: |_){1,9})?n(?:(?: |_){1,9})?(?:o|0)(?:(?: |_){1,9})?(?:t|7)(?:(?: |_){1,9})?(?:i|!|1)(?:(?: |_){1,9})?(?:s|5)(?:(?: |_){1,9})?m/gi, //coverthypnotism
+                         /n(?:i|!|1)gg(?:a|(?:e|3)r)/gi,        //Nigg(a OR er)
                         ];
 
 
@@ -1958,12 +1960,7 @@ function alterForCommands(str, user, socket, room, users)
 				socket.emit('information', '[INFO] You need to be in the big chat to do mod messaging');
 			}
 		return null;
-	}	
-    if (ans == '/commands')
-    {
-        socket.emit('openlink', '/commands')
-        return null
-    }
+	}
 	else if (rotate.test(ans))
 	{
         console.log('entered testing')

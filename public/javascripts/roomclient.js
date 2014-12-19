@@ -78,6 +78,44 @@ var isMobile = {
     }
 };
 
+var isConsole = {
+    //TV Consoles
+    Xbox360: function() {
+        return navigator.userAgent.match(/Xbox/i) && !isConsole.XboxOne();
+    },
+    XboxOne: function() {
+        return navigator.userAgent.match(/Xbox One/i);
+    },
+    PS3: function() {
+        return navigator.userAgent.match(/PLAYSTATION 3/i);
+    },
+    PS4: function() {
+        return navigator.userAgent.match(/PlayStation 4/i);
+    },
+    Wii: function() {
+        return navigator.userAgent.match(/Nintendo Wii/i) && !isConsole.WiiU();
+    },
+    WiiU: function() {
+        return navigator.userAgent.match(/Nintendo WiiU/i);
+    },
+    OUYA: function() {
+        return navigator.userAgent.match(/OUYA/i);
+    },
+    // Handheld Consoles
+    NintendoDS: function() {
+        return navigator.userAgent.match(/Nintendo (?:3DS|DSi)/i);
+    },
+    VitaPSP: function() {
+        return navigator.userAgent.match(/PlayStation (?:Portable|Vita)/i);
+    },
+    AnyTV: function() {
+        return (isConsole.Xbox360() || isConsole.XboxOne() || isConsole.PS3() || isConsole.PS4() || isConsole.Wii() || isConsole.WiiU() || isConsole.OUYA());
+    },
+    AnyMobile: function() {
+        return (isConsole.NintendoDS() || isConsole.VitaPSP());
+    }
+};
+
 $(document).ready(function()
 {
     msgFrame = $("#msgframe");
@@ -161,6 +199,10 @@ $(document).ready(function()
             {
                 $('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
             }
+            else if (msgInBox == "/commands")
+            {
+                window.open('/commands');
+            }
             else if ((msgInBox == "/list" || msgInBox == "/names") && !isMobile.any())
             {
                 if (!nameSidebar)
@@ -240,10 +282,17 @@ $(document).ready(function()
                 if (youTubeMatcher.test(msg))
                 {
                     youTubeMatcher.lastIndex = 0;
-                    var videoId = youTubeMatcher.exec(msg)[1];
-                    youTubeMatcher.lastIndex = 0;
-                    msg = msg.replace(youTubeMatcher, "<div class='yt-video-container yt-loader-container' videoid='$1'><div style='vertical-align: middle; text-align: center;'>"+(isYapiLoaded ? "Fetching Video Information..." : "YouTube API Not Loaded =/")+"</div></div>");
-                    requestYouTubeEmbed(videoId);
+                    if (isConsole.Xbox360())
+                    {
+                        msg = msg.replace(youTubeMatcher, "<div class='yt-video-container yt-loader-container'><div style='vertical-align: middle; text-align: center;'>YouTube Embedding Not Supported on Xbox 360.<br/><a href='http://youtube.com/watch?v=$1'>Link to Video</a></div></div>");
+                    }
+                    else
+                    {
+                        var videoId = youTubeMatcher.exec(msg)[1];
+                        youTubeMatcher.lastIndex = 0;
+                        msg = msg.replace(youTubeMatcher, "<div class='yt-video-container yt-loader-container' videoid='$1'><div style='vertical-align: middle; text-align: center;'>"+(isYapiLoaded ? "Fetching Video Information..." : "YouTube API Not Loaded =/")+"</div></div>");
+                        requestYouTubeEmbed(videoId);
+                    }
                 }
                 
 				msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": " + msg));
