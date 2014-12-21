@@ -11,6 +11,7 @@
 		<script src="/javascripts/audiolet.js"></script>
 	</head>
 	<body>
+        <canvas id="canvas-rain" style="position : absolute; top : 0px; left : 0px; width: 100%; height: 100%; pointer-events: none; z-index: 1;"></canvas>
         <div class="modal fade" id="disclaimer-modal" tabindex="-1" role="dialog" aria-labelledby="disclaimerModal" aria-hidden="true">
             <div class="modal-dialog modal-md">
                 <div class="modal-content">
@@ -215,6 +216,7 @@
 	<script src="/javascripts/tabcomplete.js"></script>
 	<script src="/javascripts/ticker.js" id="ticker-script"></script>
 	<script src="/javascripts/cookies.js"></script>
+	<script src="/javascripts/rainy.js" id="script-rain"></script>
 	<script src="/javascripts/client.js"></script>
     <script src="https://apis.google.com/js/client.js?onload=youtubeApiLoad"></script>
 </html>
