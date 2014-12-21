@@ -570,6 +570,15 @@ function toggleDayNight ()
     doResize();
 }
 
+// -----------
+// Tooltips!!!
+// -----------
+
+function setupTooltip(icon)
+{
+    $("#"+icon).tooltip();
+}
+
 // --------------
 // For Straw Poll
 // --------------

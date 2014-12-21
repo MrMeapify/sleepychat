@@ -12,8 +12,9 @@ var fs = require('fs');
 require('array.prototype.find');
 
 // This here is the admin password. For obvious reasons, set the ADMINPASS variable in production.admi
-var adminP = String(process.env.ADMINPASS || "testpassword");
-var moderatorP = String(process.env.MODPASS || "testpassword");
+var adminP = String(process.env.ADMINPASS || "testadmin");
+var moderatorP = String(process.env.MODPASS || "testmoderator");
+var donatorP = String(process.env.DONATEPASS || "testdonator");
 
 var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "2"));
 
@@ -309,6 +310,15 @@ io.on('connection', function(socket)
                     {
                         user.admin = false;
                         user.mod = false;
+                    }
+                    
+                    if (data.pass == donatorP)
+                    {
+                        user.donator = true;
+                    }
+                    else
+                    {
+                        user.donator = false;
                     }
 
                     if(data.inBigChat)
@@ -1465,16 +1475,25 @@ function getAuthority(user){
     
 	if (user.nick == "MrMeapify")
     {
-        toRet = "<img src='/images/creator.png' class='embedded_image' />";
+        toRet = "<img src='/images/creator.png' class='embedded_image' id='icon"+uniqueHiddenId.toString()+"' onload='setupTooltip(\"icon"+uniqueHiddenId.toString()+"\")' data-toggle='tooltip' data-placement='right' title='Creator' />";
     }
 	else if (user.admin)
 	{
-		toRet = "<img src='/images/admin.png' class='embedded_image' />";
+		toRet = "<img src='/images/admin.png' class='embedded_image' id='icon"+uniqueHiddenId.toString()+"' onload='setupTooltip(\"icon"+uniqueHiddenId.toString()+"\")' data-toggle='tooltip' data-placement='right' title='Administrator' />";
 	}
 	else if (user.mod)
 	{
-		toRet = "<img src='/images/mod.png' class='embedded_image' />";
+		toRet = "<img src='/images/mod.png' class='embedded_image' id='icon"+uniqueHiddenId.toString()+"' onload='setupTooltip(\"icon"+uniqueHiddenId.toString()+"\")' data-toggle='tooltip' data-placement='right' title='Moderator' />";
 	}
+    else if (user.donator)
+    {
+        toRet = "<img src='/images/donator.png' class='embedded_image' id='icon"+uniqueHiddenId.toString()+"' onload='setupTooltip(\"icon"+uniqueHiddenId.toString()+"\")' data-toggle='tooltip' data-placement='right' title='Donator' />";
+    }
+    
+    if (toRet != "")
+    {
+        uniqueHiddenId++;
+    }
     
     return toRet;
 }
