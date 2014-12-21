@@ -731,6 +731,10 @@ $(document).ready(function()
                 {
                     $('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
                 }
+                else if (msgInBox == "/about" || msgInBox == "/donate" || msgInBox == "/github")
+                {
+                    window.open('/about');
+                }
                 else if (msgInBox == "/help" || msgInBox == "/formatting")
                 {
                     window.open('/commands');
@@ -858,6 +862,10 @@ $(document).ready(function()
             else if (msgInBox == "/dialog")
             {
                 $('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
+            }
+            else if (msgInBox == "/about" || msgInBox == "/donate" || msgInBox == "/github")
+            {
+                window.open('/about');
             }
             else if (msgInBox == "/help" || msgInBox == "/formatting")
             {
