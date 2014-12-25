@@ -727,6 +727,10 @@ $(document).ready(function()
                         replaceTicker();
                     }
                 }
+                else if (msgInBox == "/clear")
+                {
+                    msgList.empty();
+                }
                 else if (msgInBox == "/dialog")
                 {
                     $('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
@@ -858,6 +862,10 @@ $(document).ready(function()
                 {
                     removeTicker();
                 }
+            }
+            else if (msgInBox == "/clear")
+            {
+                msgList.empty();
             }
             else if (msgInBox == "/dialog")
             {
