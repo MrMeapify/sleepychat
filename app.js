@@ -1613,7 +1613,6 @@ var modCommands = 	[['information', "[INFO] ~~~"],
 					['information', "[INFO] -- /modroom -- Opens the private mod/admin-only room."],
 					['information', "[INFO] -- /svrmsg &lt;message&gt; -- Displays the specified message to the entire server, including Match Maker and private rooms. This should be rarely used."],
 					['information', "[INFO] -- /rmmsg &lt;message&gt; -- Displays the specified message to the big chat only."],
-					['information', "[INFO] -- /mod &lt;message&gt; -- Sends a message to all moderators online, and the admin."],
 					['information', "[INFO] -- /kick &lt;name&gt; -- Kicks the specified user from the chat, but does not ban them."],
 					['information', "[INFO] -- /ban &lt;name&gt; &lt;days&gt; -- Bans the specified user for the specified number of days, based only on IP."],
 					['information', "[INFO] -- /banname &lt;name&gt; &lt;days&gt; -- Bans the specified user for the specified number of days, based on both name and IP."],
@@ -1820,7 +1819,7 @@ function alterForCommands(str, user, socket, room, users)
 	//}
 	if (mod_message)
 	{
-		if (user.inBigChat && user.mod)
+		if (user.inBigChat)
 		{
 			var userscopy = users;
 			for(var x = 0; x < userscopy.length; x++)
