@@ -617,6 +617,7 @@ io.on('connection', function(socket)
                         {
                             userWanted.socket.emit('whisper', nick, userWanted.nick, alterForFormatting(message, userWanted));
                             socket.emit('whisper', nick, userWanted.nick, alterForFormatting(message, userWanted));
+                            console.log("PM: "+nick+"->"+userWanted.nick+": "+message);
                         }
                     }
                     else if (message.lastIndexOf('/ignore ', 0) === 0)
@@ -1309,6 +1310,7 @@ io.on('connection', function(socket)
                             //socket.emit('chat message', '<' + nick + '> ' + message);
                             user.partner.socket.emit('chat message',  alterMessage(message, user, socket, null, users), "them");
                             socket.emit('chat message', alterMessage(message, user, socket, null, users, false), "me");
+                            console.log("MM: "+user.nick+"->"+user.partner.nick+": "+message);
                         }
                         catch(e)
                         {
@@ -1936,7 +1938,10 @@ function alterMessage(str, user, socket, room, users, dontLog)
     {
         if (room == null)
         {
-            console.log("BC: " + user.nick + ": " + str);
+            if (user.inBigChat)
+            {
+                console.log("BC: " + user.nick + ": " + str);
+            }
         }
         else if (!room.isprivate)
         {
