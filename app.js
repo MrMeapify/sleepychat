@@ -382,7 +382,7 @@ io.on('connection', function(socket)
                         socket.join(room.token);
                         room.here.push(finduser);
                         io.to(room.token).emit('rosterupdate', generateRoster(room.here));
-                        socket.emit('information', "[INFO] For your safety, private rooms are logged and viewable only by the Admin. The room can opt out of logging if <strong>all</strong> users opt out.<br />You can opt out by typing \"/private\" into chat. You can also force logging for complete safety by typing \"/private never\" into chat.<br />Please only opt out if you trust your hypnotist.");
+                        socket.emit('information', "[INFO] For your safety, private rooms are logged and viewable only by the Admin and Moderators. The room can opt out of logging if <strong>all</strong> users opt out.<br />You can opt out by typing \"/private\" into chat. You can also force logging for complete safety by typing \"/private never\" into chat.<br />Please only opt out if you trust your hypnotist.");
                         io.to(room.token).emit('information', "[INFO] " + nick + " has joined.");
                     }
                 }
@@ -465,6 +465,9 @@ io.on('connection', function(socket)
                         break;
                     }
                 }
+                
+                socket.emit('information', "[INFO] For your safety, Matchmaking rooms are logged and viewable only by the Admin and Moderators. Matchmaking logging cannot be opted out of at this time.");
+                
                 if(user.partner)
                 {
                     var found1 = "[INFO] Found a chat partner! Say hello to " + user.partner.nick + ", a ";
