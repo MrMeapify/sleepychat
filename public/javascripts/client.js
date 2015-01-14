@@ -166,7 +166,7 @@ $(document).ready(function()
     rtmsgFrame = $("#rtmsgframe");
     nameList = $("#namelist");
     
-    if (!isMobile.any())
+    if (!isMobile.any() && !isConsole.AnyMobile())
     {
         window.onresize = function(event) {
 
@@ -180,6 +180,9 @@ $(document).ready(function()
         nameList.remove();
         nameList = null;
         nameSidebar = false;
+        
+        $('#script-rain').remove();
+        $('#canvas-rain').remove();
     }
     
     msgFrame.css("height", (window.innerHeight-(newsTicker ? cutoffWithTicker : cutoffWithoutTicker)).toString()+"px");
@@ -769,13 +772,43 @@ $(document).ready(function()
                         replaceTicker();
                     }
                 }
+                else if (msgInBox == "/clear")
+                {
+                    msgList.empty();
+                }
                 else if (msgInBox == "/dialog")
                 {
                     $('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
                 }
+                else if (msgInBox == "/about" || msgInBox == "/donate" || msgInBox == "/github")
+                {
+                    window.open('/about');
+                }
                 else if (msgInBox == "/commands")
                 {
                     window.open('/commands');
+                }
+                else if (msgInBox.indexOf("/rainy") == 0)
+                {
+                    if (!isMobile.any() && !isConsole.AnyMobile())
+                    {
+                        toggleRain();
+                    }
+                    else
+                    {
+                        msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] For performance reasons, /rainy is disabled on mobile devices. Sorry about that.</span>"));
+                    }
+                }
+                else if (msgInBox == "/lightning")
+                {
+                    if (!isMobile.any() && !isConsole.AnyMobile())
+                    {
+                        toggleLightning();
+                    }
+                    else
+                    {
+                        msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] For performance reasons, /lightning is disabled on mobile devices. Sorry about that.</span>"));
+                    }
                 }
                 else if ((msgInBox == "/list" || msgInBox == "/names") && !isMobile.any() && bigchat)
                 {
@@ -878,13 +911,43 @@ $(document).ready(function()
                     removeTicker();
                 }
             }
+            else if (msgInBox == "/clear")
+            {
+                msgList.empty();
+            }
             else if (msgInBox == "/dialog")
             {
                 $('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
             }
+            else if (msgInBox == "/about" || msgInBox == "/donate" || msgInBox == "/github")
+            {
+                window.open('/about');
+            }
             else if (msgInBox == "/help" || msgInBox == "/formatting")
             {
                 window.open('/commands');
+            }
+            else if (msgInBox.indexOf("/rainy") == 0)
+            {
+                if (!isMobile.any() && !isConsole.AnyMobile())
+                {
+                    toggleRain();
+                }
+                else
+                {
+                    msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] For performance reasons, /rainy is disabled on mobile devices. Sorry about that.</span>"));
+                }
+            }
+            else if (msgInBox == "/lightning")
+            {
+                if (!isMobile.any() && !isConsole.AnyMobile())
+                {
+                    toggleLightning();
+                }
+                else
+                {
+                    msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] For performance reasons, /lightning is disabled on mobile devices. Sorry about that.</span>"));
+                }
             }
             if ((msgInBox == "/list" || msgInBox == "/names") && !isMobile.any() && bigchat)
             {
@@ -1445,6 +1508,35 @@ function toggleDayNight ()
     }
     
     doResize();
+}
+
+function toggleRain (msg)
+{
+    document.getElementById('canvas-rain').setAttribute('raining', (isRainy ? "false" : "true"));
+    if (!doanim)
+    {
+        doanim = true;
+        animate();
+    }
+}
+
+function toggleLightning ()
+{
+    document.getElementById('canvas-rain').setAttribute('lightning', (isLightning ? "false" : "true"));
+    if (!doanim)
+    {
+        doanim = true;
+        animate();
+    }
+}
+
+// -----------
+// Tooltips!!!
+// -----------
+
+function setupTooltip(icon)
+{
+    $("#"+icon).tooltip();
 }
 
 // ----------

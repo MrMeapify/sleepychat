@@ -12,8 +12,9 @@ var fs = require('fs');
 require('array.prototype.find');
 
 // This here is the admin password. For obvious reasons, set the ADMINPASS variable in production.admi
-var adminP = String(process.env.ADMINPASS || "testpassword");
-var moderatorP = String(process.env.MODPASS || "testpassword");
+var adminP = String(process.env.ADMINPASS || "testadmin");
+var moderatorP = String(process.env.MODPASS || "testmoderator");
+var donatorP = String(process.env.DONATEPASS || "testdonator");
 
 var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "20"));
 
@@ -371,6 +372,15 @@ io.on('connection', function(socket)
                         user.admin = false;
                         user.mod = false;
                     }
+                    
+                    if (data.pass == donatorP)
+                    {
+                        user.donator = true;
+                    }
+                    else
+                    {
+                        user.donator = false;
+                    }
 
                     if(data.inBigChat)
                     {
@@ -445,7 +455,7 @@ io.on('connection', function(socket)
                         socket.join(room.token);
                         room.here.push(finduser);
                         io.to(room.token).emit('rosterupdate', generateRoster(room.here));
-                        socket.emit('information', "[INFO] For your safety, private rooms are logged and viewable only by the Admin. The room can opt out of logging if <strong>all</strong> users opt out.<br />You can opt out by typing \"/private\" into chat. You can also force logging for complete safety by typing \"/private never\" into chat.<br />Please only opt out if you trust your hypnotist.");
+                        socket.emit('information', "[INFO] For your safety, private rooms are logged and viewable only by the Admin and Moderators. The room can opt out of logging if <strong>all</strong> users opt out.<br />You can opt out by typing \"/private\" into chat. You can also force logging for complete safety by typing \"/private never\" into chat.<br />Please only opt out if you trust your hypnotist.");
                         io.to(room.token).emit('information', "[INFO] " + nick + " has joined.");
                     }
                 }
@@ -528,6 +538,9 @@ io.on('connection', function(socket)
                         break;
                     }
                 }
+                
+                socket.emit('information', "[INFO] For your safety, Matchmaking rooms are logged and viewable only by the Admin and Moderators. Matchmaking logging cannot be opted out of at this time.");
+                
                 if(user.partner)
                 {
                     var found1 = "[INFO] Found a chat partner! Say hello to " + getAuthority(user.partner) + user.partner.nick + ", a ";
@@ -672,6 +685,7 @@ io.on('connection', function(socket)
                         {
                             userWanted.socket.emit('whisper', nick, userWanted.nick, alterForFormatting(message, userWanted));
                             socket.emit('whisper', nick, userWanted.nick, alterForFormatting(message, userWanted));
+                            console.log("PM: "+nick+"->"+userWanted.nick+": "+message);
                         }
                     }
                     else if (message.lastIndexOf('/ignore ', 0) === 0)
@@ -1418,6 +1432,7 @@ io.on('connection', function(socket)
                             //socket.emit('chat message', '<' + nick + '> ' + message);
                             user.partner.socket.emit('chat message',  alterMessage(message, user, socket, null, users), "them");
                             socket.emit('chat message', alterMessage(message, user, socket, null, users, false), "me");
+                            console.log("MM: "+user.nick+"->"+user.partner.nick+": "+message);
                         }
                         catch(e)
                         {
@@ -1633,16 +1648,25 @@ function getAuthority(user){
     
 	if (user.nick == "MrMeapify")
     {
-        toRet = "<img src='/images/creator.png' class='embedded_image' />";
+        toRet = "<img src='/images/creator.png' class='embedded_image' id='icon"+uniqueHiddenId.toString()+"' onload='setupTooltip(\"icon"+uniqueHiddenId.toString()+"\")' data-toggle='tooltip' data-placement='right' title='Creator' />";
     }
 	else if (user.admin)
 	{
-		toRet = "<img src='/images/admin.png' class='embedded_image' />";
+		toRet = "<img src='/images/admin.png' class='embedded_image' id='icon"+uniqueHiddenId.toString()+"' onload='setupTooltip(\"icon"+uniqueHiddenId.toString()+"\")' data-toggle='tooltip' data-placement='right' title='Administrator' />";
 	}
 	else if (user.mod)
 	{
-		toRet = "<img src='/images/mod.png' class='embedded_image' />";
+		toRet = "<img src='/images/mod.png' class='embedded_image' id='icon"+uniqueHiddenId.toString()+"' onload='setupTooltip(\"icon"+uniqueHiddenId.toString()+"\")' data-toggle='tooltip' data-placement='right' title='Moderator' />";
 	}
+    else if (user.donator)
+    {
+        toRet = "<img src='/images/donator.png' class='embedded_image' id='icon"+uniqueHiddenId.toString()+"' onload='setupTooltip(\"icon"+uniqueHiddenId.toString()+"\")' data-toggle='tooltip' data-placement='right' title='Donator' />";
+    }
+    
+    if (toRet != "")
+    {
+        uniqueHiddenId++;
+    }
     
     return toRet;
 }
@@ -1742,7 +1766,6 @@ var modCommands = 	[['information', "[INFO] ~~~"],
 					['information', "[INFO] -- /modroom -- Opens the private mod/admin-only room."],
 					['information', "[INFO] -- /svrmsg &lt;message&gt; -- Displays the specified message to the entire server, including Match Maker and private rooms. This should be rarely used."],
 					['information', "[INFO] -- /rmmsg &lt;message&gt; -- Displays the specified message to the big chat only."],
-					['information', "[INFO] -- /mod &lt;message&gt; -- Sends a message to all moderators online, and the admin."],
 					['information', "[INFO] -- /kick &lt;name&gt; -- Kicks the specified user from the chat, but does not ban them."],
 					['information', "[INFO] -- /ban &lt;name&gt; &lt;days&gt; -- Bans the specified user for the specified number of days, based only on IP."],
 					['information', "[INFO] -- /banname &lt;name&gt; &lt;days&gt; -- Bans the specified user for the specified number of days, based on both name and IP."],
@@ -1941,7 +1964,7 @@ function alterForCommands(str, user, socket, room, users)
 	}
 	if (mod_message)
 	{
-		if (user.inBigChat && user.mod)
+		if (user.inBigChat)
 		{
 			var userscopy = users;
 			for(var x = 0; x < userscopy.length; x++)
@@ -2079,7 +2102,10 @@ function alterMessage(str, user, socket, room, users, dontLog)
     {
         if (room == null)
         {
-            console.log("BC: " + user.nick + ": " + str);
+            if (user.inBigChat)
+            {
+                console.log("BC: " + user.nick + ": " + str);
+            }
         }
         else if (!room.isprivate)
         {
