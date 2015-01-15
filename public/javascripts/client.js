@@ -751,7 +751,7 @@ $(document).ready(function()
 
     socket.on('loggedIn', function()
     {
-        document.getElementById('canvas-spiral').setAttribute('raining', (isRainy ? "false" : "true"));
+        $('#sendbutton').removeAttr('disabled');
         if (!doanim)
         {
             doanim = true;
