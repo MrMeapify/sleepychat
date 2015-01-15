@@ -24,7 +24,7 @@ var moderators = ['MrMeapify', 'ScottB', 'Amburo', 'Phobos_D_Lawgiver', 'Anonymo
 
 //Acquire the ban list.
 var banList = [];
-fs.readFile("Ban List.blt", function (err, logData) {
+fs.readFile("Ban List.blt", {flag: "a+"}, function (err,  logData) {
 
 	if (err) throw err;
 	
@@ -59,7 +59,7 @@ fs.readFile("Ban List.blt", function (err, logData) {
 
 //Acquire the watch list.
 var watchList = [];
-fs.readFile("Watch list.blt", function (err, logData) {
+fs.readFile("Watch list.blt", {flag: "a+"}, function (err, logData) {
 
     if (err) throw err;
     

@@ -751,6 +751,12 @@ $(document).ready(function()
 
     socket.on('loggedIn', function()
     {
+        document.getElementById('canvas-spiral').setAttribute('raining', (isRainy ? "false" : "true"));
+        if (!doanim)
+        {
+            doanim = true;
+            animate();
+        }
         loggedIn = true;
         timeSinceLastMessage = Date.now();
         if(bigchat)
@@ -1523,6 +1529,16 @@ function toggleRain (msg)
 function toggleLightning ()
 {
     document.getElementById('canvas-rain').setAttribute('lightning', (isLightning ? "false" : "true"));
+    if (!doanim)
+    {
+        doanim = true;
+        animate();
+    }
+}
+
+function toggleRain (msg)
+{
+    document.getElementById('canvas-rain').setAttribute('raining', (isRainy ? "false" : "true"));
     if (!doanim)
     {
         doanim = true;
