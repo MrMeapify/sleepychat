@@ -1396,7 +1396,7 @@ function setUpModal () {
     var cookieGender = getCookie("gender", "undisclosed");
     $('#iam'+cookieGender).click();
     
-    var cookieRole = getCookie("role", "swtich");
+    var cookieRole = getCookie("role", "switch");
     $('#iam'+cookieRole).click();
     
     var cookiePrefer = getCookie("prefer", "either");
@@ -1560,7 +1560,7 @@ function youtubeRequestFailed (reason) {
     
     for (var i = 0; i < loadingContainers.length; i++)
     {
-        loadingContainers[i].innerHTML = "YouTube API Not Loaded =/"
+        loadingContainers[i].innerHTML = "YouTube API Not Loaded =/";
     }
 }
 // -----------
@@ -1586,7 +1586,7 @@ function changeTitle()
 
 function randomAdjective(){
 	var adjs = ['adaptable', 'adventurous', 'affable', 'affectionate', 'agreeable', 'ambitious', 'amiable', 'amicable', 'amusing', 'brave', 'bright', 'broad-minded', 'calm', 'charming', 'communicative', 'compassionate ', 'conscientious', 'considerate', 'convivial', 'courageous', 'courteous', 'creative', 'decisive', 'determined', 'diligent', 'diplomatic', 'discreet', 'dynamic', 'easygoing', 'emotional', 'energetic', 'enthusiastic', 'exuberant', 'fair-minded', 'faithful', 'fearless', 'forceful', 'frank', 'friendly', 'funny', 'generous', 'gentle', 'good', 'gregarious', 'hard-working', 'helpful', 'honest', 'humorous', 'imaginative', 'impartial', 'independent', 'intellectual', 'intelligent', 'intuitive', 'inventive', 'kind', 'loving', 'loyal', 'modest', 'neat', 'nice', 'optimistic', 'passionate', 'patient', 'persistent ', 'pioneering', 'philosophical', 'placid', 'plucky', 'polite', 'powerful', 'practical', 'pro-active', 'quick-witted', 'quiet', 'rational', 'reliable', 'reserved', 'resourceful', 'romantic', 'self-confident', 'sensible', 'sensitive', 'sociable', 'straightforward', 'thoughtful', 'unassuming', 'understanding', 'versatile', 'warmhearted', 'willing', 'witty', 'mysterious', 'incredible', 'amazing', 'stupefying', 'unbelieveable', 'mind-blowing'];
-	return adjs[Math.floor(Math.random()*adjs.length)]
+	return adjs[Math.floor(Math.random()*adjs.length)];
 }
 
 $("#about").click(function()
