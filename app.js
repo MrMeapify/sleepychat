@@ -20,7 +20,7 @@ var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "2"));
 
 // Admin/Mod stuff
 var administrator = "ElysianTail-Senpai";
-var moderators = ['MrMeapify', 'ScottB', 'Amburo', 'Phobos_D_Lawgiver', 'Anonymoususer2', 'Mushymoose', 'PennyDreadful', 'Gaige', "ToHypnoFu", "Atlas"];
+var moderators = ['MrMeapify', 'ScottB', 'Amburo', 'Phobos_D_Lawgiver', 'Anonymoususer2', 'Mushymoose', 'PennyDreadful', 'Gaige', "ToHypnoFu", "Tira~S"];
 
 //Acquire the ban list.
 var banList = [];
