@@ -43,6 +43,10 @@
 /*.afk { font-style: italic; font-weight: 700; font: 1.11em Roboto, Helvetica, Arial; color: #111111}*/
 
 .modal-body .input-group { margin-bottom: 20px; }
+.modal-content {
+	/*height: 100%*/
+	overflow-y: hidden;
+}
 
 li.self { background: #eee; }
 

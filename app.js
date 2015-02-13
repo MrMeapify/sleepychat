@@ -270,73 +270,6 @@ io.on('connection', function(socket)
             nick = data.nick;
             otafk.nick = data.nick;
 
-            var testResult = testNick(nick);
-            if (testResult == "")
-            {
-                data.nick = nick;
-                var hasher = crypto.createHash('sha1');
-                hasher.update(nick + new Date().getTime() + "IAmA Salt AMA" + adminP);
-                data.token = hasher.digest('hex');
-                console.log(nick + ' ' + data.token);
-                data.AFK = false
-                data.realIp = otafk.ip;
-                users.push(data);
-                socket.emit('loggedIn');
-
-                user = getUserByNick(nick)
-                if (data.nick === administrator) // Let's set the admin and mod variables
-                {
-                    user.admin = true;
-                    user.mod = true;
-                }
-                else if (moderators.indexOf(data.nick) >= 0)
-                {
-                    socket.emit('information', "You're a moderator! Type \"/modcmd\" for commands at your disposal.");
-                    user.admin = false;
-                    user.mod = true;
-                }
-                else
-                {
-                    user.admin = false;
-                    user.mod = false;
-                }
-                
-                if (data.pass == donatorP)
-                {
-                    user.donator = true;
-                }
-                else
-                {
-                    user.donator = false;
-                }
-
-                if(data.inBigChat)
-                {
-                    socket.join('bigroom');
-                    io.to('bigroom').emit('information', "[INFO] " + getAuthority(user) + nameAppend(user.nick, user.gender, user.role) + " has joined.");
-                    socket.emit('information', "[INFO] All Sleepychat activity may be monitored in real time by moderators. Users who wish to operate outside of activity logging are invited to create a private room and opt out of logging with \"/private\".");
-                    io.to('bigroom').emit('rosterupdate', generateRoster(users));
-                    if (!user.mod && !user.admin) { socket.emit('information', "[INFO] If you're new, type \"/help\" and hit enter to see a list of commands."); }
-                    if (data.isMobile)
-                    {
-                        socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users, room) + " ]");
-                    }
-                    user.readyForChat = false;
-                }
-                else
-                {
-                    socket.leave('bigroom'); // We know they're not going into the bigroom so we can leave
-                    socket.emit('information', "[INFO] Hi there, " + nick + "! You're now connected to the server.");
-                    user.readyForChat = true;
-                }
-                console.log(nick +" has joined. IP: " + otafk.ip);
-            }
-            else
-            {
-                socket.emit('information', "[INFO] Your username was not accepted.");
-                socket.conn.close();
-            }
-
             otafk.nick = nick;
         });
 
@@ -1512,92 +1445,173 @@ io.on('connection', function(socket)
 
 
 function loginhandle(data, scotrix){
-    socket = otafk.socket;
-    if (data == null || typeof data == 'undefined')
+    try
     {
-        console.log("@ " + otafk.ip + ": Attempted crash using invalid data.");
-        socket.conn.close();
-        return false;
-    }
-
-    if (data.nick == null || typeof data.nick == 'undefined')
-    {
-        console.log("@ " + otafk.ip + ": Attempted crash using invalid data.");
-        socket.conn.close();
-        return false;
-    }
-    if (otafk.loggedIn)
-    {
-        socket.conn.close();
-        return false;
-    }
-
-
-    if(data.nick.length > 64)
-    {
-        data.nick = data.nick.substring(0,63);
-        socket.emit('nickupdate', data.nick);
-    }
-    else if(data.nick.length < 1)
-    {
-        socket.emit('information', "[INFO] Please choose a nickname.");
-        socket.conn.close();
-        return false;
-    }
-    else if (data.nick == administrator && data.pass != adminP)
-    {
-        socket.emit('information', "You dare impersonate Senpai? Don't think he didn't notice. Despite common belief, Senpai <i>always</i> notices...");
-        console.log ("Person at " + otafk.ip + " tried to impersonate Senpai.");
-        socket.conn.close();
-        return false;
-    }
-    else if (moderators.indexOf(data.nick) >= 0 && data.pass != moderatorP)
-    {
-        socket.emit('information', "[INFO] You dare attempt to impersonate "+data.nick+"? Shame. Shame on you.");
-        console.log ("Person at " + otafk.ip + " tried to impersonate "+data.nick+".");
-        socket.conn.close();
-        return false;
-    }
-
-    if(getUserByNick(data.nick))
-    {
-        socket.emit('information', "[INFO] The nickname you chose was in use. Please reload the page and choose another.");
-        socket.conn.close();
-        return false;
-    }
-    else if (checkForBans(data, socket, otafk.ip) != null)
-    {
-        var banned = checkForBans(data, socket, otafk.ip);
-        var rightNow = new Date();
-        socket.emit('information', "[INFO] You've been banned from using this site for "+banned.days.toString()+" day"+(banned.days > 1 ? "s" : "")+" total. (Banned on "+rightNow.getMonth().toString()+"/"+rightNow.getDate().toString()+"/"+rightNow.getFullYear().toString()+")");
-        socket.conn.close();
-        return false;
-    }
-    else if (data.nabbed != "nope")
-    {
-        socket.emit('information', "[INFO] You've been banned from using this site.");
-        socket.conn.close();
-        return false;
-    }
-
-    if (checkForWatch(data, socket, otafk.ip) != null)
-    {
-        var watched = checkForWatch(data, socket, otafk.ip);
-        var rightNow = new Date();
-
-        var userscopy = users;
-        for(var x = 0; x < userscopy.length; x++)
+        socket = otafk.socket;
+        if (data == null || typeof data == 'undefined')
         {
-            if(userscopy[x].mod || userscopy[x].admin)
+            console.log("@ " + otafk.ip + ": Attempted crash using invalid data.");
+            socket.conn.close();
+            return false;
+        }
+
+        if (data.nick == null || typeof data.nick == 'undefined')
+        {
+            console.log("@ " + otafk.ip + ": Attempted crash using invalid data.");
+            socket.conn.close();
+            return false;
+        }
+        if (otafk.loggedIn)
+        {
+            socket.conn.close();
+            return false;
+        }
+
+
+        if(data.nick.length > 64)
+        {
+            data.nick = data.nick.substring(0,63);
+            socket.emit('nickupdate', data.nick);
+        }
+        else if(data.nick.length < 1)
+        {
+            socket.emit('information', "[INFO] Please choose a nickname.");
+            socket.conn.close();
+            return false;
+        }
+        else if (data.nick == administrator && data.pass != adminP)
+        {
+            socket.emit('information', "You dare impersonate Senpai? Don't think he didn't notice. Despite common belief, Senpai <i>always</i> notices...");
+            console.log ("Person at " + otafk.ip + " tried to impersonate Senpai.");
+            socket.conn.close();
+            return false;
+        }
+        else if (moderators.indexOf(data.nick) >= 0 && data.pass != moderatorP)
+        {
+            socket.emit('information', "[INFO] You dare attempt to impersonate "+data.nick+"? Shame. Shame on you.");
+            console.log ("Person at " + otafk.ip + " tried to impersonate "+data.nick+".");
+            socket.conn.close();
+            return false;
+        }
+
+        if(getUserByNick(data.nick))
+        {
+            socket.emit('information', "[INFO] The nickname you chose was in use. Please reload the page and choose another.");
+            socket.conn.close();
+            return false;
+        }
+        else if (checkForBans(data, socket, otafk.ip) != null)
+        {
+            var banned = checkForBans(data, socket, otafk.ip);
+            var rightNow = new Date();
+            socket.emit('information', "[INFO] You've been banned from using this site for "+banned.days.toString()+" day"+(banned.days > 1 ? "s" : "")+" total. (Banned on "+rightNow.getMonth().toString()+"/"+rightNow.getDate().toString()+"/"+rightNow.getFullYear().toString()+")");
+            socket.conn.close();
+            return false;
+        }
+        else if (data.nabbed != "nope")
+        {
+            socket.emit('information', "[INFO] You've been banned from using this site.");
+            socket.conn.close();
+            return false;
+        }
+
+        if (checkForWatch(data, socket, otafk.ip) != null)
+        {
+            var watched = checkForWatch(data, socket, otafk.ip);
+            var rightNow = new Date();
+
+            var userscopy = users;
+            for(var x = 0; x < userscopy.length; x++)
             {
-                userscopy[x].socket.emit('information', "[INFO] BZZT! A watched user has entered sleepychat!");
-                userscopy[x].socket.emit('information', "[INFO] User: " + watched.name);
-                userscopy[x].socket.emit('information', "[INFO] Reason: " + watched.reason);
+                if(userscopy[x].mod || userscopy[x].admin)
+                {
+                    userscopy[x].socket.emit('information', "[INFO] BZZT! A watched user has entered sleepychat!");
+                    userscopy[x].socket.emit('information', "[INFO] User: " + watched.name);
+                    userscopy[x].socket.emit('information', "[INFO] Reason: " + watched.reason);
+                }
             }
         }
+        data.socket = socket;
+        nick = data.nick;
+        otafk.nick = data.nick;
+        var testResult = testNick(nick);
+        if (testResult == "")
+        {
+            data.nick = nick;
+            var hasher = crypto.createHash('sha1');
+            hasher.update(nick + new Date().getTime() + "IAmA Salt AMA" + adminP);
+            data.token = hasher.digest('hex');
+            console.log(nick + ' ' + data.token);
+            data.AFK = false
+            data.realIp = otafk.ip;
+            users.push(data);
+            socket.emit('loggedIn');
+
+            user = getUserByNick(nick)
+            otafk.loggedIn = true;
+            if (data.nick === administrator) // Let's set the admin and mod variables
+            {
+                user.admin = true;
+                user.mod = true;
+            }
+            else if (moderators.indexOf(data.nick) >= 0)
+            {
+                socket.emit('information', "You're a moderator! Type \"/modcmd\" for commands at your disposal.");
+                user.admin = false;
+                user.mod = true;
+            }
+            else
+            {
+                user.admin = false;
+                user.mod = false;
+            }
+            
+            if (data.pass == donatorP)
+            {
+                user.donator = true;
+            }
+            else
+            {
+                user.donator = false;
+            }
+
+            if(data.inBigChat)
+            {
+                socket.join('bigroom');
+                io.to('bigroom').emit('information', "[INFO] " + getAuthority(user) + nameAppend(user.nick, user.gender, user.role) + " has joined.");
+                socket.emit('information', "[INFO] All Sleepychat activity may be monitored in real time by moderators. Users who wish to operate outside of activity logging are invited to create a private room and opt out of logging with \"/private\".");
+                io.to('bigroom').emit('rosterupdate', generateRoster(users));
+                if (!user.mod && !user.admin) { socket.emit('information', "[INFO] If you're new, type \"/help\" and hit enter to see a list of commands."); }
+                if (data.isMobile)
+                {
+                    socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users, room) + " ]");
+                }
+                user.readyForChat = false;
+            }
+            else
+            {
+                socket.leave('bigroom'); // We know they're not going into the bigroom so we can leave
+                socket.emit('information', "[INFO] Hi there, " + nick + "! You're now connected to the server.");
+                user.readyForChat = true;
+            }
+            console.log(nick +" has joined. IP: " + otafk.ip);
+
+            return true;
+        }
+        else
+        {
+            socket.emit('information', "[INFO] Your username was not accepted.");
+            socket.conn.close();
+            return false;
+        }
+    }
+    catch (e)
+    {
+        console.log(e);
+        socket.conn.close();
+        return false;
     }
 
-    return true;
 }
 
 
