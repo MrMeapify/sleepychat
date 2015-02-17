@@ -16,7 +16,7 @@ var adminP = String(process.env.ADMINPASS || "testadmin");
 var moderatorP = String(process.env.MODPASS || "testmoderator");
 var donatorP = String(process.env.DONATEPASS || "testdonator");
 
-var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "2"));
+var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "20"));
 
 // Admin/Mod stuff
 var administrator = "ElysianTail-Senpai";
@@ -24,7 +24,7 @@ var moderators = ['MrMeapify', 'ScottB', 'Amburo', 'Phobos_D_Lawgiver', 'Anonymo
 
 //Acquire the ban list.
 var banList = [];
-fs.readFile("Ban List.blt", function (err, logData) {
+fs.readFile("Ban List.blt", {flag: "a+"}, function (err,  logData) {
 
 	if (err) throw err;
 	
@@ -49,11 +49,48 @@ fs.readFile("Ban List.blt", function (err, logData) {
 			} catch (e)
 			{
 				console.log("Error reading entry: Name = " + entry[0] + ", IP = " + entry[1] + ", Days = " + entry[2] + ", Date (In mil) = " + entry[3]);
+                console.log('Error: ' + e);
 			}
 			
 			banList.push(bannedUser);
 		}
 	}
+});
+
+//Acquire the watch list.
+var watchList = [];
+fs.readFile("Watch list.blt", {flag: "a+"}, function (err, logData) {
+
+    if (err) throw err;
+    
+    var listString = logData.toString();
+    
+    if (listString != "")
+    {
+        var fileData = listString.split("\n");
+        
+        for (var  i = 0; i < fileData.length; i++)
+        {
+            var entry = fileData[i].split(' ');
+            var watchedUser;
+            try
+            {
+                watchedUser = {
+                    name: entry[0],
+                    ip: entry[1],
+                    days: parseInt(entry[2]),
+                    date: parseInt(entry[3]),
+                    reason: entry.slice(4, entry.length),
+                }
+            } catch (e)
+            {
+                console.log("Error reading entry: Name = " + entry[0] + ", IP = " + entry[1] + ", Days = " + entry[2] + ", Date (In mil) = " + entry[3] + ", Reason = " + entry.slice(4, entry.length));
+                console.log('Error: ' + e);
+            }
+            
+            watchList.push(watchedUser);
+        }
+    }
 });
 
 //Acquire the news
@@ -80,6 +117,7 @@ server.listen(Number(process.env.PORT || 5000));
 var index = require('./routes/index');
 var stats = require('./routes/stats');
 var privateroom = require('./routes/privateroom');
+
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -114,16 +152,24 @@ var uniqueHiddenId = 0;
 
 var MILSEC_PER_DAY = 86400000;
 
-commandsInAM = ["/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mod', '/mmsg', '/fmsg'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
+
+var commandsInAM = ["/binaural", "/names", "/list", '/help', '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mod', '/mmsg', '/fmsg', '/rotate'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
+
+var maxMessageLength = 4000; // 4,000 seemed like a good upper bound, I doubt you're going to need more than this. For reference, a page in a book is usually about 2,000 characters. Go ahead and lower this if you want
+
 
 io.on('connection', function(socket)
 {
 	try
 	{
+        otafk = {};
+
+        socket.join('bigroom'); // While they're logging in, we'll catch the messages from the bigroom but not show them
+
         var nick = "";
         var room = null;
 
-        var loggedIn = false;
+        otafk.loggedIn = false;
 
         var numberOfSimilarIps = 0;
 
@@ -139,10 +185,10 @@ io.on('connection', function(socket)
         }
 
         //Connection Capping
-        var ip = forwardedFor[forwardedFor.length - 1];
+        otafk.ip = forwardedFor[forwardedFor.length - 1];
         for (var i = 0; i < connections.length; i++)
         {
-            if (ip == connections[i].realIp)
+            if (otafk.ip == connections[i].realIp)
             {
                 numberOfSimilarIps++;
             }
@@ -157,7 +203,7 @@ io.on('connection', function(socket)
         var recentConn = -1;
         for (var i = 0; i < recentConns.length; i++)
         {
-            if (recentConns[i].ip == ip)
+            if (recentConns[i].ip == otafk.ip)
             {
                 recentConn = i; 
             }
@@ -168,9 +214,9 @@ io.on('connection', function(socket)
             
             var timeToReset = 15000;
             
-            if (connToTest.tries > 2)
+            if (connToTest.tries > 20)
             {
-                socket.emit('denial', "This IP is creating too many connections too quickly.");
+                socket.emit('denial', "This IP is creating too many connections too quickly. Try again in 10 minutes, if you please");
                 socket.conn.close();
                 timeToReset = 1000*60*10; //10 minutes.
             }
@@ -186,7 +232,7 @@ io.on('connection', function(socket)
         else
         {
             
-            var newConn = {ip: ip, tries: 1, timeout: -1};
+            var newConn = {ip: otafk.ip, tries: 1, timeout: -1};
             var newTimeout = setTimeout(function() {
                 
                 recentConns.remove(newConn);
@@ -197,7 +243,7 @@ io.on('connection', function(socket)
 
         socket.emit('allow', {keyString: (process.env.YTAPIKEY || "NOKEY") });
         socket.emit('newsupdate', { array: currentNews });
-        var connection = { realIp: ip };
+        var connection = { realIp: otafk.ip };
         connections.push(connection);
 
         var spamPoints = 0;
@@ -208,147 +254,36 @@ io.on('connection', function(socket)
             else if (spamPoints > 10 && !room) { socket.emit('information', "[INFO] You've been kicked for spamming the chat."); socket.conn.close(); }
         }, 2000);
         
+        otafk.socket = socket;
+
         socket.on('login', function(data)
         {
-            if (data == null || typeof data == 'undefined')
-            {
-                console.log("@ " + ip + ": Attempted crash using invalid data.");
-                socket.conn.close();
-                return;
-            }
 
-            if (data.nick == null || typeof data.nick == 'undefined')
-            {
-                console.log("@ " + ip + ": Attempted crash using invalid data.");
-                socket.conn.close();
-                return;
-            }
-            if (loggedIn)
-            {
-                socket.conn.close();
-                return;
-            }
+            shouldcontinue = loginhandle(data, otafk);
 
-            loggedIn = true;
+            if (!shouldcontinue) return;
 
-            if(data.nick.length > 64)
-            {
-                data.nick = data.nick.substring(0,63);
-                socket.emit('nickupdate', data.nick);
-            }
-            else if(data.nick.length < 1)
-            {
-                socket.emit('information', "[INFO] Please choose a nickname.");
-                socket.conn.close();
-                return;
-            }
-            else if (data.nick == administrator && data.pass != adminP)
-            {
-                socket.emit('information', "You dare impersonate Senpai? Don't think he didn't notice. Despite common belief, Senpai <i>always</i> notices...");
-                console.log ("Person at " + ip + " tried to impersonate Senpai.");
-                socket.conn.close();
-                return;
-            }
-            else if (moderators.indexOf(data.nick) >= 0 && data.pass != moderatorP)
-            {
-                socket.emit('information', "[INFO] You dare attempt to impersonate "+data.nick+"? Shame. Shame on you.");
-                console.log ("Person at " + ip + " tried to impersonate "+data.nick+".");
-                socket.conn.close();
-                return;
-            }
-            if(getUserByNick(data.nick))
-            {
-                socket.emit('information', "[INFO] The nickname you chose was in use. Please reload the page and choose another.");
-                socket.conn.close();
-                return;
-            }
-            else if (checkForBans(data, socket, ip) != null)
-            {
-                var banned = checkForBans(data, socket, ip);
-                var rightNow = new Date();
-                socket.emit('information', "[INFO] You've been banned from using this site for "+banned.days.toString()+" day"+(banned.days > 1 ? "s" : "")+" total. (Banned on "+rightNow.getMonth().toString()+"/"+rightNow.getDate().toString()+"/"+rightNow.getFullYear().toString()+")");
-                socket.conn.close();
-                return;
-            }
-            else if (data.nabbed != "nope")
-            {
-                socket.emit('information', "[INFO] You've been banned from using this site.");
-                socket.conn.close();
-                return;
-            }
-            else
-            {
-                data.socket = socket;
-                nick = data.nick;
+            otafk.loggedIn = true;
 
-                var testResult = testNick(nick);
-                if (testResult == "")
-                {
-                    data.nick = nick;
-                    var hasher = crypto.createHash('sha1');
-                    hasher.update(nick + new Date().getTime() + "IAmA Salt AMA" + adminP);
-                    data.token = hasher.digest('hex');
-                    console.log(nick + ' ' + data.token);
-                    data.AFK = false
-                    data.realIp = ip;
-                    users.push(data);
-                    socket.emit('loggedIn');
 
-                    user = getUserByNick(nick)
-                    if (data.nick === administrator) // Let's set the admin and mod variables
-                    {
-                        user.admin = true;
-                        user.mod = true;
-                    }
-                    else if (moderators.indexOf(data.nick) >= 0)
-                    {
-                        socket.emit('information', "You're a moderator! Type \"/modcmd\" for commands at your disposal.");
-                        user.admin = false;
-                        user.mod = true;
-                    }
-                    else
-                    {
-                        user.admin = false;
-                        user.mod = false;
-                    }
-                    
-                    if (data.pass == donatorP)
-                    {
-                        user.donator = true;
-                    }
-                    else
-                    {
-                        user.donator = false;
-                    }
+            data.socket = socket;
+            nick = data.nick;
+            otafk.nick = data.nick;
 
-                    if(data.inBigChat)
-                    {
-                        socket.join('bigroom');
-                        io.to('bigroom').emit('information', "[INFO] " + getAuthority(user) + nameAppend(user.nick, user.gender, user.role) + " has joined.");
-                        socket.emit('information', "[INFO] All Sleepychat activity may be monitored in real time by moderators. Users who wish to operate outside of activity logging are invited to create a private room and opt out of logging with \"/private\".");
-                        io.to('bigroom').emit('rosterupdate', generateRoster(users));
-                        if (!user.mod && !user.admin) { socket.emit('information', "[INFO] If you're new, type \"/help\" and hit enter to see a list of commands."); }
-                        if (data.isMobile)
-                        {
-                            socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users, room) + " ]");
-                        }
-                    }
-                    else
-                    {
-                        socket.emit('information', "[INFO] Hi there, " + nick + "! You're now connected to the server.");
-                    }
-                    console.log(nick +" has joined. IP: " + ip);
-                }
-                else
-                {
-                    socket.emit('information', "[INFO] Your username was not accepted.");
-                    socket.conn.close();
-                }
-            }
+            otafk.nick = nick;
+        });
+
+        socket.on('ready for chat', function()
+        {
+            var user = getUserByNick(nick);
+            if (!user.inBigChat) 
+                user.readyForChat = true;
         });
 
         socket.on('joinroom', function(roomtoken, usertoken)
         {
+
+            socket.leave('bigroom');
             for(var x = 0; x < privaterooms.length; x++)
             {
                 if(privaterooms[x].token === roomtoken)
@@ -417,7 +352,7 @@ io.on('connection', function(socket)
                 {
                     var potentialPartner = userscopy[x];
                     var good = true;
-                    if(potentialPartner.partner || potentialPartner.nick === data.last || potentialPartner.inBigChat)
+                    if(potentialPartner.partner || potentialPartner.nick === data.last || potentialPartner.inBigChat || potentialPartner.readyForChat == false)
                         good = false;
                     else
                     {
@@ -471,8 +406,8 @@ io.on('connection', function(socket)
                 
                 if(user.partner)
                 {
-                    var found1 = "[INFO] Found a chat partner! Say hello to " + user.partner.nick + ", a ";
-                    var found2 = "[INFO] Found a chat partner! Say hello to " + user.nick + ", a ";
+                    var found1 = "[INFO] Found a chat partner! Say hello to " + getAuthority(user.partner) + user.partner.nick + ", a ";
+                    var found2 = "[INFO] Found a chat partner! Say hello to " + getAuthority(user) + user.nick + ", a ";
 
                     if(user.partner.gender != "undisclosed")
                         found1 += user.partner.gender;
@@ -540,27 +475,19 @@ io.on('connection', function(socket)
             try
             {
                 var user = getUserByNick(nick);
-                if(data.message != "" && !(/^ +$/.test(data.message)) && user)
+                if(data.message.length > maxMessageLength) 
+                {
+                    socket.emit('information', "Sorry, your message <br />'<i>" + data.message.slice(0, maxMessageLength) + '<span style="color: red">' + data.message.slice(maxMessageLength, data.message.length)  + "</span></i>' was " + data.message.length + " characters but the maximum length for a message is " + maxMessageLength + " characters"); // If the message exceeds the maximum message length, then don't send it but tell the sender (with the parts past the limit colored red)
+                    spamPoints += 3;
+                    console.log(user.nick+" has sent a really long message: "+data.message.length.toString()+" characters.")
+                }
+                else if(data.message != "" && !(/^ +$/.test(data.message)) && user)
                 {
                     spamPoints++;
                     spamPoints += (data.message.length > 1000 ? 1 : 0);
-                    if (data.message.length > 2500)
-                    {
-                        socket.emit('information', "[INFO] Your message was too long.")
-                        console.log(user.nick+" has sent a really long message: "+data.message.length.toString()+" characters.")
-                        socket.conn.close();
-                        return;
-                    }
                     message=data.message;
                     
-                    // Escape html
-                    message = message.replace(/;/g, "&#59;"); 			//escape ;
-                    message = message.replace(/&([^#$])/, "&#38;$1");	//escape &
-                    message = message.replace(/</g, "&lt;");  			//escape <
-                    message = message.replace(/>/g, "&gt;");  			//escape >
-                    message = message.replace(/"/g, "&quot;");			//escape "
-                    message = message.replace(/'/g, "&#39;"); 			//escape '
-                    message = message.replace(/^\s+|\s+$/g, '');
+                    message = escapeHTML(message);
                     
                     // Check for any disallowed words or phrases.
                     if (!room)
@@ -670,7 +597,7 @@ io.on('connection', function(socket)
                             var roomfound = null;
                             for(var x = 0; x < privaterooms.length; x++)
                             {
-                                var person1 = false;
+                                /*var person1 = false;
                                 var person2 = false;
                                 for(var y = 0; y < privaterooms[x].users.length; y++)
                                 {
@@ -682,9 +609,11 @@ io.on('connection', function(socket)
                                     {
                                         person2 = true;
                                     }
+
                                 }
-                                if(person1 && person2)
-                                {
+                                //if(person1 && person2)*/
+                                if(  privaterooms[x].users.length == 2 && (privaterooms.lastIndexOf(user, 0) >= 0 && privaterooms.lastIndexOf(userwanted, 0) >= 0)  )
+                                { // Basically we check if there's a room 
                                     roomfound = privaterooms[x];
                                 }
                             }
@@ -1056,7 +985,7 @@ io.on('connection', function(socket)
                             
                             if (!replaced)
                                 banList.push(nameIpPair);
-                            
+
                             updateBanList();
                         }
                         else
@@ -1231,6 +1160,58 @@ io.on('connection', function(socket)
 
                         socket.emit('information', listString + "]");
                     }
+                    else if (/^\/watch ([a-zA-Z0-9-_~]+) ([0-9]*) ([^|]*)$/.test(message) && (user.admin || user.mod) )
+                    {
+
+                        console.log('yog')
+                        var regex = /^\/watch ([a-zA-Z0-9-_~]+) ([0-9]*) ([^|]*)$/; // /watch <name> [days] [why]
+
+                        var info = message.match(regex);
+
+                        var toWatch = getUserByNick(info[1]);
+                        var days = parseInt(info[2]);
+                        var reason = info[3];
+
+                        if (toWatch)
+                            if (!toWatch.admin)
+                            {
+                                var rightNow = new Date();
+                                var nameIpPair = {
+                                    name: toWatch.nick,
+                                    ip: toWatch.realIp,
+                                    days: days,
+                                    date: rightNow.getTime(),
+                                    reason: reason
+                                };
+
+                                socket.emit('information', "[INFO] " + toWatch.nick + " is being watched by our agents.");
+                                
+                                var replaced = false;
+                                for (var i = 0; i < watchList.length; i++)
+                                {
+                                    if (watchList[i].ip == nameIpPair.ip)
+                                    {
+                                        watchList[i] = nameIpPair;
+                                        replaced = true;
+                                        break;
+                                    }
+                                }
+                                
+                                if (!replaced)
+                                    watchList.push(nameIpPair);
+                                
+                                updateWatchList();
+                            }
+                            else
+                            {
+                                socket.emit('information', "[INFO] Senpai is like a ghost in the night, an appiration, a mystery wrapped in an enigma, sometimes you even wonder if he's nothing more than a figment of your imagination. What makes you think you can watch him?");
+                            }
+                        else
+                        {
+                            socket.emit('chat message', message, 'me');
+                            socket.emit('chat message', "[INFO] User '" + info[1] + "' not found :/");
+                        }
+                    }
                     //Admin Only Commands
                     else if (message.lastIndexOf('/newsmod', 0) === 0)
                     {
@@ -1325,9 +1306,40 @@ io.on('connection', function(socket)
             }
             catch (e)
             {
-                console.log("@ " + ip + ": " + e.message);
+                console.log("@ " + otafk.ip + ": " + e.message);
             }
         });
+
+
+        socket.on('realtime text', function(msg)
+        {
+            try
+            {
+                user = getUserByNick(nick);
+                if(room)
+                {
+                    if (msg == "")
+                        io.to(room.token).emit('realtime text', "", user.nick);
+                    else
+                        io.to(room.token).emit('realtime text', '&lt;' + user.nick + '&gt; ' + alterForFormatting(escapeHTML(msg)), user.nick);
+                }
+                else if(user.inBigChat) // the only way this should be able to happen is if they changed the code themselves or if I made a mistake
+                {
+                    //socket.emit('information', '[INFO] Cut that out!')
+                }
+                else if (user.partner)
+                {
+                    if (msg == "")
+                        user.partner.socket.emit('realtime text', "", user.nick);
+                    else if (user.partner)
+                        user.partner.socket.emit('realtime text', '&lt;' + user.nick + '&gt; ' + alterForFormatting(escapeHTML(msg)), user.nick);
+                }
+            }
+            catch(e){console.log(e)}
+        });
+
+
+
 
         socket.on('disconnect', function()
         {
@@ -1356,6 +1368,7 @@ io.on('connection', function(socket)
                         delete user.partner.partner;
                         users.push(user.partner);
                         user.partner.socket.emit('partnerDC', user.nick);
+                        user.partner = null;
                     }
                     if(user.inBigChat)
                     {
@@ -1364,6 +1377,7 @@ io.on('connection', function(socket)
                     }
                 }
             }
+
 
             connections.remove(connection);
         });
@@ -1390,6 +1404,7 @@ io.on('connection', function(socket)
             }
         });
         
+        
         socket.on('newsmodsubmit', function(newsData)
         {
             try
@@ -1407,12 +1422,12 @@ io.on('connection', function(socket)
                 }
                 else
                 {
-                    console.log("WARNING @ "+sender+":"+ip+": Tried to change the news.");
+                    console.log("WARNING @ "+sender+":"+otafk.ip+": Tried to change the news.");
                 }
             }
             catch (e)
             {
-                console.log("ERROR @ "+sender+":"+ip+": Invalid news data. "+e.message);
+                console.log("ERROR @ "+sender+":"+otafk.ip+": Invalid news data. "+e.message);
             }
             
         });
@@ -1424,6 +1439,226 @@ io.on('connection', function(socket)
 	}
 	
 });
+
+
+
+
+
+function loginhandle(data, scotrix){
+    try
+    {
+        socket = otafk.socket;
+        if (data == null || typeof data == 'undefined')
+        {
+            console.log("@ " + otafk.ip + ": Attempted crash using invalid data.");
+            socket.conn.close();
+            return false;
+        }
+
+        if (data.nick == null || typeof data.nick == 'undefined')
+        {
+            console.log("@ " + otafk.ip + ": Attempted crash using invalid data.");
+            socket.conn.close();
+            return false;
+        }
+        if (otafk.loggedIn)
+        {
+            socket.conn.close();
+            return false;
+        }
+
+
+        if(data.nick.length > 64)
+        {
+            data.nick = data.nick.substring(0,63);
+            socket.emit('nickupdate', data.nick);
+        }
+        else if(data.nick.length < 1)
+        {
+            socket.emit('information', "[INFO] Please choose a nickname.");
+            socket.conn.close();
+            return false;
+        }
+        else if (data.nick == administrator && data.pass != adminP)
+        {
+            socket.emit('information', "You dare impersonate Senpai? Don't think he didn't notice. Despite common belief, Senpai <i>always</i> notices...");
+            console.log ("Person at " + otafk.ip + " tried to impersonate Senpai.");
+            socket.conn.close();
+            return false;
+        }
+        else if (moderators.indexOf(data.nick) >= 0 && data.pass != moderatorP)
+        {
+            socket.emit('information', "[INFO] You dare attempt to impersonate "+data.nick+"? Shame. Shame on you.");
+            console.log ("Person at " + otafk.ip + " tried to impersonate "+data.nick+".");
+            socket.conn.close();
+            return false;
+        }
+
+        if(getUserByNick(data.nick))
+        {
+            socket.emit('information', "[INFO] The nickname you chose was in use. Please reload the page and choose another.");
+            socket.conn.close();
+            return false;
+        }
+        else if (checkForBans(data, socket, otafk.ip) != null)
+        {
+            var banned = checkForBans(data, socket, otafk.ip);
+            var rightNow = new Date();
+            socket.emit('information', "[INFO] You've been banned from using this site for "+banned.days.toString()+" day"+(banned.days > 1 ? "s" : "")+" total. (Banned on "+rightNow.getMonth().toString()+"/"+rightNow.getDate().toString()+"/"+rightNow.getFullYear().toString()+")");
+            socket.conn.close();
+            return false;
+        }
+        else if (data.nabbed != "nope")
+        {
+            socket.emit('information', "[INFO] You've been banned from using this site.");
+            socket.conn.close();
+            return false;
+        }
+
+        if (checkForWatch(data, socket, otafk.ip) != null)
+        {
+            var watched = checkForWatch(data, socket, otafk.ip);
+            var rightNow = new Date();
+
+            var userscopy = users;
+            for(var x = 0; x < userscopy.length; x++)
+            {
+                if(userscopy[x].mod || userscopy[x].admin)
+                {
+                    userscopy[x].socket.emit('information', "[INFO] BZZT! A watched user has entered sleepychat!");
+                    userscopy[x].socket.emit('information', "[INFO] User: " + watched.name);
+                    userscopy[x].socket.emit('information', "[INFO] Reason: " + watched.reason);
+                }
+            }
+        }
+        data.socket = socket;
+        nick = data.nick;
+        otafk.nick = data.nick;
+        var testResult = testNick(nick);
+        if (testResult == "")
+        {
+            data.nick = nick;
+            var hasher = crypto.createHash('sha1');
+            hasher.update(nick + new Date().getTime() + "IAmA Salt AMA" + adminP);
+            data.token = hasher.digest('hex');
+            console.log(nick + ' ' + data.token);
+            data.AFK = false
+            data.realIp = otafk.ip;
+            users.push(data);
+            socket.emit('loggedIn');
+
+            user = getUserByNick(nick)
+            otafk.loggedIn = true;
+            if (data.nick === administrator) // Let's set the admin and mod variables
+            {
+                user.admin = true;
+                user.mod = true;
+            }
+            else if (moderators.indexOf(data.nick) >= 0)
+            {
+                socket.emit('information', "You're a moderator! Type \"/modcmd\" for commands at your disposal.");
+                user.admin = false;
+                user.mod = true;
+            }
+            else
+            {
+                user.admin = false;
+                user.mod = false;
+            }
+            
+            if (data.pass == donatorP)
+            {
+                user.donator = true;
+            }
+            else
+            {
+                user.donator = false;
+            }
+
+            if(data.inBigChat)
+            {
+                socket.join('bigroom');
+                io.to('bigroom').emit('information', "[INFO] " + getAuthority(user) + nameAppend(user.nick, user.gender, user.role) + " has joined.");
+                socket.emit('information', "[INFO] All Sleepychat activity may be monitored in real time by moderators. Users who wish to operate outside of activity logging are invited to create a private room and opt out of logging with \"/private\".");
+                io.to('bigroom').emit('rosterupdate', generateRoster(users));
+                if (!user.mod && !user.admin) { socket.emit('information', "[INFO] If you're new, type \"/help\" and hit enter to see a list of commands."); }
+                if (data.isMobile)
+                {
+                    socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users, room) + " ]");
+                }
+                user.readyForChat = false;
+            }
+            else
+            {
+                socket.leave('bigroom'); // We know they're not going into the bigroom so we can leave
+                socket.emit('information', "[INFO] Hi there, " + nick + "! You're now connected to the server.");
+                user.readyForChat = true;
+            }
+            console.log(nick +" has joined. IP: " + otafk.ip);
+
+            return true;
+        }
+        else
+        {
+            socket.emit('information', "[INFO] Your username was not accepted.");
+            socket.conn.close();
+            return false;
+        }
+    }
+    catch (e)
+    {
+        console.log(e);
+        socket.conn.close();
+        return false;
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function escapeHTML(message)
+{
+
+    // Escape html
+    message = message.replace(/;/g, "&#59;");           //escape ;
+    message = message.replace(/&([^#$])/, "&#38;$1");   //escape &
+    message = message.replace(/</g, "&lt;");            //escape <
+    message = message.replace(/>/g, "&gt;");            //escape >
+    message = message.replace(/"/g, "&quot;");          //escape "
+    message = message.replace(/'/g, "&#39;");           //escape '
+    message = message.replace(/^\s+|\s+$/g, '');
+    return message;
+}
 
 
 // ==================================
@@ -1547,7 +1782,7 @@ function getUsers(users, room)
 	return list;
 }
 
-function generateRoster (from)
+function generateRoster(from)
 {
     var roster = [];
     for (var i = 0; i < from.length; i++)
@@ -1580,36 +1815,16 @@ var pies = ["http://i.imgur.com/Zb2ZnBF.jpg",
 var helpPage1 = 	[['information', "[INFO] ~~~"],
 					['information', "[INFO] Welcome to Sleepychat!"],
 					['information', "[INFO] Sleepychat was created by MrMeapify, and is now operated by ElysianTail-Senpai."],
-					['information', "[INFO] Help Page 1:"],
-					['information', "[INFO] While in chat, you can use several commands:"],
+					['information', "[INFO] Use can use some commands while in the chat, here are some examples:"],
 					['information', "[INFO] -- /help -- Launches this message. Duh"],
 					['information', "[INFO] -- /formatting -- Shows formatting tips."],
 					['information', "[INFO] -- /news -- Re-opens the news ticker if it was closed."],
 					['information', "[INFO] -- /ignore user -- Ignores all messages for a user."],
 					['information', "[INFO] -- /names OR /list -- Toggles the username sidebar on PC, or prints a list of users in the room on mobile."],
-					['information', "[INFO] -- /help 2 -- Shows page 2 of help."],
+                    ['information', "[INFO] -- /msg &lt;username&gt; &lt;message&gt; -- Sends a private message to the specified user."],
+                    ['information', "[INFO] -- /room &lt;user&gt; -- Requests a private chat with the specified user."],
+					['information', "[INFO] -- To see all the commands you can do, type <a href='/commands'>/commands</a>."],
 					['information', "[INFO] ~~~"]];
-
-var helpPage2 = [['information', "[INFO] ~~~"],
-                ['information', "[INFO] Help Page 2:"],
-                ['information', "[INFO] -- /whois &lt;user&gt; -- Display sex and role information for a user."],
-                ['information', "[INFO] -- /msg &lt;username&gt; &lt;message&gt; -- Sends a private message to the specified user."],
-                ['information', "[INFO] -- /r OR /reply &lt;message&gt; -- Replies to the last user to privately message you."],
-                ['information', "[INFO] -- /room &lt;user&gt; -- Requests a private chat with the specified user."],
-                ['information', "[INFO] -- /createroom &lt;room name&gt; -- Creates a public room which multiple users can be invited to using\"/invite\"."],
-                ['information', "[INFO] -- /invite &lt;room name&gt; &lt;username1 username2 usernameN&gt; -- Invites the specified user(s) to the specified public room."],
-                ['information', "[INFO] -- /me &lt;did a thing&gt; -- Styles your message differently to indicate that you're doing an action."],
-                ['information', "[INFO] -- /banana -- Sends a picture of banana cream pie."],
-                ['information', "[INFO] -- /help 3 -- Shows page 3 of help."],
-                ['information', "[INFO] ~~~"]];
-
-var helpPage3 = [['information', "[INFO] ~~~"],
-                ['information', "[INFO] Help Page 3:"],
-                ['information', "[INFO] -- /coinflip -- Publicly flips a coin."],
-                ['information', "[INFO] -- /roll &lt;number (optional)&gt; -- Publicly rolls up to 10 dice."],
-                ['information', "[INFO] -- /mmsg &lt;message&gt; -- Sends a message to males only."],
-                ['information', "[INFO] -- /fmsg &lt;message&gt; -- Sends a message to females only."],
-                ['information', "[INFO] ~~~"]];
 
 var modCommands = 	[['information', "[INFO] ~~~"],
 					['information', "[INFO] Welcome, moderator!"],
@@ -1624,6 +1839,7 @@ var modCommands = 	[['information', "[INFO] ~~~"],
 					['information', "[INFO] -- /banname &lt;name&gt; &lt;days&gt; -- Bans the specified user for the specified number of days, based on both name and IP."],
 					['information', "[INFO] -- /banip &lt;IP address&gt; &lt;days&gt; -- Bans the specified IP for the specified number of days, based only on IP."],
 					['information', "[INFO] -- /banlist -- Lists the banned users and their IP addresses."],
+                    ['information', "[INFO] -- /watch &lt;name&gt; &lt;days&gt; &lt;reason&gt; -- Notifies the admins whenever the named user enters (based on name and IP)."],
 					['information', "[INFO] -- /objection -- Displays the Ace Attourney \"Objection!\" gif."],
 					['information', "[INFO] -- /holdit -- Displays the Ace Attourney \"Hold it!\" gif."],
 					['information', "[INFO] ~~~"]];
@@ -1634,7 +1850,8 @@ var helpFormatting = [['information', "[INFO] ~~~"],
 					['information', "[INFO] -- Text surrounded by double asterisk (**) is <strong>bolded</strong>."],
 					['information', "[INFO] -- Text surrounded by single asterisk (*) is <i>italicized</i>."],
 					['information', "[INFO] -- Text surrounded by single grave accents (`) is <span style='font-family: monospace'>monospaced</span>."],
-					['information', "[INFO] -- Text surrounded by double grave accents (``) is <span style='font-family: Georgia, serif'>serif font</span>."],
+					['information', "[INFO] -- Text surrounded by double grave accents (``) is <span style='font-family: Georgia, serif'>serif font</span>."]
+                    ['information', "[INFO] -- /me &lt;does a thing&gt; -- Styles your message differently to indicate that you're doing an action."],
 					['information', "[INFO] ~~~"]];
 
 var disallowedNames = [/(?:a|4)dm(?:i|!|1)n/gi,                             //Admin(istrator)
@@ -1664,16 +1881,6 @@ function giveHelp(str, socket){
 	{
 		for(var x = 0; x < helpPage1.length; x++)
 			socket.emit(helpPage1[x][0], helpPage1[x][1]);
-	}
-    else if (str=="/help 2")
-	{
-		for(var x = 0; x < helpPage2.length; x++)
-			socket.emit(helpPage2[x][0], helpPage2[x][1]);
-	}
-    else if (str=="/help 3")
-	{
-		for(var x = 0; x < helpPage3.length; x++)
-			socket.emit(helpPage3[x][0], helpPage3[x][1]);
 	}
 	else if (str=="/formatting")
 	{
@@ -1718,7 +1925,7 @@ function dice_replacer(match, p1, p2, offset, string){
 
 function link_replacer(match, p1, p2, offset, string)
 {
-    if ((p2 == '.jpg') || (p2 == '.jpeg') || (p2 == '.png')) {
+    if (/(?:\.jpg)|(?:\.jpeg)|(?:\.png)/i.test(p2)) {
 		a = "<a tabindex='-1' target='_blank' href='http://"+p1+"'><img src='http://"+p1+"' class='embedded_image'/></a>";
 	}
 	else if ((p2 == '.gif')) {
@@ -1734,13 +1941,12 @@ function link_replacer(match, p1, p2, offset, string)
     return a;
 }
 
-
 function alterForFormatting(str, user)
 {
 	var ans = str; // Copies the variable so V8 can do it's optimizations.
 
 	// regex's
-	var banana = /^\/(?:(?:banana)|(?:banana-cream-pie))$/g; // Matches "/me " followed by anything
+	var banana = /^\/(?:(?:banana)|(?:banana-cream-pie))$/g; 
 	var bold = /\*\*(.+?)\*\*/g; // Matches stuff between ** **
 	var italics = /\*(.+?)\*/g; // Matches stuff between * *
 	var underline = /__(.+?)__/g; // Matches stuff between __ __
@@ -1754,7 +1960,7 @@ function alterForFormatting(str, user)
     var strawpoll = /http:\/\/strawpoll\.me\/([0-9]{6,10})(?:\/r)?/g; //matches http://strawpoll.me/*/r
     var youtube = /(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+(?:&|&#38;);v=))((?:\w|-|_){11})(?:(?:\?|&|&#38;)index=((?:\d){1,3}))?(?:(?:\?|&|&#38;)list=((?:\w|-|_){24}))?(?:\S+)?/g;
 
-	var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:[oO]\.[oO])|(?:\>\:\))|(?:\>\:\()|(?:\:O)|(?:&#59\;\))|(?:&#59\;\())/;
+	var emoticons = /((?:\\\('o'\)\/)|(?:\._\.)|(?:\:3)|(?:\:\\)|(?:\:\/)|(?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:[oO]\.[oO])|(?:\>\:\))|(?:\>\:\()|(?:\:O)|(?:&#59\;\))|(?:&#59\;\())/gi;
     
     var ansCopy = ans;
     var changed = false;
@@ -1804,7 +2010,8 @@ function alterForCommands(str, user, socket, room, users)
 	var mod_msg = /^\/mod (.+)/g; // Matches "/fmsg " followed by anything
 	var roll = /^\/roll ?([0-9]*)$/; // Matches "roll' or "roll " followed by a number 
 	var binaural = /^\/binaural ?(\d*)?$/;
-	var me = /^\/me( .*)/g; // Matches "/me " followed by anything
+	var me = /^\/me((?:'s)? .*)$/g; // Matches "/me " followed by anything
+	var rotate = /^\/rotate (.+)$/; // Matches "/rotate " followed by anything
 
 	// implementations
 
@@ -1814,15 +2021,15 @@ function alterForCommands(str, user, socket, room, users)
 	
 	female_message = f_msg.test(ans);
 	male_message = m_msg.test(ans);
-	//if (binaural.test(ans))
-	//{
-	//	function trigger(match, p1, p2, offset, string)
-	//	{
-	//		socket.emit('binaural', p1); // All "me" does is highlight the message, so we just use that
-	//		return match
-	//	}
-	//	ans.replace(binaural, trigger);
-	//}
+	if (binaural.test(ans))
+	{
+		function trigger(match, p1, p2, offset, string)
+		{
+			socket.emit('binaural', p1);
+			return match
+		}
+		ans.replace(binaural, trigger);
+	}
 	if (mod_message)
 	{
 		if (user.inBigChat)
@@ -1844,6 +2051,27 @@ function alterForCommands(str, user, socket, room, users)
 				socket.emit('information', '[INFO] You need to be in the big chat to do mod messaging');
 			}
 		return null;
+	}
+	else if (rotate.test(ans))
+	{
+        console.log('entered testing')
+		var results = ans.match(rotate);
+		var rotates = results[1];
+		var hash = crypto.createHash('md5').update(rotates + new Date().getTime() + "Scott was here" + adminP).digest('hex');
+		if(room)
+		{
+			io.to(room.token).emit('rotate', rotates, user.nick, hash);
+		}
+		else if(user.inBigChat)
+		{
+			io.to('bigroom').emit('rotate', rotates, user.nick, hash);
+		}
+		else
+		{
+			user.partner.socket.emit('rotate', rotates, user.nick, hash);
+			socket.emit('rotate', rotates, user.nick, hash);
+		}	
+		return null
 	}
 	else if(male_message || female_message)
 	{
@@ -2081,6 +2309,53 @@ function checkForBans(user, socket, ip)
 	return null;
 }
 
+function checkForWatch(user, socket, ip) // Just in case someomeone loses their rolex
+{
+    var splice = -1;
+    
+    for (var i = 0; i < watchList.length; i++)
+    {
+        if (user.nick === "?" && ip === watchList[i].ip)
+        {
+            var rightNow = new Date();
+            var dayUnwatched = new Date(watchList[i].date + (MILSEC_PER_DAY * watchList[i].days));
+            
+            if (dayUnwatched > rightNow)
+            {
+                return watchList[i];
+            }
+            else
+            {
+                splice = i;
+                break;
+            }
+        }
+        else if (user.nick === watchList[i].name || ip === watchList[i].ip)
+        {
+            var rightNow = new Date();
+            var dayUnwatched = new Date(watchList[i].date + (MILSEC_PER_DAY * watchList[i].days));
+            
+            if (dayUnwatched > rightNow)
+            {
+                return watchList[i];
+            }
+            else
+            {
+                splice = i;
+                break;
+            }
+        }
+    }
+    
+    if (splice > -1)
+    {
+        watchList.remove(watchList[splice]);
+        updatewatchList();
+    }
+    
+    return null;
+}
+
 function updateBanList()
 {
 	var dataToWrite = "";
@@ -2096,6 +2371,23 @@ function updateBanList()
 	}
     
     updateFile("Ban List.blt", dataToWrite);
+}
+
+function updateWatchList()
+{
+    var dataToWrite = "";
+    
+    for (var i = 0; i < watchList.length; i++)
+    {
+        dataToWrite += watchList[i].name + " " + watchList[i].ip + " " + watchList[i].days.toString() + " " + watchList[i].date.toString();
+        
+        if (i < watchList.length - 1)
+        {
+            dataToWrite += "\n";
+        }
+    }
+    
+    updateFile("Watch List.blt", dataToWrite);
 }
 
 function updateNewsFile()
@@ -2185,7 +2477,7 @@ app.use('/about', function(req, res)
 });
 app.use('/commands', function(req, res)
 {
-	res.render('commands');
+    res.render('commands');
 });
 
 /// catch 404 and render the 404 page

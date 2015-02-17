@@ -20,7 +20,7 @@
 
 #sidebar-sort-btn { position: absolute; top: 3px; left: 3px; padding: 3px; }
 
-.body { font: 1.11em Roboto, Helvetica, Arial }
+.body { font: 1.11em Roboto, Helvetica, Arial; overflow:auto; word-wrap: break-word;}
 
 .body #messages { list-style-type: none; height: 100%; margin: 0; padding: 0; }
 
@@ -30,9 +30,23 @@
 
 .body #messages .blocking { display: inline-block; vertical-align: top; max-width: 95%; }
 
+.realtimetext {
+  font: 1.11em Roboto, Helvetica, Arial; overflow:auto; word-wrap: break-word;
+
+  /* For gradient*/
+  background: -webkit-linear-gradient(left, #CCFFFF, white); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(right, #CCFFFF, white); /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(right, #CCFFFF, white); /* For Firefox 3.6 to 15 */
+  background: linear-gradient(to right, #CCFFFF, white); /* Standard syntax */
+}
+
 /*.afk { font-style: italic; font-weight: 700; font: 1.11em Roboto, Helvetica, Arial; color: #111111}*/
 
 .modal-body .input-group { margin-bottom: 20px; }
+.modal-content {
+	/*height: 100%*/
+	overflow-y: hidden;
+}
 
 li.self { background: #eee; }
 

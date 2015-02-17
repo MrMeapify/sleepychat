@@ -8,6 +8,7 @@ var snd = new Audio("/sounds/notify.ogg");
 var soundMesg = true;
 var soundSite = true;
 var denied = false;
+var playing = false;
 
 //For name list
 var users = null;
@@ -48,6 +49,13 @@ var apiKey = "NOTLOADED";
 var isGapiLoaded = false;
 var isYapiLoaded = false;
 var youTubeMatcher = /\^~([A-Za-z0-9-_]{11})~\^~(?:([A-Za-z0-9-_]{24}))?~\^?/g; // Matches the video ID between ^~ ~^, and optionally matches the playlist ID between ~ ~^
+
+//For realtime
+var realtime = false;                  // This controls if realtime is on. Change this with /realtime on and /realtime off
+var realtimeMaxRate = 250;             // How often we should transmit
+var timeOfLastRTTransmit = Date.now(); // We use this to make sure we wait realtimeMaxRate before the next transmit
+var lastRTMessage = "";                // We use this to make sure we don't transmit the same message over and over
+var realtimeEpistasis = true;          // This is required to show realtime messages. Turn this off with /norealtime. Epistasis isn't actually the right word here, but I like it
 
 var isMobile = {
     Android: function() {
@@ -185,10 +193,15 @@ $(document).ready(function()
 		$('#chatbar').submit(function()
 		{
             var msgInBox = $('#m').val();
+            if (realtime) socket.emit('realtime text', '')
             
             if (msgInBox == "/dialog")
             {
                 $('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
+            }
+            else if (msgInBox == "/commands")
+            {
+                window.open('/commands');
             }
             else if ((msgInBox == "/list" || msgInBox == "/names") && !isMobile.any())
             {
@@ -196,6 +209,28 @@ $(document).ready(function()
                 {
                     replaceNameList();
                 }
+            }
+            else if (msgInBox == "/realtime on" || (msgInBox == "/realtime" && realtime == false))
+            {
+                msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] Realtime text is activated, other users in the room can now see what you type!' + "</span>"));
+                realtime = true;
+                $(".realtimetext").appendTo("#messages"); // Move all realtime messages to the bottom
+                scrollDown(true);
+            }
+            else if (msgInBox == "/realtime off" || (msgInBox == "/realtime" && realtime == true))
+            {
+                msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] Realtime text is off, other users in the room can no longer see what you type' + "</span>"));
+                socket.emit('realtime text', '')
+                realtime = false;
+                $(".realtimetext").appendTo("#messages"); // Move all realtime messages to the bottom
+                scrollDown(true);
+            }
+            else if (msgInBox == "/norealtime")
+            {
+                msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information\">" + '[INFO] You can no longer see the other users\' realtime text' + "</span>"));
+                realtimeEpistasis = false;
+                $('.realtimetext').remove()
+                scrollDown(true);
             }
             else
             {
@@ -206,6 +241,9 @@ $(document).ready(function()
 			$('#m').val('');
 			return false;
 		});
+        $('#m').on('input', function(){
+            realtimeTransmit(); // For slightly quicker updating
+        });
         
         socket.on('allow', function(googleApiKey)
 		{
@@ -229,7 +267,7 @@ $(document).ready(function()
 			msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] Your connection was refused. "+reason+"</span>"));
 		});
 		
-		socket.on('chat message', function(msg, who)
+		socket.on('chat message', function(msg, who, userFrom)
 		{
 			if(msg)
 			{
@@ -266,6 +304,14 @@ $(document).ready(function()
 				{
 					$('#messages > li').filter(':last').addClass('self');
 				}
+
+
+                $(".realtimetext").appendTo("#messages");
+
+                if (userFrom && $('.realtimetext#' + userFrom).length)
+                {
+                    $('.realtimetext#' + userFrom).remove()
+                }
 				
 				scrollDown();
 			}
@@ -299,6 +345,14 @@ $(document).ready(function()
 				}
 				msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information blocking\">" + msg + "</span>"));
 				scrollDown();
+
+                $(".realtimetext").appendTo("#messages"); // Move all realtime message to the bottom
+                // When someone leaves, remove their realtime messages
+                if (/\[INFO\] (.+?) has left/.test(msg))
+                {
+                    userLeft = /\[INFO\] (.+?) has left/.match(msg)[1];
+                    $('.realtimetext#' + userLeft).remove()
+                }
 			}
 		});
 
@@ -318,7 +372,39 @@ $(document).ready(function()
 			}
 			scrollDown();
 		});
-		
+
+        socket.on('openlink', function(url)
+        {
+            if (url)
+                window.open(url);
+        });
+
+        socket.on('rotate', function(toRotate, userFrom, hash, origintime)
+        {
+            var rotates = toRotate.split(", ");
+            var current = rotates[Math.floor(Math.random()*rotates.length)]
+            $('#messages').append($('<li id="'+ hash +'"">').html(moment().format('h:mm:ss a') + ": &lt;" + userFrom + '&gt; ' + current));
+
+            var TimeBetweenMsgs = Math.min(Math.max((rotates.reduce(function(previousValue, currentValue, index, array) 
+            {
+                return previousValue+(currentValue.length)
+            }, 0)/rotates.length)*60, 300), 1000); // get the average string length, multiply it by 50, and if it's more than 300 return that, otherwise return 300. However, never return more than a second
+            (function(rotates, userFrom, hash, origintime, current) {
+                var prev = current;
+                var current = null;
+                setInterval(function(){
+                    var rotemp = rotates.filter(function(i) {
+                        return i != prev
+                    }); // create a variable called rotemp, wich is the same as rotates, but without the previous value
+                    rotemp = rotemp.length ? rotemp : rotates; // if rotemp is empty (because it only contained one variable) then just use rotates
+                    current = rotemp[Math.floor(Math.random()*rotemp.length)];
+                    $('#'+hash).html(origintime + ": &lt;" + userFrom + '&gt; ' + current);
+                    prev = current;
+                }, TimeBetweenMsgs);
+            })(rotates, userFrom, hash, moment().format('h:mm:ss a'), current); // We do this to create a new scope, so setInterval doesn't forget the vars
+            scrollDown();
+        });
+
 		socket.emit('joinroom', roomtoken, usertoken);
 		timeSinceLastMessage = Date.now();
 	});
@@ -339,32 +425,87 @@ $(document).ready(function()
 	var playing = false;
 	var prevBeat = null;
 
-	socket.on('binaural', function(BBeat)
-	{
-		if(!BBeat)
-			var BBeat = 7;
-			var prevBeat = 7; // If they just did /binaural we want to stop the binaurals if they're playing
-		console.log(BBeat)
-		var frequency = 65;
+    socket.on('binaural', function(BBeat)
+    {
+        if(!BBeat)
+            var BBeat = 7;
+            var prevBeat = 7; // If they just did /binaural we want to stop the binaurals if they're playing
+        var frequency = 65;
 
-		var leftear = (BBeat / 2) + frequency;
-		var rightear = frequency - (BBeat / 2);
-		if (playing && (prevBeat == BBeat))
-		{
-			stop();
-			playing = false;
-		}
-		else
-		{
-			stop();
-			SetupBeat(leftear,rightear);
-			PlayBeat(BBeat,frequency);
-			prevBeat = BBeat
-			playing = true;
-		}
-	});
+        var leftear = (BBeat / 2) + frequency;
+        var rightear = frequency - (BBeat / 2);
+        if (playing && (prevBeat == BBeat))
+        {
+            stop();
+            playing = false;
+        }
+        else
+        {
+            if (playing) stop();
+            SetupBeat(leftear,rightear);
+            PlayBeat(BBeat,frequency);
+            prevBeat = BBeat
+            playing = true;
+        }
+    });
+
+    socket.on('realtime text', function(msg, fromwho)
+    {
+        try
+        {
+            if ((fromwho != nick) && realtimeEpistasis) // Change existing realtime text
+            {
+                fromwho = 'realtime' + fromwho
+                if($('.realtimetext#' + fromwho).length)
+                {
+                    if(msg != "") // Edit
+                    {
+                        $('.realtimetext#' + fromwho).html(moment().format('h:mm a') + ": " + msg);
+                        //scrollDown(isWithinScrollThreshold());
+                    }
+                    else          // Delete existing
+                    {
+                        $('#' + fromwho).remove()
+                        //scrollDown(isWithinScrollThreshold());
+                    }
+                }
+                else             // Add new realtime text
+                {
+                    if(msg != "")
+                    {
+                        $('#messages').append($('<li class="realtimetext" id="' + fromwho + '">').html(moment().format('h:mm a') + ": " + msg));
+                        scrollDown();
+                    }
+                }
+            }
+            else
+            {
+                console.log(fromwho)
+                console.log(nick)
+                console.log(realtimeEpistasis)
+            }
+        }
+        catch(e){console.log(e)}
+    });
 
 });
+
+var realtimeTransmit = function(){
+    message = $('#m').val();
+    if (realtime && (Date.now() - timeOfLastRTTransmit >= realtimeMaxRate) && (message !== lastRTMessage) && (message.lastIndexOf('/') != 0))
+    {
+        lastRTMessage = message;
+        timeOfLastRTTransmit = Date.now();
+        socket.emit('realtime text', message);
+    }
+    else if((Date.now() - timeOfLastRTTransmit >= realtimeMaxRate) && (message.lastIndexOf('/') == 0)  && (message !== lastRTMessage) && realtime)
+    {
+        lastRTMessage = message;
+        socket.emit('realtime text', '');
+    }
+}
+
+setInterval(realtimeTransmit, 1000);
 
 var audiolet = new Audiolet();
 var out = audiolet.output;
@@ -381,14 +522,16 @@ var SetupBeat = function(leftear,rightear){
 }
 
 var PlayBeat = function(beat,frequency){
-	beat = parseFloat(beat);
-	frequency = parseFloat(frequency);
-	var beat = beat / 2;
-	var leftear = beat + frequency;
-	var rightear = frequency - beat;
-	stop();
-	SetupBeat(leftear,rightear);
-	start();
+    beat = parseFloat(beat);
+    frequency = parseFloat(frequency);
+    var beat = beat / 2;
+    var leftear = beat + frequency;
+    var rightear = frequency - beat;
+    if (playing)
+        stop();
+    playing = true;
+    SetupBeat(leftear,rightear);
+    start();
 }
 
 var start = function(){
@@ -400,8 +543,10 @@ var start = function(){
 var stop = function(){
 	try
 	{
+        console.log('stopping play')
+        playing = false
 		gain.disconnect(out);
-	} catch (e) {}
+	} catch (e) {console.log(e)}
 }
 
 function doResize() {
