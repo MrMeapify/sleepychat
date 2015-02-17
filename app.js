@@ -1925,7 +1925,7 @@ function dice_replacer(match, p1, p2, offset, string){
 
 function link_replacer(match, p1, p2, offset, string)
 {
-    if (/(?:\.jpg)|(?:\.jpeg)|(?:\.png))/i.test(p2)) {
+    if (/(?:\.jpg)|(?:\.jpeg)|(?:\.png)/i.test(p2)) {
 		a = "<a tabindex='-1' target='_blank' href='http://"+p1+"'><img src='http://"+p1+"' class='embedded_image'/></a>";
 	}
 	else if ((p2 == '.gif')) {
