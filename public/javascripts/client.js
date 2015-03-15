@@ -761,7 +761,7 @@ $(document).ready(function()
                 }
                 else if (msgInBox == "/help" || msgInBox == "/formatting")
                 {
-                    window.open('/commands');
+                    window.open('/help');
                 }
                 else if (msgInBox.indexOf("/rainy") == 0)
                 {

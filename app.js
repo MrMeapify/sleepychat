@@ -2111,9 +2111,9 @@ app.use('/about', function(req, res)
 {
 	res.render('about');
 });
-app.use('/commands', function(req, res)
+app.use('/help', function(req, res)
 {
-	res.render('commands');
+	res.render('help');
 });
 app.use('/contact', function(req, res)
 {

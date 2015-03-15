@@ -211,6 +211,10 @@ $(document).ready(function()
             {
                 $('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
             }
+			else if (msgInBox == "/help" || msgInBox == "/formatting")
+			{
+				window.open('/help');
+			}
             else if ((msgInBox == "/list" || msgInBox == "/names") && !isMobile.any())
             {
                 if (!nameSidebar)
