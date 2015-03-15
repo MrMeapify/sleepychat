@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title><%= title %></title>
+		<link rel='stylesheet' type='text/css' href='/stylesheets/bootstrap.min.css' id='stylesheet1' />
+		<link rel='stylesheet' type='text/css' href='/stylesheets/bootstrap-theme.min.css' id='stylesheet2' />
+		<link rel='stylesheet' type='text/css' href='//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css' />
+		<link rel='stylesheet' type='text/css' href='http://fonts.googleapis.com/css?family=Roboto:400,700,400italic,700italic|Sigmar+One&v2'>
+		<link rel='stylesheet' type='text/css' href='/stylesheets/style.css' id='stylesheet3' />
+		<link rel='stylesheet' type='text/css' href='/stylesheets/yt.css' />
+		<script src="/javascripts/audiolet.js"></script>
+	</head>
+	<body>
+        <div class="modal fade" id="iframe-modal" tabindex="-1" role="dialog" aria-labelledby="iFrameModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">
+							<span aria-hidden="true">x</span>
+							<span class="sr-only">Close</span>
+						</button>
+                        <h4 class="modal-title" id="iframe-modal-title">Empty</h4>
+                    </div>
+                    <div class="modal-body" id="iframe-modal-body">
+                        <h3>Congratulations!</h3>
+                        <p>You're a smart one! Gratz on finding this easter egg! Here's a little gift for your find:</p>
+                        <img style="display: block; margin: auto; padding: 5px; background-color: #303030;" src="http://i.imgur.com/AVdIrof.png" />
+                    </div>
+                    <div class="modal-body" id="iframe-modal-body">
+                        <h4>Re-open with "/dialog"</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="sound-modal" tabindex="-1" role="dialog" aria-labelledby="soundModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm" style="position: fixed; right: 20px; bottom: 20px; width: 175px; outline: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">
+							<span aria-hidden="true">x</span>
+							<span class="sr-only">Close</span>
+						</button>
+                        <h4 class="modal-title">Sound Options</h4>
+                    </div>
+                    <div class="modal-body">
+                        <input type="checkbox" id="mesg-alerts" checked>Message Alerts
+						<br /><br />
+                        <input type="checkbox" id="ment-alerts" checked>Mention Alerts
+						<br /><br />
+                        <input type="checkbox" id="jnlv-alerts" checked>Join/Leave Alerts
+                        <br /><br />
+                        <input type="checkbox" id="site-alerts" checked>Site Alerts
+                    </div>
+                    <div class="modal-body">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Done</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+		<div class="page" id="page">
+            <div class="list-right" id="namelist"></div>
+			<div id="msgframe"></div>
+	  		<form id="chatbar" action="">
+				<div class="form-group">
+					<div class="input-group">
+						<input tabindex="1" id="m" type="text" autocomplete="off" class="form-control">
+						<span class="input-group-btn">
+							<button id="sendbutton" class="btn btn-default" type="submit">Send</button>
+							<button id="mutebutton" class="btn btn-default" type="button"><i class="fa fa-volume-up"></i></button>
+							<button id="daynbutton" class="btn btn-default" type="button" onclick="toggleDayNight();"><img id="daynimage" src="/images/night.png" /></button>
+						</span>
+					</div>
+				</div>
+	  		</form>
+		</div>
+	</body>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+	<script src="/javascripts/bootstrap.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.7.0/moment.min.js"></script>
+	<script src="/javascripts/tabcomplete.js"></script>
+	<script>
+		var nick = '<%= nick %>';
+	</script>
+	<script src="/javascripts/cookies.js"></script>
+	<script src="/javascripts/roomclient.js"></script>
+    <script src="https://apis.google.com/js/client.js?onload=youtubeApiLoad"></script>
+</html>
