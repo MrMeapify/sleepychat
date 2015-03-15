@@ -1686,7 +1686,7 @@ function alterForFormatting(str, user)
     var strawpoll = /http:\/\/strawpoll\.me\/([0-9]{6,10})(?:\/r)?/g; //matches http://strawpoll.me/*/r
     var youtube = /(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+(?:&|&#38;);v=))((?:\w|-|_){11})(?:(?:\?|&|&#38;)index=((?:\d){1,3}))?(?:(?:\?|&|&#38;)list=((?:\w|-|_){24}))?(?:\S+)?/g;
 
-	var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:[oO]\.[oO])|(?:\>\:\))|(?:\>\:\()|(?:\:O)|(?:\:3)|(?:&#59\;\))|(?:&#59\;\())/;
+	var emoticons = /((?:\:\))|(?:XD)|(?:\:\()|(?:\:D)|(?:\:P)|(?:\:c)|(?:c\:)|(?:[oO]\.[oO])|(?:\>\:\))|(?:\>\:\()|(?:\:O)|(?:\:3)|(?:&#59\;\))|(?:&#59\;\())/g;
     
     var ansCopy = ans;
     var changed = false;
