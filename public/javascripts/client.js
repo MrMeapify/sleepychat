@@ -763,6 +763,10 @@ $(document).ready(function()
                 {
                     window.open('/help');
                 }
+                else if (msgInBox == "/guide")
+                {
+                    window.open('/guidelines');
+                }
                 else if (msgInBox.indexOf("/rainy") == 0)
                 {
                     if (!isMobile.any() && !isConsole.AnyMobile())
@@ -922,6 +926,10 @@ $(document).ready(function()
             else if (msgInBox == "/help" || msgInBox == "/formatting")
             {
                 window.open('/commands');
+            }
+            else if (msgInBox == "/guide")
+            {
+                window.open('/guidelines');
             }
             else if (msgInBox.indexOf("/rainy") == 0)
             {

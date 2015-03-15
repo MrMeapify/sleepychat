@@ -325,10 +325,8 @@ io.on('connection', function(socket)
                     {
                         socket.join('bigroom');
                         io.to('bigroom').emit('information', "[INFO] " + getAuthority(user) + nameAppend(user.nick, user.gender, user.role) + " has joined.");
-                        socket.emit('information', "[INFO] All Sleepychat activity may be monitored in real time by moderators. Users who wish to operate outside of activity logging are invited to create a private room and opt out of logging with \"/private\".");
-                        socket.emit('information', "[INFO] Extended hypnosis play (longer than 10 minutes) is now prohibited in the main chat. Those who wish to participate in or view public sessions may visit <a href='/room/playground/"+user.token+"' target='_blank'>The Playground</a>.<br />(You can also type \"/playground\" to get the there.)");
+                        socket.emit('information', "[INFO] All Sleepychat activity may be monitored in real time by moderators. Users who wish to operate outside of activity logging are invited to create a private room and opt out of logging with \"/private\"."+(!user.mod && !user.admin ? "<br />If you're new, type \"/help\" and hit enter to see a list of commands, or type \"/guide\" for a general list of guidelines to follow." : "")+"<br />Extended hypnosis play (longer than 10 minutes) is now prohibited in the main chat. Those who wish to participate in or view public sessions may visit <a href='/room/playground/"+user.token+"' target='_blank'>The Playground</a>.<br />(You can also type \"/playground\" to get the there.)");
                         io.to('bigroom').emit('rosterupdate', generateRoster(users));
-                        if (!user.mod && !user.admin) { socket.emit('information', "[INFO] If you're new, type \"/help\" and hit enter to see a list of commands."); }
                         if (data.isMobile)
                         {
                             socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users, room) + " ]");
@@ -2118,6 +2116,10 @@ app.use('/help', function(req, res)
 app.use('/contact', function(req, res)
 {
 	res.render('contact');
+});
+app.use('/guidelines', function(req, res)
+{
+	res.render('guidelines');
 });
 app.use('/2257exemption', function(req, res)
 {
