@@ -1323,16 +1323,19 @@ io.on('connection', function(socket)
         {
             if(room)
             {
-                io.to(room.token).emit('information', "[INFO] " + nick + " has left.");
-                for (var i = 0; i < room.here.length; i++)
-                {
-                    if (room.here[i].nick == nick)
-                    {
-                        room.here.remove(room.here[i]);
-                        break;
-                    }
-                }
-                io.to(room.token).emit('rosterupdate', generateRoster(room.here));
+				if (nick && nick != "")
+				{
+					io.to(room.token).emit('information', "[INFO] " + nick + " has left.");
+					for (var i = 0; i < room.here.length; i++)
+					{
+						if (room.here[i].nick == nick)
+						{
+							room.here.remove(room.here[i]);
+							break;
+						}
+					}
+					io.to(room.token).emit('rosterupdate', generateRoster(room.here));
+				}
             }
             else
             {
