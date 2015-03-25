@@ -118,6 +118,73 @@ var MILSEC_PER_DAY = 86400000;
 
 commandsInAM = ["/names", "/list", '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mod', '/mmsg', '/fmsg'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
 
+var mmShutdown = false;
+
+var restartTime = new Date();
+if (restartTime.getUTCHours() >= 15)
+{
+	restartTime.setUTCDate(restartTime.getUTCDate()+1);
+}
+restartTime.setUTCHours(15);
+restartTime.setUTCMinutes(0);
+restartTime.setUTCSeconds(0);
+restartTime.setUTCMilliseconds(0);
+
+var today = new Date();
+console.log((restartTime.getTime() - today.getTime()).toString());
+
+// 60 minute warning.
+if (restartTime.getTime() - today.getTime() - 3600000 > 0)
+{
+	setTimeout(function() {
+
+		io.sockets.emit('information', "[SERVER MESSAGE] Attention users. The site is scheduled to restart in one hour, at 1500 (3:00 PM) GMT. At this time, Matchmaking is now shut down.");
+		mmShutdown = true;
+
+	}, restartTime.getTime() - today.getTime() - 3600000);
+}
+else
+{
+	mmShutdown = true;
+}
+
+// 30 minute warning.
+if (restartTime.getTime() - today.getTime() - 1800000 > 0)
+{
+	setTimeout(function() {
+
+		io.sockets.emit('information', "[SERVER MESSAGE] Attention users. The site is scheduled to restart in 30 minutes, at 1500 (3:00 PM) GMT.");
+
+	}, restartTime.getTime() - today.getTime() - 1800000);
+}
+
+// 15 minute warning.
+if (restartTime.getTime() - today.getTime() - 900000 > 0)
+{
+	setTimeout(function() {
+
+		io.sockets.emit('information', "[SERVER MESSAGE] Attention users. The site is scheduled to restart in 15 minutes. Hypnotists, please wrap up your sessions.");
+
+	}, restartTime.getTime() - today.getTime() - 900000);
+}
+
+// 5 minute warning.
+if (restartTime.getTime() - today.getTime() - 300000 > 0)
+{
+	setTimeout(function() {
+
+		io.sockets.emit('information', "[SERVER MESSAGE] Attention users. The site is scheduled to restart in 5 minutes. Hypnotists, end your sessions immediately.");
+
+	}, restartTime.getTime() - today.getTime() - 300000);
+}
+
+// RESTART
+setTimeout(function() {
+	
+	throw "RESTARTING...";
+	
+}, restartTime.getTime() - today.getTime());
+
 io.on('connection', function(socket)
 {
 	try
@@ -395,6 +462,13 @@ io.on('connection', function(socket)
 
         socket.on('getNewChat', function(data)
         {
+			if (mmShutdown)
+			{
+				socket.emit('information', "[INFO] We're sorry, but Matchmaking is currently shut down for the coming restart, at the turn of the hour. Please rejoin us then.");
+				socket.conn.close();
+				return;
+			}
+			
             var user = getUserByNick(nick);
             try
             {
@@ -461,8 +535,6 @@ io.on('connection', function(socket)
                         break;
                     }
                 }
-                
-                socket.emit('information', "[INFO] For your safety, Matchmaking rooms are logged and viewable only by the Admin and Moderators. Matchmaking logging cannot be opted out of at this time.");
                 
                 if(user.partner)
                 {
