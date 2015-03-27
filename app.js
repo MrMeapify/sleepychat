@@ -11,6 +11,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var io = require('socket.io')(server);
 var fs = require('fs');
+var timespan = require('timespan');
 require('array.prototype.find');
 
 // This here is the admin password. For obvious reasons, set the ADMINPASS variable in production.admi
@@ -120,18 +121,23 @@ commandsInAM = ["/names", "/list", '/formatting', '/me', '/afk', '/banana', '/ba
 
 var mmShutdown = false;
 
+var today = new Date();
 var restartTime = new Date();
-if (restartTime.getUTCHours() >= 15)
-{
-	restartTime.setUTCDate(restartTime.getUTCDate()+1);
-}
 restartTime.setUTCHours(15);
 restartTime.setUTCMinutes(0);
 restartTime.setUTCSeconds(0);
 restartTime.setUTCMilliseconds(0);
+if (today.getTime() >= (restartTime.getTime() - 300000))
+{
+	console.log("Restart is considered completed today. Setting timer for tomorrow.")
+	restartTime.setUTCDate(restartTime.getUTCDate()+1);
+}
 
-var today = new Date();
-console.log((restartTime.getTime() - today.getTime()).toString());
+(function() {
+	
+	var till = new timespan.TimeSpan(restartTime.getTime() - today.getTime());
+	console.log("Next restart in: "+till.days+" Day"+(till.days > 1 || till.days == 0 ? "s" : "")+", "+till.hours+" Hour"+(till.hours > 1 || till.hours == 0 ? "s" : "")+", "+till.minutes+" Minute"+(till.minutes > 1 || till.minutes == 0 ? "s" : "")+", "+till.seconds+"."+till.milliseconds+" Seconds");
+})();
 
 // 60 minute warning.
 if (restartTime.getTime() - today.getTime() - 3600000 > 0)
