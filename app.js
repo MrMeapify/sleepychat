@@ -657,16 +657,16 @@ io.on('connection', function(socket)
                     {
                         var command = '/svrmsg ';
                         var msg = message.substring(command.length);
-                        var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/\,]*(\.[\w\-_()\:]+)?(?:[\-\+=&;%@\.\w?#\/\:\,]*))/gi;
-                        msg = msg.replace(link, "<a tabindex='-1' target='_blank' href='http://$1'>$1</a>");
+                        var link = /(?:((?:http|ftp)(?:s)?):\/\/)?((?:www\.)?([-a-zA-Z0-9@:%\.\-_\+~#=]{2,256}\.[a-z]{2,6})\/((?:[-a-zA-Z0-9@:%._\+~#]*\/)*([a-zA-Z0-9@:%\-_\+~#]*(?:\.([\w]{2,6}))?)?)?(?:\?((?:[\w]+=[\w]*(?:&)?)*))?)/g;
+                        msg = msg.replace(link, link_replacer);
                         io.sockets.emit('information', "[SERVER MESSAGE] " + msg);
                     }
                     else if (message.lastIndexOf('/rmmsg ', 0) === 0 && (user.admin || user.mod))
                     {
                         var command = '/rmmsg ';
                         var msg = message.substring(command.length);
-                        var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/\,]*(\.[\w\-_()\:]+)?(?:[\-\+=&;%@\.\w?#\/\:\,]*))/gi;
-                        msg = msg.replace(link, "<a tabindex='-1' target='_blank' href='http://$1'>$1</a>");
+                        var link = /(?:((?:http|ftp)(?:s)?):\/\/)?((?:www\.)?([-a-zA-Z0-9@:%\.\-_\+~#=]{2,256}\.[a-z]{2,6})\/((?:[-a-zA-Z0-9@:%._\+~#]*\/)*([a-zA-Z0-9@:%\-_\+~#]*(?:\.([\w]{2,6}))?)?)?(?:\?((?:[\w]+=[\w]*(?:&)?)*))?)/g;
+                        msg = msg.replace(link, link_replacer);
                         io.to('bigroom').emit('information', "[ROOM MESSAGE] " + msg);
                     }
                     else if (message.lastIndexOf('/'+user.nick, 0) === 0)
@@ -1725,20 +1725,20 @@ function dice_replacer(match, p1, p2, offset, string){
 }
 
 
-function link_replacer(match, p1, p2, offset, string)
+function link_replacer(match, p1, p2, p3, p4, p5, p6, p7, offset, string)
 {
-    if ((p2 == '.jpg') || (p2 == '.jpeg') || (p2 == '.png')) {
-		a = "<a tabindex='-1' target='_blank' href='http://"+p1+"'><img src='http://"+p1+"' class='embedded_image'/></a>";
+    if ((p6 == 'jpg') || (p6 == 'jpeg') || (p6 == 'png')) {
+		a = "<a tabindex='-1' target='_blank' href='http://"+p2+"'><img src='http://"+p2+"' class='embedded_image'/></a>";
 	}
-	else if ((p2 == '.gif')) {
+	else if ((p6 == 'gif')) {
 		uniqueHiddenId++;
-		a = "<img id='hiddenInd"+uniqueHiddenId.toString()+"' class='image_loader_link' src='/images/gif.png' onclick=\"loadGif("+uniqueHiddenId.toString()+", 'http://"+p1+"')\" />\n<a tabindex='-1' id=\"hiddenLnk"+uniqueHiddenId.toString()+"\" target='_blank' href=\"\" style=\"display:none\"><img class=\"embedded_image\" id=\"hiddenImg"+uniqueHiddenId.toString()+"\" src=\"\" onload=\"onGifLoaded("+uniqueHiddenId.toString()+")\" /></a>";
+		a = "<img id='hiddenInd"+uniqueHiddenId.toString()+"' class='image_loader_link' src='/images/gif.png' onclick=\"loadGif("+uniqueHiddenId.toString()+", 'http://"+p2+"')\" />\n<a tabindex='-1' id=\"hiddenLnk"+uniqueHiddenId.toString()+"\" target='_blank' href=\"\" style=\"display:none\"><img class=\"embedded_image\" id=\"hiddenImg"+uniqueHiddenId.toString()+"\" src=\"\" onload=\"onGifLoaded("+uniqueHiddenId.toString()+")\" /></a>";
 	}
-	else if ((p2 == '.gifv')) {
-		a = "<a tabindex='-1' href='http://"+p1+"' target='_blank'>\n<video poster='http://"+p1.substring(0, p1.length-5)+"h.jpg' preload='auto' autoplay='autoplay' muted='muted' loop='loop' class='embedded_image' style='vertical-align: middle;'>\n<source src='http://"+p1.substring(0, p1.length-4)+"mp4' type='video/mp4'>\n</video>\n</a>";
+	else if ((p2 == 'gifv')) {
+		a = "<a tabindex='-1' href='http://"+p2+"' target='_blank'>\n<video poster='http://"+p2.substring(0, p2.length-5)+"h.jpg' preload='auto' autoplay='autoplay' muted='muted' loop='loop' class='embedded_image' style='vertical-align: middle;'>\n<source src='http://"+p2.substring(0, p2.length-4)+"mp4' type='video/mp4'>\n</video>\n</a>";
 	}
     else {
-		a = "<a tabindex='-1' target='_blank' href='http://"+p1+"'>"+(p1.length > 250 ? (p1.substring(0, 247)+"...") : p1)+"</a>";
+		a = "<a tabindex='-1' target='_blank' href='http://"+p2+"'>"+(p2.length > 250 ? (p2.substring(0, 247)+"...") : p2)+"</a>";
 	}
     return a;
 }
@@ -1758,7 +1758,7 @@ function alterForFormatting(str, user)
 	var serif = /\`\`(.+?)\`\`/g; // Matches stuff between `` ``
 
 
-	var link = /(?:https?:\/\/)?((?:[\w\-_.])+\.[\w\-_]+\/[\w\-_()\/\,]*(\.[\w\-_()\:]+)?(?:[\-\+=&;%@\.\w?#\/\:\,]*))/gi; //matches "google.com/" and "blog.google.com/" and but not P.H.D. For details, see http://pastebin.com/8zQJmt9N
+	var link = /(?:((?:http|ftp)(?:s)?):\/\/)?((?:www\.)?([-a-zA-Z0-9@:%\.\-_\+~#=]{2,256}\.[a-z]{2,6})\/((?:[-a-zA-Z0-9@:%._\+~#]*\/)*([a-zA-Z0-9@:%\-_\+~#]*(?:\.([\w]{2,6}))?)?)?(?:\?((?:[\w]+=[\w]*(?:&)?)*))?)/g; //matches "google.com/" and "blog.google.com/" and but not P.H.D. For details, see http://pastebin.com/8zQJmt9N
 	var subreddit = /\/r\/[A-Za-z0-9][A-Za-z0-9_]{2,20}[^ ]*/g; //matches /r/Hello
     var strawpoll = /http:\/\/strawpoll\.me\/([0-9]{6,10})(?:\/r)?/g; //matches http://strawpoll.me/*/r
     var youtube = /(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+(?:&|&#38;);v=))((?:\w|-|_){11})(?:(?:\?|&|&#38;)index=((?:\d){1,3}))?(?:(?:\?|&|&#38;)list=((?:\w|-|_){24}))?(?:\S+)?/g;
