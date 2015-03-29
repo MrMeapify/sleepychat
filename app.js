@@ -99,6 +99,41 @@ var recentConns = [];
 var users = [];
 var privaterooms = [];
 
+//Username Regexes
+var userRegexes = [];
+var adminRegexes = [];
+var modRegexes = [];
+for (var a = 0; a < administrators.length; a++)
+{
+	var patternString = administrators[a];
+	patternString = patternString.replace(/a/gi, "(?:a|4)");
+	patternString = patternString.replace(/e/gi, "(?:e|3)");
+	patternString = patternString.replace(/i/gi, "(?:i|l|1)");
+	patternString = patternString.replace(/l(?!\|)/gi, "(?:i|l|1)");
+	patternString = patternString.replace(/o/gi, "(?:o|0)");
+	patternString = patternString.replace(/s/gi, "(?:s|5)");
+	patternString = patternString.replace(/t/gi, "(?:t|7)");
+	patternString = patternString.replace(/0(?!\))/gi, "(?:o|0)");
+	patternString = patternString.replace(/1(?!\))/gi, "(?:i|l|1)");
+	patternString = "^"+patternString+"$";
+	adminRegexes.push({ nick: administrators[a], regex: new RegExp(patternString, "i") });
+}
+for (var a = 0; a < moderators.length; a++)
+{
+	var patternString = moderators[a];
+	patternString = patternString.replace(/a/gi, "(?:a|4)");
+	patternString = patternString.replace(/e/gi, "(?:e|3)");
+	patternString = patternString.replace(/i/gi, "(?:i|l|1)");
+	patternString = patternString.replace(/l(?!\|)/gi, "(?:i|l|1)");
+	patternString = patternString.replace(/o/gi, "(?:o|0)");
+	patternString = patternString.replace(/s/gi, "(?:s|5)");
+	patternString = patternString.replace(/t/gi, "(?:t|7)");
+	patternString = patternString.replace(/0(?!\))/gi, "(?:o|0)");
+	patternString = patternString.replace(/1(?!\))/gi, "(?:i|l|1)");
+	patternString = "^"+patternString+"$";
+	modRegexes.push({ nick: moderators[a], regex: new RegExp(patternString, "i") });
+}
+
 //Mod Room
 var playground =
 {
@@ -318,21 +353,29 @@ io.on('connection', function(socket)
                 socket.conn.close();
                 return;
             }
-            else if (administrators.indexOf(data.nick) >= 0 && data.pass != adminP)
+            else if ((NickSimilarToAdmin(data.nick, "ElysianTail-Senpai") || NickSimilarToAdmin(data.nick, "ElysianMobile-Senpai")) && data.pass != adminP)
             {
                 socket.emit('information', "You dare impersonate Senpai? Don't think he didn't notice. Despite common belief, Senpai <i>always</i> notices...");
-                console.log ("Person at " + ip + " tried to impersonate Senpai.");
+                console.log ("Person at " + ip + " tried to impersonate Senpai using "+data.nick+".");
                 socket.conn.close();
                 return;
             }
-            else if (moderators.indexOf(data.nick) >= 0 && data.pass != moderatorP)
+            else if (NickSimilarToAdmin(data.nick, "PennyDreadful") && data.pass != adminP)
             {
-                socket.emit('information', "[INFO] You dare attempt to impersonate "+data.nick+"? Shame. Shame on you.");
-                console.log ("Person at " + ip + " tried to impersonate "+data.nick+".");
+                socket.emit('information', "[INFO] You dare attempt to impersonate the great Penny? Tsk tsk.");
+                console.log ("Person at " + ip + " tried to impersonate Penny using "+data.nick+".");
                 socket.conn.close();
                 return;
             }
-            if(getUserByNick(data.nick))
+            else if (NickSimilarToMod(data.nick) && data.pass != moderatorP)
+            {
+				var impersonation = NickSimilarToMod(data.nick);
+                socket.emit('information', "[INFO] You dare attempt to impersonate "+impersonation+"? Shame. Shame on you.");
+                console.log ("Person at " + ip + " tried to impersonate "+impersonation+" using "+data.nick+".");
+                socket.conn.close();
+                return;
+            }
+            if(NickSimilar(data.nick))
             {
                 socket.emit('information', "[INFO] The nickname you chose was in use. Please reload the page and choose another.");
                 socket.conn.close();
@@ -415,6 +458,22 @@ io.on('connection', function(socket)
                         socket.emit('information', "[INFO] Hi there, " + nick + "! You're now connected to the server.");
                     }
                     console.log(nick +" has joined. IP: " + ip);
+					var patternString = nick;
+					patternString = patternString.replace(/a/gi, "(?:a|4)");
+					patternString = patternString.replace(/e/gi, "(?:e|3)");
+					patternString = patternString.replace(/i/gi, "(?:i|l|1)");
+					patternString = patternString.replace(/l(?!\|)/gi, "(?:i|l|1)");
+					patternString = patternString.replace(/o/gi, "(?:o|0)");
+					patternString = patternString.replace(/s/gi, "(?:s|5)");
+					patternString = patternString.replace(/t/gi, "(?:t|7)");
+					patternString = patternString.replace(/0(?!\))/gi, "(?:o|0)");
+					patternString = patternString.replace(/1(?!\))/gi, "(?:i|l|1)");
+					patternString = "^"+patternString+"$";
+					
+					if (administrators.indexOf(nick) < 0 && moderators.indexOf(nick < 0))
+					{
+						userRegexes.push({nick: nick, regex: new RegExp(patternString, "i") });
+					}
                 }
                 else
                 {
@@ -1460,6 +1519,17 @@ io.on('connection', function(socket)
                         io.to('bigroom').emit('rosterupdate', generateRoster(users));
 						console.log(nick+" has disconnected.");
                     }
+					if (NickSimilar(nick))
+					{
+						for (var i = 0; i < userRegexes.length; i++)
+						{
+							if (userRegexes[i].nick == nick)
+							{
+								userRegexes.remove(userRegexes[i]);
+								break;
+							}
+						}
+					}
                 }
             }
 
@@ -1995,6 +2065,113 @@ function alterMessage(str, user, socket, room, users, dontLog)
 
 // ==================================
 // ==================================
+
+function NickSimilar(nick, search)
+{
+	if (nick)
+	{
+		if (search)
+		{
+			for (var i = 0; i < userRegexes.length; i++)
+			{
+				if (userRegexes[i].nick == search)
+				{
+					userRegexes[i].regex.lastIndex = 0;
+					return userRegexes[i].regex.test(nick);
+				}
+			}
+			return false;
+		}
+		else
+		{
+			for (var i = 0; i < userRegexes.length; i++)
+			{
+				userRegexes[i].regex.lastIndex = 0;
+				if (userRegexes[i].regex.test(nick))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+}
+
+function NickSimilarToAdmin(nick, search)
+{
+	if (nick)
+	{
+		if (search)
+		{
+			for (var i = 0; i < adminRegexes.length; i++)
+			{
+				if (adminRegexes[i].nick == search)
+				{
+					adminRegexes[i].regex.lastIndex = 0;
+					if (adminRegexes[i].regex.test(nick))
+					{
+						return adminRegexes[i].nick;
+					}
+					else
+					{
+						return "";
+					}
+				}
+			}
+			return "";
+		}
+		else
+		{
+			for (var i = 0; i < adminRegexes.length; i++)
+			{
+				adminRegexes[i].regex.lastIndex = 0;
+				if (adminRegexes[i].regex.test(nick))
+				{
+					return adminRegexes[i].nick;
+				}
+			}
+			return "";
+		}
+	}
+}
+
+function NickSimilarToMod(nick, search)
+{
+	if (nick)
+	{
+		if (search)
+		{
+			for (var i = 0; i < modRegexes.length; i++)
+			{
+				if (modRegexes[i].nick == search)
+				{
+					modRegexes[i].regex.lastIndex = 0;
+					if (modRegexes[i].regex.test(nick))
+					{
+						return modRegexes[i].nick;
+					}
+					else
+					{
+						return "";
+					}
+				}
+			}
+			return "";
+		}
+		else
+		{
+			for (var i = 0; i < modRegexes.length; i++)
+			{
+				modRegexes[i].regex.lastIndex = 0;
+				if (modRegexes[i].regex.test(nick))
+				{
+					return modRegexes[i].nick;
+				}
+			}
+			return "";
+		}
+	}
+}
 
 function testNick(nickToTest)
 {
