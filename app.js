@@ -114,6 +114,7 @@ var playground =
 privaterooms.push(playground);
 
 var uniqueHiddenId = 0;
+var uniqueMessageId = Number.MIN_VALUE;
 
 var MILSEC_PER_DAY = 86400000;
 
@@ -374,12 +375,14 @@ io.on('connection', function(socket)
                     {
                         user.admin = true;
                         user.mod = true;
+						socket.emit('make mod');
                     }
                     else if (moderators.indexOf(data.nick) >= 0)
                     {
                         socket.emit('information', "You're a moderator! Type \"/modcmd\" for commands at your disposal.");
                         user.admin = false;
                         user.mod = true;
+						socket.emit('make mod');
                     }
                     else
                     {
@@ -1365,7 +1368,7 @@ io.on('connection', function(socket)
                                 user.AFK = false;
                                 io.to('bigroom').emit('afk', { nick: user.nick, AFK: false });
                             }
-                            io.to('bigroom').emit('chat message', alterMessage(message, user, socket, null, users), "eval", user.nick);
+                            io.to('bigroom').emit('chat message', alterMessage(message, user, socket, null, users), "eval", user.nick, uniqueMessageId);
                         }
                         catch(e)
                         {
@@ -1398,6 +1401,22 @@ io.on('connection', function(socket)
                 console.log("@ " + ip + ": " + e.message);
             }
         });
+		
+		socket.on('clearmsg', function(mid) {
+			
+			if (mid)
+			{
+				var user = getUserByNick(nick);
+				if (user)
+				{
+					if (user.admin || user.mod)
+					{
+						io.to('bigroom').emit('clearmsg', mid);
+						console.log ("Admin/Mod clearing a message...");
+					}
+				}
+			}
+		});
 
         socket.on('disconnect', function()
         {

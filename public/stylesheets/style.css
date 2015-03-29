@@ -40,6 +40,10 @@ li.highlight { background: #f7ff6a!important; }
 
 li.mention { background: #fffca8!important; }
 
+button.btn-clearmsg { position: relative; top: -1px; height: 16px; width: 16px; padding: 0px; vertical-align: center; }
+
+span.spn-clearmsg { position: relative; top: -4px; }
+
 .login-modal { font-family: Roboto, Helvetica, Arial; }
 
 .embedded_image { max-height: 250px; max-width: 600px; }

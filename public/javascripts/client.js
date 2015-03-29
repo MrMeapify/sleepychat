@@ -34,6 +34,9 @@ var disallowedNames = [/(?:a|4)dm(?:i|!|1)n/gi,                                 
                       /r(?:a|4)p(?:e|(?:i|!|1)(?:s|5)(?:t|7))/gi,                                   //Rap(e OR ist)
                       /^all$/gi];                                                                   //all
 
+//For Administration
+var isModOrAdmin = false;
+
 //For chat section
 var msgFrame = null;
 var msgList = null;
@@ -562,7 +565,7 @@ $(document).ready(function()
 			}
 		});
 
-		socket.on('chat message', function(msg, who, userFrom)
+		socket.on('chat message', function(msg, who, userFrom, mid)
 		{
 			if(msg)
 			{
@@ -618,7 +621,11 @@ $(document).ready(function()
 				}
                 else
                 {
-                    msgList.append($('<li class="'+msgClass+'">').html(moment().format('h:mm:ss a') + ": " + msg));
+                    msgList.append($('<li class="'+msgClass+'"'+(mid ? ' id="mid'+mid.toString()+'"' : '')+'>').html(((isModOrAdmin && mid) ? '<button class="btn btn-default btn-clearmsg" id="bid'+mid.toString()+'"><span class="spn-clearmsg">x</span></button> ' : '') + moment().format('h:mm:ss a') + ": " + msg));
+					$('#bid'+mid.toString()).click(function() {
+						
+						clearmsg(mid, true);
+					})
                 }
 
 				if(notify)
@@ -684,6 +691,11 @@ $(document).ready(function()
 				}
 
 			}
+		});
+		
+		socket.on('make mod', function() {
+			
+			isModOrAdmin = true;
 		});
 
 		socket.on('ignore', function(user)
@@ -1092,6 +1104,24 @@ $(document).ready(function()
 			playing = true;
 		}
 	});
+	
+	socket.on('clearmsg', function(mid) {
+		
+		console.log("Clear command received.");
+		clearmsg(mid);
+	});
+
+	function clearmsg(mid, send)
+	{
+		if (mid)
+		{
+			$('#mid'+mid.toString()).remove();
+			if (isModOrAdmin && send)
+			{
+				socket.emit('clearmsg', mid);
+			}
+		}
+	}
 });
 
 var audiolet = new Audiolet();
