@@ -621,6 +621,7 @@ $(document).ready(function()
 				}
                 else
                 {
+					clearmsg(mid);
                     msgList.append($('<li class="'+msgClass+'"'+(mid ? ' id="mid'+mid.toString()+'"' : '')+'>').html(((isModOrAdmin && mid) ? '<button class="btn btn-default btn-clearmsg" id="bid'+mid.toString()+'"><span class="spn-clearmsg">x</span></button> ' : '') + moment().format('h:mm:ss a') + ": " + msg));
 					$('#bid'+mid.toString()).click(function() {
 						
@@ -1115,7 +1116,10 @@ $(document).ready(function()
 	{
 		if (mid)
 		{
-			$('#mid'+mid.toString()).remove();
+			if ($('#mid'+mid.toString()).length > 0)
+			{
+				$('#mid'+mid.toString()).remove();
+			}
 			if (isModOrAdmin && send)
 			{
 				socket.emit('clearmsg', mid);

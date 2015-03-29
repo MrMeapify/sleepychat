@@ -1369,6 +1369,11 @@ io.on('connection', function(socket)
                                 io.to('bigroom').emit('afk', { nick: user.nick, AFK: false });
                             }
                             io.to('bigroom').emit('chat message', alterMessage(message, user, socket, null, users), "eval", user.nick, uniqueMessageId);
+							uniqueMessageId++;
+							if (uniqueMessageId == Number.MAX_VALUE)
+							{
+								uniqueMessageId = Number.MIN_VALUE;
+							}
                         }
                         catch(e)
                         {
