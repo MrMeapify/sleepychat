@@ -623,10 +623,13 @@ $(document).ready(function()
                 {
 					clearmsg(mid);
                     msgList.append($('<li class="'+msgClass+'"'+(mid ? ' id="mid'+mid.toString()+'"' : '')+'>').html(((isModOrAdmin && mid) ? '<button class="btn btn-default btn-clearmsg" id="bid'+mid.toString()+'"><span class="spn-clearmsg">x</span></button> ' : '') + moment().format('h:mm:ss a') + ": " + msg));
-					$('#bid'+mid.toString()).click(function() {
-						
-						clearmsg(mid, true);
-					})
+					if (mid)
+					{
+						$('#bid'+mid.toString()).click(function() {
+
+							clearmsg(mid, true);
+						});
+					}
                 }
 
 				if(notify)
