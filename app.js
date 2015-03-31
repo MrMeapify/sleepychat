@@ -180,7 +180,7 @@ if (restartTime.getTime() - today.getTime() - 3600000 > 0)
 {
 	setTimeout(function() {
 
-		io.sockets.emit('information', "[SERVER MESSAGE] Attention users. The site is scheduled to restart in one hour, at 1500 (3:00 PM) GMT. At this time, Matchmaking is now shut down.");
+		io.sockets.emit('information', "[SERVER MESSAGE] Attention users. The site is scheduled to restart in one hour, at 1500 (3:00 PM) UTC. At this time, Matchmaking is now shut down.");
 		mmShutdown = true;
 
 	}, restartTime.getTime() - today.getTime() - 3600000);
@@ -195,7 +195,7 @@ if (restartTime.getTime() - today.getTime() - 1800000 > 0)
 {
 	setTimeout(function() {
 
-		io.sockets.emit('information', "[SERVER MESSAGE] Attention users. The site is scheduled to restart in 30 minutes, at 1500 (3:00 PM) GMT.");
+		io.sockets.emit('information', "[SERVER MESSAGE] Attention users. The site is scheduled to restart in 30 minutes, at 1500 (3:00 PM) UTC.");
 
 	}, restartTime.getTime() - today.getTime() - 1800000);
 }
