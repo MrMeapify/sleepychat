@@ -6,13 +6,14 @@
 		<link rel='stylesheet' href='/stylesheets/bootstrap.min.css' />
 		<link rel='stylesheet' href='/stylesheets/bootstrap-theme.min.css' />
 		<link rel='stylesheet' href='/stylesheets/common.css' />
+		<link rel='stylesheet' href='<%= nightStyle %>' />
 	</head>
 	<body>
         <div class="body">
-            <a href="/"><img class="center" src="/images/logo-day.jpg"/></a>
+            <a href="/"><img class="center" src="/images/logo-<%= logoType %>.jpg"/></a>
 			<br/>
             <p>@_@ Whoa... Are you trying a confusion induction on this poor website? Either way, looks like you found the wrong page. Turns out "sleepychat.com<%= url %>" doesn't exist. Try heading back to the <a href="/">Main Page</a>.
-                If you believe this is in error, please feel free to contact ElysianTail-Senpai, who is the administrator and developer of this site, or any moderator through the main chat.</p>
+                If you believe this is in error, please feel free to <a href="/contact">Contact Us</a>.</p>
         </div>
 	</body>
 </html>

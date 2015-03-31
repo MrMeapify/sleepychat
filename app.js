@@ -2393,43 +2393,49 @@ app.use('/' + adminP, stats);
 app.use('/room', privateroom);
 app.use('/about', function(req, res)
 {
-	res.render('about');
+	var isNight = req.cookies.theme == "night";
+	res.render('about', { logoType: (isNight ? "night" : "day"), nightStyle: (isNight ? "/stylesheets/night/common.css" : "") });
 });
 app.use('/help', function(req, res)
 {
-	res.render('help');
+	var isNight = req.cookies.theme == "night";
+	res.render('help', { logoType: (isNight ? "night" : "day"), nightStyle: (isNight ? "/stylesheets/night/common.css" : "") });
 });
 app.use('/contact', function(req, res)
 {
-	res.render('contact');
+	var isNight = req.cookies.theme == "night";
+	res.render('contact', { logoType: (isNight ? "night" : "day"), nightStyle: (isNight ? "/stylesheets/night/common.css" : "") });
 });
 app.use('/guidelines', function(req, res)
 {
-	res.render('guidelines');
+	var isNight = req.cookies.theme == "night";
+	res.render('guidelines', { logoType: (isNight ? "night" : "day"), nightStyle: (isNight ? "/stylesheets/night/common.css" : "") });
 });
 app.use('/2257exemption', function(req, res)
 {
-	res.render('2257exemption');
+	var isNight = req.cookies.theme == "night";
+	res.render('2257exemption', { logoType: (isNight ? "night" : "day"), nightStyle: (isNight ? "/stylesheets/night/common.css" : "") });
 });
 
 /// catch 404 and render the 404 page
 app.use(function(req, res, next){
-  res.status(404);
+	res.status(404);
+	
+	// respond with html page
+	if (req.accepts('html')) {
+		var isNight = req.cookies.theme == "night";
+    	res.render('404', { logoType: (isNight ? "night" : "day"), nightStyle: (isNight ? "/stylesheets/night/common.css" : ""), url: req.url });
+    	return;
+	}
 
-  // respond with html page
-  if (req.accepts('html')) {
-    res.render('404', { url: req.url });
-    return;
-  }
+	// respond with json
+	if (req.accepts('json')) {
+		res.send({ error: 'Not found' });
+		return;
+	}
 
-  // respond with json
-  if (req.accepts('json')) {
-    res.send({ error: 'Not found' });
-    return;
-  }
-
-  // default to plain-text. send()
-  res.type('txt').send('Not found');
+	// default to plain-text. send()
+	res.type('txt').send('Not found');
 });
 
 /// error handlers
