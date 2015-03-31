@@ -1595,8 +1595,6 @@ function youtubeApiLoad() {
 
 function youtubeRequestSucceeded (resp) {
     
-    console.log(resp.result);
-    
     var resultingVideo = resp.result.items[0];
     var loadingContainers = document.getElementsByClassName('yt-loader-container');
     var correctContainer = null;
