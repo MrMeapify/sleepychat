@@ -12,6 +12,7 @@ var bodyParser = require('body-parser');
 var io = require('socket.io')(server);
 var fs = require('fs');
 var timespan = require('timespan');
+var database = require('./subapps/database');
 require('array.prototype.find');
 
 // This here is the admin password. For obvious reasons, set the ADMINPASS variable in production.admi
@@ -27,35 +28,16 @@ var moderators = ['MrMeapify', 'ScottB', 'Amburo', 'Phobos_D_Lawgiver', 'Anonymo
 
 //Acquire the ban list.
 var banList = [];
-fs.readFile("Ban List.blt", function (err, logData) {
-
-	if (err) throw err;
+database.Ban.find({}, function (err, bans) {
 	
-	var listString = logData.toString();
-	
-	if (listString != "")
+	if (err)
 	{
-		var fileData = listString.split("\n");
-		
-		for (var  i = 0; i < fileData.length; i++)
-		{
-			var entry = fileData[i].split(' ');
-			var bannedUser;
-			try
-			{
-				bannedUser = {
-					name: entry[0],
-					ip: entry[1],
-					days: parseInt(entry[2]),
-					date: parseInt(entry[3])
-				}
-			} catch (e)
-			{
-				console.log("Error reading entry: Name = " + entry[0] + ", IP = " + entry[1] + ", Days = " + entry[2] + ", Date (In mil) = " + entry[3]);
-			}
-			
-			banList.push(bannedUser);
-		}
+		console.log(err);
+	}
+	else
+	{
+		banList = bans;
+		console.log("Ban count: "+banList.length.toString());
 	}
 });
 
@@ -1158,12 +1140,12 @@ io.on('connection', function(socket)
                                 days = 1;
                             }
                             var rightNow = new Date();
-                            var nameIpPair = {
+                            var nameIpPair = new database.Ban({
                                 name: "?",
                                 ip: tokick.realIp,
                                 days: days,
                                 date: rightNow.getTime()
-                            };
+                            });
 
                             io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been struck by the Ban Hammer, swung by "+user.nick+". ("+days.toString()+" day ban)");
                             var dateTill = new Date();
@@ -1183,9 +1165,19 @@ io.on('connection', function(socket)
                             }
                             
                             if (!replaced)
-                                banList.push(nameIpPair);
-                            
-                            updateBanList();
+							{
+                                nameIpPair.save(function(err, saved) {
+									
+									if (err)
+									{
+										console.log(err);
+									}
+									else
+									{
+										banList.push(nameIpPair);
+									}
+								});
+							}
                         }
                         else
                         {
@@ -1213,12 +1205,12 @@ io.on('connection', function(socket)
                                 days = 1;
                             }
                             var rightNow = new Date();
-                            var nameIpPair = {
+                            var nameIpPair = new database.Ban({
                                 name: tokick.nick,
                                 ip: tokick.realIp,
                                 days: days,
                                 date: rightNow.getTime()
-                            };
+                            });
 
                             io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been struck by the Ban Hammer, swung by "+user.nick+". ("+days.toString()+" day ban)");
                             var dateTill = new Date();
@@ -1238,9 +1230,19 @@ io.on('connection', function(socket)
                             }
                             
                             if (!replaced)
-                                banList.push(nameIpPair);
-                            
-                            updateBanList();
+							{
+                                nameIpPair.save(function(err, saved) {
+									
+									if (err)
+									{
+										console.log(err);
+									}
+									else
+									{
+										banList.push(nameIpPair);
+									}
+								});
+							}
                         }
                         else
                         {
@@ -1268,12 +1270,12 @@ io.on('connection', function(socket)
                                 days = 1;
                             }
                             var rightNow = new Date();
-                            var nameIpPair = {
+                            var nameIpPair =  new database.Ban({
                                 name: "?",
                                 ip: postpass[0],
                                 days: days,
                                 date: rightNow.getTime()
-                            };
+                            });
                             
                             socket.emit('information', "[INFO] IP " + postpass[0] + " has been struck by the Ban Hammer, swung by "+user.nick+". ("+days.toString()+" day ban)");
 
@@ -1289,9 +1291,19 @@ io.on('connection', function(socket)
                             }
                             
                             if (!replaced)
-                                banList.push(nameIpPair);
-                            
-                            updateBanList();
+							{
+                                nameIpPair.save(function(err, saved) {
+									
+									if (err)
+									{
+										console.log(err);
+									}
+									else
+									{
+										banList.push(nameIpPair);
+									}
+								});
+							}
                         }
                         else if (!tokick.admin)
                         {
@@ -1309,12 +1321,12 @@ io.on('connection', function(socket)
                                 days = 1;
                             }
                             var rightNow = new Date();
-                            var nameIpPair = {
+                            var nameIpPair = new database.Ban({
                                 name: "?",
                                 ip: tokick.realIp,
                                 days: days,
                                 date: rightNow.getTime()
-                            };
+                            });
 
                             io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been struck by the Ban Hammer, swung by "+user.nick+". ("+days.toString()+" day ban)");
                             var dateTill = new Date();
@@ -1334,9 +1346,19 @@ io.on('connection', function(socket)
                             }
                             
                             if (!replaced)
-                                banList.push(nameIpPair);
-                            
-                            updateBanList();
+                            {
+                                nameIpPair.save(function(err, saved) {
+									
+									if (err)
+									{
+										console.log(err);
+									}
+									else
+									{
+										banList.push(nameIpPair);
+									}
+								});
+							}
                         }
                         else
                         {
@@ -2294,28 +2316,21 @@ function checkForBans(user, socket, ip)
 	
 	if (splice > -1)
 	{
-		banList.remove(banList[splice]);
-        updateBanList();
+		database.Ban.remove({ _id: banList[splice].id }, function(err) {
+			
+			if (err)
+			{
+				console.log(err);
+				return banList[splice];
+			}
+			else
+			{
+				banList.remove(banList[splice]);
+			}
+		});
 	}
 	
 	return null;
-}
-
-function updateBanList()
-{
-	var dataToWrite = "";
-	
-	for (var i = 0; i < banList.length; i++)
-	{
-		dataToWrite += banList[i].name + " " + banList[i].ip + " " + banList[i].days.toString() + " " + banList[i].date.toString();
-		
-		if (i < banList.length - 1)
-		{
-			dataToWrite += "\n";
-		}
-	}
-    
-    updateFile("Ban List.blt", dataToWrite);
 }
 
 function updateNewsFile()
