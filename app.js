@@ -1885,14 +1885,22 @@ function alterForFormatting(str, user)
     
     if (ansCopy == ans)
     {
-        //implementations
-        ans = ans.replace(bold, "<strong>$1</strong>"); 
-        ans = ans.replace(italics, "<i>$1</i>"); 
-        ans = ans.replace(underline, "<span style='text-decoration: underline;'>$1</span>"); 
-        ans = ans.replace(strikethrough, "<span style='text-decoration: line-through;'>$1</span>"); 
-        ans = ans.replace(serif, "<span style='font-family: Georgia, serif'>$1</span>"); 
-        ans = ans.replace(monospace, "<span style='font-family: monospace'>$1</span>"); 
-        ans = ans.replace(emoticons, "<strong>$&</strong>");
+		if (ans.indexOf("@@ ") == 0)
+		{
+			ans = ans.substring(3);
+		}
+		else
+		{
+			//implementations
+			ans = ans.replace(bold, "<strong>$1</strong>"); 
+			ans = ans.replace(italics, "<i>$1</i>"); 
+			ans = ans.replace(underline, "<span style='text-decoration: underline;'>$1</span>"); 
+			ans = ans.replace(strikethrough, "<span style='text-decoration: line-through;'>$1</span>"); 
+			ans = ans.replace(serif, "<span style='font-family: Georgia, serif'>$1</span>"); 
+			ans = ans.replace(monospace, "<span style='font-family: monospace'>$1</span>");
+		}
+		
+		ans = ans.replace(emoticons, "<strong>$&</strong>");
     }
     else
     {
