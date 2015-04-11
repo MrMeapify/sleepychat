@@ -28,18 +28,7 @@ var moderators = ['MrMeapify', 'ScottB', 'Amburo', 'Phobos_D_Lawgiver', 'Anonymo
 
 //Acquire the ban list.
 var banList = [];
-database.Ban.find({}, function (err, bans) {
-	
-	if (err)
-	{
-		console.log(err);
-	}
-	else
-	{
-		banList = bans;
-		console.log("Ban count: "+banList.length.toString());
-	}
-});
+reloadBans();
 
 //Acquire the news
 var currentNews = [];
@@ -1381,6 +1370,12 @@ io.on('connection', function(socket)
 
                         socket.emit('information', listString + "]");
                     }
+                    else if (message.lastIndexOf('/banreload', 0) === 0 && (user.admin || user.mod))
+                    {
+						reloadBans();
+						console.log("Bans reloaded.");
+						socket.emit('information', "[INFO] Bans reloaded.");
+                    }
                     //Admin Only Commands
                     else if (message.lastIndexOf('/newsmod', 0) === 0)
                     {
@@ -1660,6 +1655,23 @@ function sendMessage(information, message, user, room, socket)
 		}
 	}
 
+}
+
+function reloadBans()
+{
+	banList = [];
+	database.Ban.find({}, function (err, bans) {
+
+		if (err)
+		{
+			console.log(err);
+		}
+		else
+		{
+			banList = bans;
+			console.log("Ban count: "+banList.length.toString());
+		}
+	});
 }
 
 // ==================================
