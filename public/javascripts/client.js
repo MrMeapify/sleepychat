@@ -622,7 +622,7 @@ $(document).ready(function()
                 else
                 {
 					clearmsg(mid);
-                    msgList.append($('<li class="'+msgClass+'"'+(mid ? ' id="mid'+mid.toString()+'"' : '')+'>').html(((isModOrAdmin && mid) ? '<button class="btn btn-default btn-clearmsg" id="bid'+mid.toString()+'"><span class="spn-clearmsg">x</span></button> ' : '') + moment().format('h:mm:ss a') + ": " + msg));
+                    msgList.append($('<li class="'+msgClass+'"'+(mid ? ' id="mid'+mid.toString()+'"' : '')+'>').html(((isModOrAdmin && mid) ? '<button class="btn btn-default btn-clearmsg" id="bid'+mid.toString()+'" tabindex="-1"><span class="spn-clearmsg">x</span></button> ' : '') + moment().format('h:mm:ss a') + ": " + msg));
 					if (mid)
 					{
 						$('#bid'+mid.toString()).click(function() {
