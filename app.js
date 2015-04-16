@@ -31,23 +31,9 @@ var banList = [];
 reloadBans();
 
 //Acquire the news
+var currentMotd = [];
 var currentNews = [];
-fs.readFile("Current News.ndf", function(err, logData) {
-
-	if (err) throw err;
-	
-	var listString = logData.toString();
-	
-	if (listString != "")
-	{
-		var fileData = listString.split("\n");
-		
-		for (var  i = 0; i < fileData.length; i++)
-		{
-			currentNews.push(fileData[i]);
-		}
-	}
-});
+reloadNews();
 
 server.listen(Number(process.env.PORT || 5000));
 
@@ -417,7 +403,18 @@ io.on('connection', function(socket)
                     {
                         socket.join('bigroom');
                         io.to('bigroom').emit('information', "[INFO] " + getAuthority(user) + nameAppend(user.nick, user.gender, user.role) + " has joined.");
-                        socket.emit('information', "[INFO] All Sleepychat activity may be monitored in real time by moderators. Users who wish to operate outside of activity logging are invited to create a private room and opt out of logging with \"/private\"."+(!user.mod && !user.admin ? "<br /><span style='color: red;'>IMPORTANT:</span> A banned user has been recently asking people for logs. If someone asks you, please report them.<br />If you're new, type \"/help\" and hit enter to see a list of commands, or type \"/guide\" for a general list of guidelines to follow." : "")+"<br />Extended hypnosis play (longer than 10 minutes) is now prohibited in the main chat. Those who wish to participate in or view public sessions may visit <a href='/room/playground/"+user.token+"' target='_blank'>The Playground</a>.<br />(You can also type \"/playground\" to get there.)");
+						
+						var newsToSend = "[INFO] ";
+						for (var i = 0; i < currentMotd.length; i++)
+						{
+							newsToSend += currentMotd[i].news.replace("{USER TOKEN}", user.token);
+							if (i < currentMotd.length - 1)
+							{
+								newsToSend += "<br />";
+							}
+						}
+						
+						socket.emit('information', newsToSend);
                         io.to('bigroom').emit('rosterupdate', generateRoster(users));
                         if (data.isMobile)
                         {
@@ -1377,24 +1374,11 @@ io.on('connection', function(socket)
 						socket.emit('information', "[INFO] Bans reloaded.");
                     }
                     //Admin Only Commands
-                    else if (message.lastIndexOf('/newsmod', 0) === 0)
+                    else if (message.lastIndexOf('/reloadnews', 0) === 0)
                     {
                         if (user.admin)
                         {
-                            uniqueHiddenId++;
-
-                            var newsVal = "";
-
-                            for (var i = 0; i < currentNews.length; i++)
-                            {
-                                newsVal += currentNews[i];
-                                if (i < currentNews.length - 1)
-                                {
-                                    newsVal += "\n";
-                                }
-                            }
-
-                            socket.emit('newsmod', { id: uniqueHiddenId, currentVal: newsVal })
+							reloadNews();
                         }
                         else
                         {
@@ -1574,33 +1558,6 @@ io.on('connection', function(socket)
                 io.to('bigroom').emit('afk', { nick: data.nick, AFK: data.AFK });
             }
         });
-        
-        socket.on('newsmodsubmit', function(newsData)
-        {
-            try
-            {
-                var sender = getUserByNick(newsData.nick);
-                if (newsData.password == adminP)
-                {
-                    var newNews = newsData.newNews.split('\n');
-                    currentNews = newNews;
-                    updateNewsFile();
-                    for (var i = 0; i < users.length; i++)
-                    {
-                        users[i].socket.emit('newsupdate', { array: currentNews });
-                    }
-                }
-                else
-                {
-                    console.log("WARNING @ "+sender+":"+ip+": Tried to change the news.");
-                }
-            }
-            catch (e)
-            {
-                console.log("ERROR @ "+sender+":"+ip+": Invalid news data. "+e.message);
-            }
-            
-        });
 	}
 	catch (e)
 	{
@@ -1670,6 +1627,46 @@ function reloadBans()
 		{
 			banList = bans;
 			console.log("Ban count: "+banList.length.toString());
+		}
+	});
+}
+
+function reloadNews()
+{
+	currentMotd = [];
+	currentNews = [];
+	database.News.find({ type: "MOTD" }, function(err, motds) {
+		
+		if (err)
+		{
+			console.log(err);
+		}
+		else
+		{
+			currentMotd = motds;
+			console.log(currentMotd.length.toString() + " MOTD's loaded.");
+			for (var i = 0; i < currentMotd.length; i++)
+			{
+				console.log(currentMotd[i].news);
+			}
+			
+			database.News.find({ type: "News" }, function(err, news) {
+
+				if (err)
+				{
+					console.log(err);
+				}
+				else
+				{
+					currentNews = news;
+					console.log(currentNews.length.toString() + " news's loaded.");
+					
+					for (var i = 0; i < users.length; i++)
+					{
+						users[i].socket.emit('newsupdate', { array: currentNews });
+					}
+				}
+			});
 		}
 	});
 }
@@ -2343,30 +2340,6 @@ function checkForBans(user, socket, ip)
 	}
 	
 	return null;
-}
-
-function updateNewsFile()
-{
-	var dataToWrite = "";
-	
-	for (var i = 0; i < currentNews.length; i++)
-	{
-		dataToWrite += currentNews[i];
-		
-		if (i < currentNews.length - 1)
-		{
-			dataToWrite += "\n";
-		}
-	}
-	
-	updateFile("Current News.ndf", dataToWrite);
-}
-
-function updateFile(file, data)
-{
-    fs.writeFile(file, data, function(err) {
-		if (err) console.log(err);
-	});
 }
 
 setInterval(function()

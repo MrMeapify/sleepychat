@@ -40,10 +40,21 @@ var banSchema = mongoose.Schema({
 banSchema.set('autoindex', false);
 banSchema.set('collection', 'chatbans');
 
+var newsSchema = mongoose.Schema({
+	
+	news: String,
+	type: String
+});
+
+newsSchema.set('autoindex', false);
+newsSchema.set('collection', 'chatnews');
+
 var Ban = mongoose.model('Ban', banSchema);
+var News = mongoose.model('News', newsSchema);
 
 module.exports = {
 		
 	Database: db,
-	Ban: Ban
+	Ban: Ban,
+	News: News
 };
