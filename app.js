@@ -18,13 +18,15 @@ require('array.prototype.find');
 // This here is the admin password. For obvious reasons, set the ADMINPASS variable in production.admi
 var adminP = String(process.env.ADMINPASS || "testadmin");
 var moderatorP = String(process.env.MODPASS || "testmoderator");
+var formerP = String(process.env.FMRPASS || "testformer");
 var donatorP = String(process.env.DONATEPASS || "testdonator");
 
 var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "10"));
 
 // Admin/Mod stuff
 var administrators = ["ElysianTail-Senpai", "ElysianMobile-Senpai", "PennyDreadful"];
-var moderators = ['MrMeapify', 'ScottB', 'Amburo', 'Phobos_D_Lawgiver', 'Anonymoususer2', 'Mushymoose', 'Gaige', "ToHypnoFu", "Tira~S", "Tira~K"];
+var moderators = ['MrMeapify', 'ScottB', 'Amburo', 'Phobos_D_Lawgiver', 'Mushymoose', 'Gaige', "ToHypnoFu", "Tira~S", "Tira~K"];
+var formers = ['Anonymoususer2'];
 
 //Acquire the ban list.
 var banList = [];
@@ -60,35 +62,21 @@ var privaterooms = [];
 var userRegexes = [];
 var adminRegexes = [];
 var modRegexes = [];
+var fmrRegexes = [];
 for (var a = 0; a < administrators.length; a++)
 {
-	var patternString = administrators[a];
-	patternString = patternString.replace(/a/gi, "(?:a|4)");
-	patternString = patternString.replace(/e/gi, "(?:e|3)");
-	patternString = patternString.replace(/i/gi, "(?:i|l|1)");
-	patternString = patternString.replace(/l(?!\|)/gi, "(?:i|l|1)");
-	patternString = patternString.replace(/o/gi, "(?:o|0)");
-	patternString = patternString.replace(/s/gi, "(?:s|5)");
-	patternString = patternString.replace(/t/gi, "(?:t|7)");
-	patternString = patternString.replace(/0(?!\))/gi, "(?:o|0)");
-	patternString = patternString.replace(/1(?!\))/gi, "(?:i|l|1)");
-	patternString = "^"+patternString+"$";
+	var patternString = RegexifyNick(administrators[a]);
 	adminRegexes.push({ nick: administrators[a], regex: new RegExp(patternString, "i") });
 }
 for (var a = 0; a < moderators.length; a++)
 {
-	var patternString = moderators[a];
-	patternString = patternString.replace(/a/gi, "(?:a|4)");
-	patternString = patternString.replace(/e/gi, "(?:e|3)");
-	patternString = patternString.replace(/i/gi, "(?:i|l|1)");
-	patternString = patternString.replace(/l(?!\|)/gi, "(?:i|l|1)");
-	patternString = patternString.replace(/o/gi, "(?:o|0)");
-	patternString = patternString.replace(/s/gi, "(?:s|5)");
-	patternString = patternString.replace(/t/gi, "(?:t|7)");
-	patternString = patternString.replace(/0(?!\))/gi, "(?:o|0)");
-	patternString = patternString.replace(/1(?!\))/gi, "(?:i|l|1)");
-	patternString = "^"+patternString+"$";
+	var patternString = RegexifyNick(moderators[a]);
 	modRegexes.push({ nick: moderators[a], regex: new RegExp(patternString, "i") });
+}
+for (var a = 0; a < formers.length; a++)
+{
+	var patternString = RegexifyNick(formers[a]);
+	fmrRegexes.push({ nick: formers[a], regex: new RegExp(patternString, "i") });
 }
 
 //Mod Room
@@ -332,6 +320,14 @@ io.on('connection', function(socket)
                 socket.conn.close();
                 return;
             }
+            else if (NickSimilarToFormer(data.nick) && data.pass != formerP)
+            {
+				var impersonation = NickSimilarToFormer(data.nick);
+                socket.emit('information', "[INFO] You dare attempt to impersonate "+impersonation+"? Shame. Shame on you.");
+                console.log ("Person at " + ip + " tried to impersonate "+impersonation+" using "+data.nick+".");
+                socket.conn.close();
+                return;
+            }
             if(NickSimilar(data.nick))
             {
                 socket.emit('information', "[INFO] The nickname you chose was in use. Please reload the page and choose another.");
@@ -426,17 +422,7 @@ io.on('connection', function(socket)
                         socket.emit('information', "[INFO] Hi there, " + nick + "! You're now connected to the server.");
                     }
                     console.log(nick +" has joined. IP: " + ip);
-					var patternString = nick;
-					patternString = patternString.replace(/a/gi, "(?:a|4)");
-					patternString = patternString.replace(/e/gi, "(?:e|3)");
-					patternString = patternString.replace(/i/gi, "(?:i|l|1)");
-					patternString = patternString.replace(/l(?!\|)/gi, "(?:i|l|1)");
-					patternString = patternString.replace(/o/gi, "(?:o|0)");
-					patternString = patternString.replace(/s/gi, "(?:s|5)");
-					patternString = patternString.replace(/t/gi, "(?:t|7)");
-					patternString = patternString.replace(/0(?!\))/gi, "(?:o|0)");
-					patternString = patternString.replace(/1(?!\))/gi, "(?:i|l|1)");
-					patternString = "^"+patternString+"$";
+					var patternString = RegexifyNick(nick);
 					
 					if (administrators.indexOf(nick) < 0 && moderators.indexOf(nick < 0))
 					{
@@ -2210,6 +2196,61 @@ function NickSimilarToMod(nick, search)
 			return "";
 		}
 	}
+}
+
+function NickSimilarToFormer(nick, search)
+{
+	if (nick)
+	{
+		if (search)
+		{
+			for (var i = 0; i < fmrRegexes.length; i++)
+			{
+				if (fmrRegexes[i].nick == search)
+				{
+					fmrRegexes[i].regex.lastIndex = 0;
+					if (fmrRegexes[i].regex.test(nick))
+					{
+						return fmrRegexes[i].nick;
+					}
+					else
+					{
+						return "";
+					}
+				}
+			}
+			return "";
+		}
+		else
+		{
+			for (var i = 0; i < fmrRegexes.length; i++)
+			{
+				fmrRegexes[i].regex.lastIndex = 0;
+				if (fmrRegexes[i].regex.test(nick))
+				{
+					return fmrRegexes[i].nick;
+				}
+			}
+			return "";
+		}
+	}
+}
+
+function RegexifyNick(nickToRegexify)
+{
+	var patternString = nickToRegexify;
+	patternString = patternString.replace(/a/gi, "(?:a|4)");
+	patternString = patternString.replace(/e/gi, "(?:e|3)");
+	patternString = patternString.replace(/i/gi, "(?:i|l|1)");
+	patternString = patternString.replace(/l(?!\|)/gi, "(?:i|l|1)");
+	patternString = patternString.replace(/o/gi, "(?:o|0)");
+	patternString = patternString.replace(/s/gi, "(?:s|5)");
+	patternString = patternString.replace(/t/gi, "(?:t|7)");
+	patternString = patternString.replace(/0(?!\))/gi, "(?:o|0)");
+	patternString = patternString.replace(/1(?!\))/gi, "(?:i|l|1)");
+	patternString = "^"+patternString+"$";
+	
+	return patternString;
 }
 
 function testNick(nickToTest)
