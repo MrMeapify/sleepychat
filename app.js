@@ -24,8 +24,8 @@ var donatorP = String(process.env.DONATEPASS || "testdonator");
 var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "10"));
 
 // Admin/Mod stuff
-var administrators = ["ElysianTail-Senpai", "ElysianMobile-Senpai", "PennyDreadful"];
-var moderators = ['MrMeapify', 'ScottB', 'Amburo', 'Phobos_D_Lawgiver', 'Hypnonymoose', 'Gaige', "ToHypnoFu", "Tira~S", "Tira~K"];
+var administrators = ["Ely-Senpai", "Mobile-Senpai"];
+var moderators = ["Avaria", "Cloud", "FallingInward", "Misty", "Amburo", "Phobos_D_Lawgiver", "Hypnonymoose", "Gaige", "MrMeapify", "ToHypnoFu", "Tira~S", "Tira~K"];
 var formers = ['Anonymoususer2'];
 
 //Acquire the ban list.
