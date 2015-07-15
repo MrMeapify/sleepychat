@@ -56,6 +56,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 var connections = [];
 var recentConns = [];
 var users = [];
+var silent = [];
 var privaterooms = [];
 
 //Username Regexes
@@ -631,6 +632,7 @@ io.on('connection', function(socket)
                 var user = getUserByNick(nick);
                 if(data.message != "" && !(/^ +$/.test(data.message)) && user)
                 {
+					
                     spamPoints++;
                     spamPoints += (data.message.length > 1000 ? 1 : 0);
                     if (data.message.length > 2500)
@@ -640,7 +642,7 @@ io.on('connection', function(socket)
                         socket.conn.close();
                         return;
                     }
-                    message=data.message;
+                    message = data.message;
                     
                     // Escape html
                     message = message.replace(/;/g, "&#59;"); 			//escape ;
@@ -674,6 +676,27 @@ io.on('connection', function(socket)
                             }
                         }
                     }
+					
+					for (var i = 0; i < silent.length; i++)
+					{
+						console.log("Checking token "+user.token);
+						
+						if (user.token == silent[i])
+						{
+							console.log("Silenced token! "+user.token);
+							
+							if (room)
+							{
+								socket.emit('chat message', alterMessage(message, user, socket, room, users));
+							}
+							else
+							{
+								socket.emit('chat message', alterMessage(message, user, socket, null, users));
+							}
+							
+							return;
+						}
+					}
                     
                     if (message.lastIndexOf('/svrmsg ', 0) === 0 && (user.admin || user.mod))
                     {
@@ -1050,7 +1073,7 @@ io.on('connection', function(socket)
                         }
                     }
                     // ----- Mod/Admin Commands
-                    else if (message.lastIndexOf('/modcmd', 0) === 0)
+                    else if (message.lastIndexOf('/modcmd', 0) === 0 && (user.admin || user.mod))
                     {
                         for(var x = 0; x < modCommands.length; x++)
                             socket.emit(modCommands[x][0], modCommands[x][1]);
@@ -1075,6 +1098,34 @@ io.on('connection', function(socket)
                         else
                         {
                             socket.emit('information', "[INFO] That command is reserved for administrators and moderators, sorry.");
+                        }
+                    }
+                    else if (message.lastIndexOf('/silence ', 0) === 0 && (user.admin || user.mod))
+                    {
+                        var silencing = getUserByNick(message.substring(9));
+                        if (!silencing.admin && !silencing.mod)
+                        {
+                            silent.push(silencing.token);
+							console.log ("Silencing "+silencing.token);
+                        }
+                        else
+                        {
+                            socket.emit('information', "[INFO] You can't silence Senpai!");
+                        }
+                    }
+                    else if (message.lastIndexOf('/unsilence ', 0) === 0 && (user.admin || user.mod))
+                    {
+                        var silencing = getUserByNick(message.substring(11));
+                        if (!silencing.admin && !silencing.mod)
+                        {
+                            for (var j = 0; j < silent.length; j++)
+							{
+								silent.remove(silencing.token);
+							}
+                        }
+                        else
+                        {
+                            socket.emit('information', "[INFO] You can't silence Senpai!");
                         }
                     }
                     else if (message.lastIndexOf('/kick ', 0) === 0 && (user.admin || user.mod))
@@ -1769,6 +1820,8 @@ var modCommands = 	[['information', "[INFO] ~~~"],
 					['information', "[INFO] -- /modcmd -- Launches this message. Duh"],
 					['information', "[INFO] -- /svrmsg &lt;message&gt; -- Displays the specified message to the entire server, including Match Maker and private rooms. This should be rarely used."],
 					['information', "[INFO] -- /rmmsg &lt;message&gt; -- Displays the specified message to the big chat only."],
+					['information', "[INFO] -- /silence &lt;name&gt; -- Silences the specified user. They see their message, but no one else does."],
+					['information', "[INFO] -- /unsilence &lt;name&gt; -- Unsilences the specified user."],
 					['information', "[INFO] -- /kick &lt;name&gt; -- Kicks the specified user from the chat, but does not ban them."],
 					['information', "[INFO] -- /ban &lt;name&gt; &lt;days&gt; -- Bans the specified user for the specified number of days, based only on IP."],
 					['information', "[INFO] -- /banname &lt;name&gt; &lt;days&gt; -- Bans the specified user for the specified number of days, based on both name and IP."],
