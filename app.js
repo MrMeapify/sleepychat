@@ -1857,6 +1857,15 @@ var disallowedNames = [/(?:a|4)dm(?:i|!|1)n/gi,                             //Ad
                        /^all$/gi                                            //all
                       ];
 
+var allowedImgDomains = ["sleepychat.com",
+						 "sleepychat.net",
+						 "imgur.com",
+						 "deviantart.com",
+						 "deviantart.net",
+						 "tumblr.com",
+						 "hypnohub.net",
+						 "postimg.org"];
+
 var disallowedPhrases = [/c(?:(?: |_){1,9})?(?:o|0)(?:(?: |_){1,9})?v(?:(?: |_){1,9})?(?:e|3)(?:(?: |_){1,9})?r(?:(?: |_){1,9})?(?:t|7)(?:(?: |_){1,9})?h(?:(?: |_){1,9})?y(?:(?: |_){1,9})?p(?:(?: |_){1,9})?n(?:(?: |_){1,9})?(?:o|0)(?:(?: |_){1,9})?(?:t|7)(?:(?: |_){1,9})?(?:i|!|1)(?:(?: |_){1,9})?(?:s|5)(?:(?: |_){1,9})?m/gi, //coverthypnotism
                          /n(?:i|!|1)gg(?:a|(?:e|3)r)/gi,        //Nigg(a OR er)
                         ];
@@ -1897,6 +1906,14 @@ function dice_replacer(match, p1, p2, offset, string){
 
 function link_replacer(match, p1, p2, p3, p4, p5, p6, offset, string)
 {
+	var originatingDomain = p2+p3;
+	
+	var isImg = true;
+	
+	var imgAllowed = false;
+	
+	var i = 0;
+	
 	var extension = p5.substring(p5.lastIndexOf(".")+1);
 	
     if ((extension == 'jpg') || (extension == 'jpeg') || (extension == 'png')) {
@@ -1911,7 +1928,26 @@ function link_replacer(match, p1, p2, p3, p4, p5, p6, offset, string)
 	}
     else {
 		a = "<a tabindex='-1' target='_blank' href='http://"+p2+"'>"+(p2.length > 250 ? (p2.substring(0, 247)+"...") : p2)+"</a>";
+		isImg = false;
 	}
+	
+	if (isImg)
+	{
+		for (i = 0; i < allowedImgDomains.length; i++)
+		{
+			if (originatingDomain.indexOf(allowedImgDomains[i]) != -1)
+			{
+				imgAllowed = true;
+				break;
+			}
+		}
+
+		if (!imgAllowed)
+		{
+			return "<a tabindex='-1' target='_blank' href='http://www.sleepychat.com/help/'><img src='http://www.sleepychat.com/images/dna.png' class='embedded_image'/></a>";
+		}
+	}
+	
     return a;
 }
 
