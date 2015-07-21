@@ -299,17 +299,10 @@ io.on('connection', function(socket)
                 socket.conn.close();
                 return;
             }
-            else if ((NickSimilarToAdmin(data.nick, "ElysianTail-Senpai") || NickSimilarToAdmin(data.nick, "ElysianMobile-Senpai")) && data.pass != adminP)
+            else if ((NickSimilarToAdmin(data.nick, "Ely-Senpai") || NickSimilarToAdmin(data.nick, "Mobile-Senpai")) && data.pass != adminP)
             {
                 socket.emit('information', "You dare impersonate Senpai? Don't think he didn't notice. Despite common belief, Senpai <i>always</i> notices...");
                 console.log ("Person at " + ip + " tried to impersonate Senpai using "+data.nick+".");
-                socket.conn.close();
-                return;
-            }
-            else if (NickSimilarToAdmin(data.nick, "PennyDreadful") && data.pass != adminP)
-            {
-                socket.emit('information', "[INFO] You dare attempt to impersonate the great Penny? Tsk tsk.");
-                console.log ("Person at " + ip + " tried to impersonate Penny using "+data.nick+".");
                 socket.conn.close();
                 return;
             }
