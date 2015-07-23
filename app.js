@@ -704,12 +704,8 @@ io.on('connection', function(socket)
 					
 					for (var i = 0; i < silent.length; i++)
 					{
-						console.log("Checking token "+user.token);
-						
 						if (user.token == silent[i])
 						{
-							console.log("Silenced token! "+user.token);
-							
 							if (room)
 							{
 								socket.emit('chat message', alterMessage(message, user, socket, room, users));
