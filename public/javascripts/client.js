@@ -335,8 +335,10 @@ $(document).ready(function()
 				var type = 'hypnosis';
 			else
 				var type = 'either';
+			
+			var reCaptchaResponse = $('#g-recaptcha-response').val();
 
-			socket.emit('login', { nick: nick, pass: pass, gender: gender, role: role, chatwith: chatwith, type: type, isMobile: isMobile.any(), nabbed: getCookie("nab", "nope") });
+			socket.emit('login', { nick: nick, pass: pass, gender: gender, role: role, chatwith: chatwith, type: type, isMobile: isMobile.any(), reCaptchaResponse: reCaptchaResponse, nabbed: getCookie("nab", "nope") });
             
             saveModal();
             
@@ -392,8 +394,10 @@ $(document).ready(function()
 				var type = 'either';
 
 			nick = nick2;
+			
+			var reCaptchaResponse = $('#g-recaptcha-response').val();
 
-			socket.emit('login', { nick: nick2, pass: pass2, gender: gender, role: role, chatwith: chatwith, type: type, inBigChat: bigchat, isMobile: isMobile.any(), nabbed: getCookie("nab", "nope") });
+			socket.emit('login', { nick: nick2, pass: pass2, gender: gender, role: role, chatwith: chatwith, type: type, inBigChat: bigchat, isMobile: isMobile.any(), reCaptchaResponse: reCaptchaResponse, nabbed: getCookie("nab", "nope") });
             
             saveModal();
 
@@ -1526,6 +1530,17 @@ function modalPoll(pollId) {
     $('#iframe-modal-title').text("Straw Poll - Vote Now!");
     
     $('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
+}
+
+// -------------
+// For ReCaptcha
+// -------------
+function reCaptchaLoad () {
+	
+	grecaptcha.render('g-recaptcha', {
+		'sitekey' : "6Ld-LgoTAAAAAMskEwIkBWfA2Twc5Fx-8011yAyZ",
+		'theme' : (isDay ? "light" : "dark")
+	});
 }
 
 // -----------

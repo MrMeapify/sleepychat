@@ -2,15 +2,18 @@ console.log("App started at: "+new Date().toUTCString());
 
 var express = require('express');
 var app = express();
-var server = require('http').Server(app);
+var http = require('http');
+var server = http.Server(app);
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
 var crypto = require('crypto');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var querystring = require('querystring');
 var io = require('socket.io')(server);
 var fs = require('fs');
+var request = require('request');
 var timespan = require('timespan');
 var database = require('./subapps/database');
 require('array.prototype.find');
@@ -20,6 +23,9 @@ var adminP = String(process.env.ADMINPASS || "testadmin");
 var moderatorP = String(process.env.MODPASS || "testmoderator");
 var formerP = String(process.env.FMRPASS || "testformer");
 var donatorP = String(process.env.DONATEPASS || "testdonator");
+
+// reCaptcha secret
+var reCaptchaSecret = String(process.env.GRCSECRET || "test");
 
 var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "10"));
 
@@ -280,6 +286,14 @@ io.on('connection', function(socket)
                 socket.conn.close();
                 return;
             }
+
+            if (data.reCaptchaResponse == null || typeof data.reCaptchaResponse == 'undefined')
+            {
+                console.log("@ " + ip + ": Attempted crash using invalid data.");
+                socket.conn.close();
+                return;
+            }
+			
             if (loggedIn)
             {
                 socket.conn.close();
@@ -287,148 +301,166 @@ io.on('connection', function(socket)
             }
 
             loggedIn = true;
-
-            if(data.nick.length > 64)
-            {
-                data.nick = data.nick.substring(0,63);
-                socket.emit('nickupdate', data.nick);
-            }
-            else if(data.nick.length < 1)
-            {
-                socket.emit('information', "[INFO] Please choose a nickname.");
-                socket.conn.close();
-                return;
-            }
-            else if ((NickSimilarToAdmin(data.nick, "Ely-Senpai") || NickSimilarToAdmin(data.nick, "Mobile-Senpai")) && data.pass != adminP)
-            {
-                socket.emit('information', "You dare impersonate Senpai? Don't think he didn't notice. Despite common belief, Senpai <i>always</i> notices...");
-                console.log ("Person at " + ip + " tried to impersonate Senpai using "+data.nick+".");
-                socket.conn.close();
-                return;
-            }
-            else if (NickSimilarToMod(data.nick) && data.pass != moderatorP)
-            {
-				var impersonation = NickSimilarToMod(data.nick);
-                socket.emit('information', "[INFO] You dare attempt to impersonate "+impersonation+"? Shame. Shame on you.");
-                console.log ("Person at " + ip + " tried to impersonate "+impersonation+" using "+data.nick+".");
-                socket.conn.close();
-                return;
-            }
-            else if (NickSimilarToFormer(data.nick) && data.pass != formerP)
-            {
-				var impersonation = NickSimilarToFormer(data.nick);
-                socket.emit('information', "[INFO] You dare attempt to impersonate "+impersonation+"? Shame. Shame on you.");
-                console.log ("Person at " + ip + " tried to impersonate "+impersonation+" using "+data.nick+".");
-                socket.conn.close();
-                return;
-            }
-            if(NickSimilar(data.nick))
-            {
-                socket.emit('information', "[INFO] The nickname you chose was in use. Please reload the page and choose another.");
-                socket.conn.close();
-                return;
-            }
-            else if (checkForBans(data, socket, ip) != null)
-            {
-                var banned = checkForBans(data, socket, ip);
-                var banDate = new Date(banned.date);
-                socket.emit('information', "[INFO] You've been banned from using this site for "+banned.days.toString()+" day"+(banned.days > 1 ? "s" : "")+" total. (Banned on "+(banDate.getMonth()+1).toString()+"/"+banDate.getDate().toString()+"/"+banDate.getFullYear().toString()+")");
-                socket.conn.close();
-                return;
-            }
-            else if (data.nabbed != "nope")
-            {
-                socket.emit('information', "[INFO] You've been banned from using this site.");
-                socket.conn.close();
-                return;
-            }
-            else
-            {
-                data.socket = socket;
-                nick = data.nick;
-
-                var testResult = testNick(nick);
-                if (testResult == "")
-                {
-                    data.nick = nick;
-                    var hasher = crypto.createHash('sha1');
-                    hasher.update(nick + new Date().getTime() + "IAmA Salt AMA" + adminP);
-                    data.token = hasher.digest('hex');
-                    console.log(nick + ' ' + data.token);
-                    data.AFK = false
-                    data.realIp = ip;
-                    users.push(data);
-                    socket.emit('loggedIn');
-
-                    user = getUserByNick(nick)
-                    if (administrators.indexOf(data.nick) >= 0) // Let's set the admin and mod variables
-                    {
-                        user.admin = true;
-                        user.mod = true;
-						socket.emit('make mod');
-                    }
-                    else if (moderators.indexOf(data.nick) >= 0)
-                    {
-                        socket.emit('information', "You're a moderator! Type \"/modcmd\" for commands at your disposal.");
-                        user.admin = false;
-                        user.mod = true;
-						socket.emit('make mod');
-                    }
-                    else
-                    {
-                        user.admin = false;
-                        user.mod = false;
-                    }
-                    
-                    if (data.pass == donatorP)
-                    {
-                        user.donator = true;
-                    }
-                    else
-                    {
-                        user.donator = false;
-                    }
-
-                    if(data.inBigChat)
-                    {
-                        socket.join('bigroom');
-                        io.to('bigroom').emit('information', "[INFO] " + getAuthority(user) + nameAppend(user.nick, user.gender, user.role) + " has joined.");
+			
+			// Send the reCaptcha verification POST request.
+			request.post('https://www.google.com/recaptcha/api/siteverify', { form: { secret: reCaptchaSecret, response: data.reCaptchaResponse, remoteip: ip } }, function (error, response, body) {
+					
+					if (!error && response.statusCode == 200) {
 						
-						var newsToSend = "[INFO] ";
-						for (var i = 0; i < currentMotd.length; i++)
+						var jsified = JSON.parse(body);
+						
+						if (jsified.success)
 						{
-							newsToSend += currentMotd[i].news.replace("{USER TOKEN}", user.token);
-							if (i < currentMotd.length - 1)
+							if(data.nick.length > 64)
 							{
-								newsToSend += "<br />";
+								data.nick = data.nick.substring(0,63);
+								socket.emit('nickupdate', data.nick);
+							}
+							else if(data.nick.length < 1)
+							{
+								socket.emit('information', "[INFO] Please choose a nickname.");
+								socket.conn.close();
+								return;
+							}
+							else if ((NickSimilarToAdmin(data.nick, "Ely-Senpai") || NickSimilarToAdmin(data.nick, "Mobile-Senpai")) && data.pass != adminP)
+							{
+								socket.emit('information', "You dare impersonate Senpai? Don't think he didn't notice. Despite common belief, Senpai <i>always</i> notices...");
+								console.log ("Person at " + ip + " tried to impersonate Senpai using "+data.nick+".");
+								socket.conn.close();
+								return;
+							}
+							else if (NickSimilarToMod(data.nick) && data.pass != moderatorP)
+							{
+								var impersonation = NickSimilarToMod(data.nick);
+								socket.emit('information', "[INFO] You dare attempt to impersonate "+impersonation+"? Shame. Shame on you.");
+								console.log ("Person at " + ip + " tried to impersonate "+impersonation+" using "+data.nick+".");
+								socket.conn.close();
+								return;
+							}
+							else if (NickSimilarToFormer(data.nick) && data.pass != formerP)
+							{
+								var impersonation = NickSimilarToFormer(data.nick);
+								socket.emit('information', "[INFO] You dare attempt to impersonate "+impersonation+"? Shame. Shame on you.");
+								console.log ("Person at " + ip + " tried to impersonate "+impersonation+" using "+data.nick+".");
+								socket.conn.close();
+								return;
+							}
+							if(NickSimilar(data.nick))
+							{
+								socket.emit('information', "[INFO] The nickname you chose was in use. Please reload the page and choose another.");
+								socket.conn.close();
+								return;
+							}
+							else if (checkForBans(data, socket, ip) != null)
+							{
+								var banned = checkForBans(data, socket, ip);
+								var banDate = new Date(banned.date);
+								socket.emit('information', "[INFO] You've been banned from using this site for " + banned.days.toString() + " day" + (banned.days > 1 ? "s" : "") + " total. (Banned on " + (banDate.getMonth() + 1).toString() + "/"+banDate.getDate().toString() + "/" + banDate.getFullYear().toString() + ")");
+								socket.conn.close();
+								return;
+							}
+							else if (data.nabbed != "nope")
+							{
+								socket.emit('information', "[INFO] You've been banned from using this site.");
+								socket.conn.close();
+								return;
+							}
+							else
+							{
+								data.socket = socket;
+								nick = data.nick;
+
+								var testResult = testNick(nick);
+								if (testResult == "")
+								{
+									data.nick = nick;
+									var hasher = crypto.createHash('sha1');
+									hasher.update(nick + new Date().getTime() + "IAmA Salt AMA" + adminP);
+									data.token = hasher.digest('hex');
+									console.log(nick + ' ' + data.token);
+									data.AFK = false
+									data.realIp = ip;
+									users.push(data);
+									socket.emit('loggedIn');
+
+									user = getUserByNick(nick)
+									if (administrators.indexOf(data.nick) >= 0) // Let's set the admin and mod variables
+									{
+										user.admin = true;
+										user.mod = true;
+										socket.emit('make mod');
+									}
+									else if (moderators.indexOf(data.nick) >= 0)
+									{
+										socket.emit('information', "You're a moderator! Type \"/modcmd\" for commands at your disposal.");
+										user.admin = false;
+										user.mod = true;
+										socket.emit('make mod');
+									}
+									else
+									{
+										user.admin = false;
+										user.mod = false;
+									}
+
+									if (data.pass == donatorP)
+									{
+										user.donator = true;
+									}
+									else
+									{
+										user.donator = false;
+									}
+
+									if(data.inBigChat)
+									{
+										socket.join('bigroom');
+										io.to('bigroom').emit('information', "[INFO] " + getAuthority(user) + nameAppend(user.nick, user.gender, user.role) + " has joined.");
+
+										var newsToSend = "[INFO] ";
+										for (var i = 0; i < currentMotd.length; i++)
+										{
+											newsToSend += currentMotd[i].news.replace("{USER TOKEN}", user.token);
+											if (i < currentMotd.length - 1)
+											{
+												newsToSend += "<br />";
+											}
+										}
+
+										socket.emit('information', newsToSend);
+										io.to('bigroom').emit('rosterupdate', generateRoster(users));
+										if (data.isMobile)
+										{
+											socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users, room) + " ]");
+										}
+									}
+									else
+									{
+										socket.emit('information', "[INFO] Hi there, " + nick + "! You're now connected to the server.");
+									}
+									console.log(nick +" has joined. IP: " + ip);
+									var patternString = RegexifyNick(nick);
+
+									if (administrators.indexOf(nick) < 0 && moderators.indexOf(nick < 0))
+									{
+										userRegexes.push({nick: nick, regex: new RegExp(patternString, "i") });
+									}
+								}
+								else
+								{
+									socket.emit('information', "[INFO] Your username was not accepted.");
+									socket.conn.close();
+								}
 							}
 						}
-						
-						socket.emit('information', newsToSend);
-                        io.to('bigroom').emit('rosterupdate', generateRoster(users));
-                        if (data.isMobile)
-                        {
-                            socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users, room) + " ]");
-                        }
-                    }
-                    else
-                    {
-                        socket.emit('information', "[INFO] Hi there, " + nick + "! You're now connected to the server.");
-                    }
-                    console.log(nick +" has joined. IP: " + ip);
-					var patternString = RegexifyNick(nick);
-					
-					if (administrators.indexOf(nick) < 0 && moderators.indexOf(nick < 0))
-					{
-						userRegexes.push({nick: nick, regex: new RegExp(patternString, "i") });
+						else
+						{
+							socket.emit('information', "reCaptcha verification unsuccessful. Did you complete it?");
+							socket.conn.close();
+						}
 					}
-                }
-                else
-                {
-                    socket.emit('information', "[INFO] Your username was not accepted.");
-                    socket.conn.close();
-                }
-            }
+				}
+			);
         });
 
         socket.on('joinroom', function(roomtoken, usertoken)
