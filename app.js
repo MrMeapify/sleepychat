@@ -1846,6 +1846,7 @@ var disallowedNames = [/(?:a|4)dm(?:i|!|1)n/gi,                             //Ad
                        /r(?:a|4)p(?:e|(?:i|!|1)(?:s|5)(?:t|7))/gi,          //Rap(e OR ist)
                        /r(?:a|4)c(?:i|!|1)(?:s|5)(?:t|7)/gi,                //Racist
                        /cun(?:t|7)/gi,                                      //Cunt
+                       /(?:a|4)n(?:us|(?:a|4)l)/gi,                         //Anus(al)
                        /c(?:_{1,9})?(?:o|0)(?:_{1,9})?v(?:_{1,9})?(?:e|3)(?:_{1,9})?r(?:_{1,9})?(?:t|7)/gi, //Covert
                        /^all$/gi                                            //all
                       ];

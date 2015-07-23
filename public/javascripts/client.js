@@ -20,19 +20,23 @@ var soundMods = true;
 var denied = false;
 var isDCd = false;
 
-var disallowedNames = [/(?:a|4)dm(?:i|!|1)n/gi,                                                     //Admin(istrator)
-                      /m(?:o|0)d(?:e|3)r(?:a|4)(?:t|7)(?:o|0)r/gi,                                  //Moderator
-                      /(?:s|5)(?:l|i)(?:e|3)(?:e|3)pych(?:a|4)(?:t|7)/gi,                           //Sleepychat
-                      /(?:s|5)(?:e|3)rv(?:e|3)r/gi,                                                 //server
-                      /g(?:o|0)d/gi,                                                                //God
-                      /J(?:e|3)(?:s|5)u(?:s|5)/gi,                                                  //Jesus
-                      /(?:a|4)(?:l|i)(?:l|i)(?:a|4)(?:h)?/gi,                                       //Alla(h)
-                      /buddh(?:a|4)/gi,                                                             //Buddha
-                      /(?:s|5)(?:a|4)(?:t|7)(?:a|4)n/gi,                                            //Satan
-                      /(?:l|i)uc(?:i|!|1)f(?:e|3)r/gi,                                              //Lucifer
-                      /n(?:i|!|1)gg(?:e|3)r/gi,                                                     //Nigger
-                      /r(?:a|4)p(?:e|(?:i|!|1)(?:s|5)(?:t|7))/gi,                                   //Rap(e OR ist)
-                      /^all$/gi];                                                                   //all
+var disallowedNames = [/(?:a|4)dm(?:i|!|1)n/gi,                             //Admin(istrator)
+                       /(?:s|5)(?:l|i)(?:e|3)(?:e|3)pych(?:a|4)(?:t|7)/gi,  //Sleepychat
+                       /(?:s|5)(?:e|3)rv(?:e|3)r/gi,                        //server
+                       /g(?:o|0)d/gi,                                       //God
+                       /J(?:e|3)(?:s|5)u(?:s|5)/gi,                         //Jesus
+                       /(?:a|4)(?:l|i)(?:l|i)(?:a|4)(?:h)?/gi,              //Alla(h)
+                       /buddh(?:a|4)/gi,                                    //Buddha
+                       /(?:s|5)(?:a|4)(?:t|7)(?:a|4)n/gi,                   //Satan
+                       /(?:l|i)uc(?:i|!|1)f(?:e|3)r/gi,                     //Lucifer
+                       /n(?:i|!|1)gg(?:a|(?:e|3)r)/gi,                      //Nigg(a OR er)
+                       /r(?:a|4)p(?:e|(?:i|!|1)(?:s|5)(?:t|7))/gi,          //Rap(e OR ist)
+                       /r(?:a|4)c(?:i|!|1)(?:s|5)(?:t|7)/gi,                //Racist
+                       /cun(?:t|7)/gi,                                      //Cunt
+                       /(?:a|4)n(?:us|(?:a|4)l)/gi,                         //Anus(al)
+                       /c(?:_{1,9})?(?:o|0)(?:_{1,9})?v(?:_{1,9})?(?:e|3)(?:_{1,9})?r(?:_{1,9})?(?:t|7)/gi, //Covert
+                       /^all$/gi                                            //all
+                      ];
 
 //For Administration
 var isModOrAdmin = false;
