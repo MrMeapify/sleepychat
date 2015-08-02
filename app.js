@@ -1,4 +1,4 @@
-console.log("App started at: "+new Date().toUTCString());
+﻿console.log("App started at: "+new Date().toUTCString());
 
 var express = require('express');
 var app = express();
@@ -1870,6 +1870,8 @@ var disallowedNames = [/(?:a|4)dm(?:i|!|1)n/gi,                             //Ad
                        /buddh(?:a|4)/gi,                                    //Buddha
                        /(?:s|5)(?:a|4)(?:t|7)(?:a|4)n/gi,                   //Satan
                        /(?:l|i)uc(?:i|!|1)f(?:e|3)r/gi,                     //Lucifer
+                       /c(?:o|0)(?:s|5)by/gi,                               //Cosby
+                       /(?:o|0)b(?:a|4)m(?:a|4)/gi,                         //Obama
                        /n(?:i|!|1)gg(?:a|(?:e|3)r)/gi,                      //Nigg(a OR er)
                        /r(?:a|4)p(?:e|(?:i|!|1)(?:s|5)(?:t|7))/gi,          //Rap(e OR ist)
                        /r(?:a|4)c(?:i|!|1)(?:s|5)(?:t|7)/gi,                //Racist
