@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Sleepychat - Rules</title>
+		<meta name="description" content="The Rules Page of Sleepychat. If you don't follow these, you're gonna have a bad time.">
+		<link rel='stylesheet' href='/stylesheets/bootstrap.min.css' />
+		<link rel='stylesheet' href='/stylesheets/bootstrap-theme.min.css' />
+		<link rel='stylesheet' href='/stylesheets/common.css' />
+		<link rel='stylesheet' href='<%= nightStyle %>' />
+	</head>
+	<body>
+		<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+		<script type="text/javascript">
+			function ToggleExplanation(id)
+			{
+				var elem = $('#expl'+id);
+				
+				if (elem.hasClass('hidden'))
+				{
+					elem.removeClass('hidden');
+				}
+				else
+				{
+					elem.addClass('hidden');
+				}
+			}
+		</script>
+        <div class="body">
+            <a href="/"><img class="center" src="/images/logo-<%= logoType %>.jpg"/></a>
+			<br/>
+			<h1>Sleepychat Community Rules</h1>
+            <p>Sleepychat is a community. That is, everyone here is one of many who are like-minded in some topic. In this case, hypnosis. Normally, community rules are simple and universal, but as hypnosis is performed on a more-than-daily basis on Sleepychat, there are additional rules which must be followed for the uninterrupted flow of chat and camaraderie, as well as to maintain the safety of the subjects and hypnotists.</p>
+			<br/>
+            <p>Regardless, both the standard and non-standard rules for Sleepychat will be posted here for everyone to see. Keep in mind that we the Sleepychat staff (Ely-Senpai the admin and his team of moderators) may make minor or major changes without notification, though we will try to announce any and all changes via server messages, MOTD entries, or news ticker entries.</p>
+			<br/>
+			<h3>Basic Community Rules</h3>
+			<br/>
+			<p>As a community, Sleepychat thrives on healthy discussion and flowing chat. Users who wish to contribute to the chat must do so maturely; otherwise, disputes break out which disrupt the flow and, for lack of a better phrase, “cause drama” which no one really wants to see. That said, here are the basic rules to follow to avoid any problems:</p>
+			<br/>
+			<ol>
+				<li>Treat everyone with the same respect which you would like to receive from others at all times. It should go without saying that this rules out name calling, insults, talking behind someone’s back, and attacks on character.</li>
+				<br/>
+				<li>Respect all Staff and any decisions they pass. If there is any disagreement with any decisions a staff member has made, privately message said Staff member or email Support with your concern, preferably in a mature manner. The staff has the right to refuse any concerns about the decisions that have been made and it should not be argued with at that point. The staff makes their decisions based on what they believe to be the best for the entire community, not just you, nor any individual being removed from chat (should that be the case), but everyone, whether involved or not.</li>
+				<br/>
+				<li>All discussions should be handled in a civil manner. Staff has the right to end any conversations before they start to dissolve into a petty dispute. If any user feels uncomfortable with any discussion, they should alert the staff promptly with the /mod command.</li>
+				<br/>
+				<li>Everyone in Sleepychat has a right to contribute to the discussion, no matter what the topic. Don’t ever deny that right. All users should have a chance to contribute to the chat.</li>
+				<br/>
+				<li>That said, you also have that right, but you don’t have the right to own the discussion, so don’t dominate the chat. If a user would like to lead a discussion, it should be moved to a private room so it does not disrupt the main chat.</li>
+				<br/>
+				<li>Do not spam the chat. This includes posting multiple images, repeating the same message multiple times, asking for the same thing, and so on.</li>
+				<br/>
+				<li>Do not harass other users. It’s ok to PM someone without asking, but if they wish not to talk, whether publicly or privately, then stop talking to them. Continuing is considered harassment and is an offense.</li>
+				<br/>
+				<li>Do not circumvent a ban, should you be under one. We will catch you and your ban will be instantly increased to permanent status without a chance for appeal.</li>
+			</ol>
+			<br/>
+			<h3>Sleepychat Hypnosis Rules</h3>
+			<br/>
+			<p>Not only is hypnosis discussed on Sleepychat, but it is also performed recreationally. Because of this, rules must be set in place to protect both the subjects (subs) and the hypnotists (‘tists). Here are the basic rules. Click each for an explanation:</p>
+			<br/>
+			<ol>
+				<li>
+					<a style="cursor: pointer;" onclick="ToggleExplanation('1');">Absolutely everything done with hypnosis on Sleepychat requires explicit consent, and entry to the site does not equal consent.</a>
+					<p class="indent hidden" id="expl1">This is the single most important rule on Sleepychat. Basically, it means this: consent must be given before any act of hypnosis, regardless of length, while the subject is wide awake, and uninfluenced by hypnosis. A hypnotist may not hypnotize someone without explicit permission from the subject, nor can the hypnotist install any triggers without permission, nor can the hypnotist use any triggers installed by him/her or even someone else without permission. A natural by-rule of this is that the subject should at all times know exactly what’s being done in the session. It should also be noted that, as stated above, merely entering the site does not mean that consent is given.</p>
+				</li>
+				<br/>
+				<li>
+					<a style="cursor: pointer;" onclick="ToggleExplanation('2');">Consent is lost at the first and slightest indication of “no” with the exception of rule three.</a>
+					<p class="indent hidden" id="expl2">Whenever a subject says no, then it’s over. If a subject implies no, then it’s over. A subject may say “I don’t feel like it” or “I don’t have privacy”. Both of those examples count as “no” and it’s over. Continuing is considered non-consent and is punishable.</p>
+				</li>
+				<br/>
+				<li>
+					<a style="cursor: pointer;" onclick="ToggleExplanation('3');">We the staff are well aware that some enjoy “consensual non-consent” (what we call “con-noncon”), but since this line is extremely difficult to draw, anyone wishing to enjoy this sort of hypnosis must inform the staff to make it clear that such is occurring.</a>
+					<p class="indent hidden" id="expl3">The staff has agreed that this rule should be in effect because “con-noncon” has been repeatedly used as an excuse for broken consent. For example, we’ve seen a hypnotist (with initial consent) hypnotise a subject and install triggers, and then proceed to use those triggers while said subject was in a public place where she did not want them used. When spoken to about this, the hypnotist would defend with “Well I got all the consent I needed to do whatever I wanted during the last session.” This is wrong because the subject could have been giving consent only during the session, and not at any other time. In another case, we the staff have stumbled on con-noncon in our logs before, and been rushed to end what we believed to be actual noncon, when it is not. This is why we wish to be made aware of it.</p>
+				</li>
+				<br/>
+				<li>
+					<a style="cursor: pointer;" onclick="ToggleExplanation('4');">Hypnotists are NOT allowed to solicit personal or contact information from their subjects, to include (but not limited to) name, current location, images, email addresses, and Skype information unless the subject is wide awake and uninfluenced by all hypnotic suggestion.</a>
+					<p class="indent hidden" id="expl4">Sleepychat is designed to be a place to meet other people, and we encourage relationships of all types to grow beyond the site, but trust should definitely be built before taking interactions off-site for safety reasons. Thus, hypnotists may not ask for any personal or contact information from a subject without ensuring that they’re wide awake and uninfluenced, so that they may make the decision themselves to share it. And should a subject deny hypnotist’s requests, then the hypnotist should not ask further, as that is considered harassment.</p>
+				</li>
+				<br/>
+				<li>
+					<a style="cursor: pointer;" onclick="ToggleExplanation('5');">Hypnotherapy may NOT be performed on Sleepychat under any circumstances.</a>
+					<p class="indent hidden" id="expl5">As therapy requires a license under most authorities, Sleepychat must be careful to avoid legal action taken against it due to illegal therapy performed on the site.Thus, hypnotherapy may not be performed at all. We the staff understand that the line may be a bit blurry, so it is best to check with the staff before attempting your session. Either way, we the staff reserve the right to end a session on the grounds that it is veering too close to hypnotherapy.</p>
+				</li>
+				<br/>
+				<li>
+					<a style="cursor: pointer;" onclick="ToggleExplanation('6');">Subjects are required to be specific in what they want to happen in a session, or at least in what they are not willing to do (otherwise known as soft and hard limits).</a>
+					<p class="indent hidden" id="expl6">We the staff have too often seen subjects taken advantage of because they weren’t specific enough. Many times, a subject will literally say nothing more than “I just want to lose control.” This is very dangerous and we do not encourage it. Should any subject wish to be controlled, made a slave or pet, or anything similar, the absolute least that should be stated as a limit is whether or not the subject wishes the effects to be temporary or not. Even so, it is recommended to be specific on how much control one wishes to lose, what activities one wishes not to do (e.g. “financial domination”, “sexual activity”), and how private the subject wishes the effects to be. A good practice is to specify things that you (the subject) don’t normally do, but are willing to try (called “soft limits”) and things you wish not to try at all (called “hard limits”), while again being as specific as possible.</p>
+				</li>
+				<br/>
+				<li>
+					<a style="cursor: pointer;" onclick="ToggleExplanation('7');">Trances are not allowed in the main room unless it is non-disruptive and short.</a>
+					<p class="indent hidden" id="expl7">Sleepychat has a public room that any can join dedicated specifically to public hypnosis and other forms of play called The Playground. This is where all hypnosis or trigger play should be done when one wishes it to be public. However, one may perform very short trances or play in the main chat, as long as it is not disruptive (more than one or two of the other users complain). The staff reserves the right to tell any user at any time to take their play into a room.</p>
+				</li>
+				<br/>
+				<li>
+					<a style="cursor: pointer;" onclick="ToggleExplanation('8');">It is highly recommended to add safeties and restrict your triggers so that abreactions do not take place.</a>
+					<p class="indent hidden" id="expl8">Sleepychat isn’t perfect, and disconnects can and will happen while your subject is in a trance. Because of this, it’s very highly recommended that all hypnotists add disconnection safeties. Secondly, it is also recommended to ensure all triggers you as a hypnotist install are properly restricted to yourself (unless openness is intended) and to appropriate situations.</p>
+				</li>
+			</ol>
+			<br/>
+			<h3>Consequences and Appeals</h3>
+			<br/>
+			<p>Once Sleepychat staff has identified an offense and decided on an action, a member of the staff will first alert the offender of their offense and the consequences chosen by the staff, and then the staff member will enact it. Various actions the staff will take include, but are not limited to, warnings, kicks from the site, temporary bans, and permanent bans. The staff reserves the right to ban either your username and/or IP address from accessing Sleepychat without warning or explanation. Keep in mind that, while we can see your IP address, we cannot, would not, and do not, attempt to obtain any further personally identifiable information, such as your name, location, etc.</p>
+			<br/>
+			<p>Once a consequence has been enacted, the offender has the right to appeal their situation, but only by contacting <a href="mailto:support@sleepychat.com">Sleepychat Support</a>. Keep in mind that the staff reserves the right to accept or deny your appeal at any time.</p>
+			<br/>
+			<h3>Chat Logging</h3>
+			<br/>
+			<p>Every member of the Sleepychat staff has access to a real-time log of all chat activity. This means that all Public rooms, Private rooms, Matchmaker rooms, and Private Messages are visible to the staff with only one exception (see below). Through this, we are capable of catching any and all violations of the above rules, and punish offenders accordingly.</p>
+			<br/>
+			<p>We the staff realize, however, that some users may wish for a truly private environment, so Sleepychat has the capability to opt a room out of logging, but only if all users present perform the opt-out. Information on how to do this can be found on the Sleepychat Help Page. We recommend, though, that subjects should not opt out of logging unless they trust their hypnotist. It should also be noted that there is also a chat command which forces the room to log the chat regardless of who has or hasn’t opted out. This is in place for those who are worried about being told to opt out of logging while in trance (This is a bannable offense on the hypnotist’s part, as it counts as non-consent).</p>
+			<br/>
+			<p>Finally, users are allowed to save their own logs of chat at any time, whether public or private, without permission. However, sharing any log that is not public requires permission from all participating users. Should any user not wish to have their part of the log shared, then the sharing person may not share the log until an agreement between themselves and the person denying the request can be reached. Additionally (though it is not required), consent should also be acquired for public logs. For the sake of definition, logs are public if and only if they originate from the Big Chat or Playground, and do not contain PM’s. All other logs are considered private. In regards to using logs as evidence of abuse or another offense, the staff has access to all on-site logs with the exception of opted-out rooms, as stated above. Thus, sharing logs with staff is almost completely unnecessary. Should a user wish to report an offense that occurred in an opted-out room however, the user may share the log with staff and staff only without requiring consent.</p>
+        </div>
+	</body>
+</html>

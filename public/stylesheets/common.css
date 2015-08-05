@@ -1,5 +1,7 @@
 .body { margin: 5px auto; width: 640px; padding: 5px 5px; border: 1px solid gray; border-radius: 8px; position: relative; }
 .center { display: block; margin: auto; }
+.indent { padding-left: 20px; text-indent: 0px; }
+.hidden { display: none; }
 .custom-counter { margin-left: 0; padding: 0px; list-style-type: none; }
 .custom-counter li { counter-increment: step-counter; }
 .custom-counter li::before { content: counter(step-counter) ": "; margin-right: 5px; font-size: 18px; display: inline; }

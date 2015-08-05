@@ -1,4 +1,4 @@
-﻿console.log("App started at: "+new Date().toUTCString());
+console.log("App started at: "+new Date().toUTCString());
 
 var express = require('express');
 var app = express();
@@ -2557,6 +2557,11 @@ app.use('/about', function(req, res)
 {
 	var isNight = req.cookies.theme == "night";
 	res.render('about', { logoType: (isNight ? "night" : "day"), nightStyle: (isNight ? "/stylesheets/night/common.css" : "") });
+});
+app.use('/rules', function(req, res)
+{
+	var isNight = req.cookies.theme == "night";
+	res.render('rules', { logoType: (isNight ? "night" : "day"), nightStyle: (isNight ? "/stylesheets/night/common.css" : "") });
 });
 app.use('/help', function(req, res)
 {

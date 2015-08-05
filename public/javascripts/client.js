@@ -758,6 +758,10 @@ $(document).ready(function()
                 {
                     window.open('/about');
                 }
+                else if (msgInBox == "/rules")
+                {
+                    window.open('/rules');
+                }
                 else if (msgInBox == "/contact")
                 {
                     window.open('/contact');
@@ -922,6 +926,10 @@ $(document).ready(function()
             {
                 window.open('/about');
             }
+			else if (msgInBox == "/rules")
+			{
+				window.open('/rules');
+			}
 			else if (msgInBox == "/contact")
 			{
 				window.open('/contact');
