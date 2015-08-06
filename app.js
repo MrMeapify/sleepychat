@@ -1,7 +1,6 @@
 require('newrelic');
 console.log("App started at: "+new Date().toUTCString());
 
-require('newrelic');
 var express = require('express');
 var app = express();
 var http = require('http');
