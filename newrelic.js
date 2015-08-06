@@ -8,7 +8,7 @@ exports.config = {
   /**
    * Array of application names.
    */
-  app_name: ['Sleepychat'],
+  app_name: ['Sleepychat Test'],
   /**
    * Your New Relic license key.
    */
@@ -19,6 +19,6 @@ exports.config = {
      * issues with the agent, 'info' and higher will impose the least overhead on
      * production applications.
      */
-    level: 'trace'
+    level: 'info'
   }
 }
