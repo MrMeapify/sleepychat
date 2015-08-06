@@ -215,6 +215,7 @@ io.on('connection', function(socket)
         {
             socket.emit('denial', "There are too many users with your IP address at this time.");
             socket.conn.close();
+			return;
         }
         
         //Connection Throttling
@@ -246,6 +247,11 @@ io.on('connection', function(socket)
                 recentConns.remove(connToTest);
             }, timeToReset);
             connToTest.timeout = newTimeout;
+			
+			if (timeToReset == (1000*60*10))
+			{
+				return;
+			}
         }
         else
         {
