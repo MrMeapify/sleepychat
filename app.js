@@ -180,7 +180,9 @@ setTimeout(function() {
 	
 }, restartTime.getTime() - today.getTime());
 
-io.on('connection', function(socket)
+io.on('connection', OnConnect);
+
+function OnConnect(socket)
 {
 	try
 	{
@@ -214,7 +216,7 @@ io.on('connection', function(socket)
         if (numberOfSimilarIps > maxAllowedSimilarIps)
         {
             socket.emit('denial', "There are too many users with your IP address at this time.");
-            socket.conn.close();
+            socket.disconnect();
 			return;
         }
         
@@ -236,7 +238,7 @@ io.on('connection', function(socket)
             if (connToTest.tries > 2)
             {
                 socket.emit('denial', "This IP is creating too many connections too quickly.");
-                socket.conn.close();
+                socket.disconnect();
                 timeToReset = 1000*60*10; //10 minutes.
             }
             
@@ -275,7 +277,7 @@ io.on('connection', function(socket)
             
             spamPoints--;
             if (spamPoints < 0) { spamPoints = 0; }
-            else if (spamPoints > 10 && !room) { socket.emit('information', "[INFO] You've been kicked for spamming the chat."); socket.conn.close(); }
+            else if (spamPoints > 10 && !room) { socket.emit('information', "[INFO] You've been kicked for spamming the chat."); socket.disconnect(); }
         }, 2000);
         
         socket.on('login', function(data)
@@ -283,27 +285,27 @@ io.on('connection', function(socket)
             if (data == null || typeof data == 'undefined')
             {
                 console.log("@ " + ip + ": Attempted crash using invalid data.");
-                socket.conn.close();
+                socket.disconnect();
                 return;
             }
 
             if (data.nick == null || typeof data.nick == 'undefined')
             {
                 console.log("@ " + ip + ": Attempted crash using invalid data.");
-                socket.conn.close();
+                socket.disconnect();
                 return;
             }
 
             if (data.reCaptchaResponse == null || typeof data.reCaptchaResponse == 'undefined')
             {
                 console.log("@ " + ip + ": Attempted crash using invalid data.");
-                socket.conn.close();
+                socket.disconnect();
                 return;
             }
 			
             if (loggedIn)
             {
-                socket.conn.close();
+                socket.disconnect();
                 return;
             }
 
@@ -326,14 +328,14 @@ io.on('connection', function(socket)
 							else if(data.nick.length < 1)
 							{
 								socket.emit('information', "[INFO] Please choose a nickname.");
-								socket.conn.close();
+								socket.disconnect();
 								return;
 							}
 							else if ((NickSimilarToAdmin(data.nick, "Ely-Senpai") || NickSimilarToAdmin(data.nick, "Mobile-Senpai")) && data.pass != adminP)
 							{
 								socket.emit('information', "You dare impersonate Senpai? Don't think he didn't notice. Despite common belief, Senpai <i>always</i> notices...");
 								console.log ("Person at " + ip + " tried to impersonate Senpai using "+data.nick+".");
-								socket.conn.close();
+								socket.disconnect();
 								return;
 							}
 							else if (NickSimilarToMod(data.nick) && data.pass != moderatorP)
@@ -341,7 +343,7 @@ io.on('connection', function(socket)
 								var impersonation = NickSimilarToMod(data.nick);
 								socket.emit('information', "[INFO] You dare attempt to impersonate "+impersonation+"? Shame. Shame on you.");
 								console.log ("Person at " + ip + " tried to impersonate "+impersonation+" using "+data.nick+".");
-								socket.conn.close();
+								socket.disconnect();
 								return;
 							}
 							else if (NickSimilarToFormer(data.nick) && data.pass != formerP)
@@ -349,13 +351,13 @@ io.on('connection', function(socket)
 								var impersonation = NickSimilarToFormer(data.nick);
 								socket.emit('information', "[INFO] You dare attempt to impersonate "+impersonation+"? Shame. Shame on you.");
 								console.log ("Person at " + ip + " tried to impersonate "+impersonation+" using "+data.nick+".");
-								socket.conn.close();
+								socket.disconnect();
 								return;
 							}
 							if(NickSimilar(data.nick))
 							{
 								socket.emit('information', "[INFO] The nickname you chose was in use. Please reload the page and choose another.");
-								socket.conn.close();
+								socket.disconnect();
 								return;
 							}
 							else if (checkForBans(data, socket, ip) != null)
@@ -363,13 +365,13 @@ io.on('connection', function(socket)
 								var banned = checkForBans(data, socket, ip);
 								var banDate = new Date(banned.date);
 								socket.emit('information', "[INFO] You've been banned from using this site for " + banned.days.toString() + " day" + (banned.days > 1 ? "s" : "") + " total. (Banned on " + (banDate.getMonth() + 1).toString() + "/"+banDate.getDate().toString() + "/" + banDate.getFullYear().toString() + ")");
-								socket.conn.close();
+								socket.disconnect();
 								return;
 							}
 							else if (data.nabbed != "nope")
 							{
 								socket.emit('information', "[INFO] You've been banned from using this site.");
-								socket.conn.close();
+								socket.disconnect();
 								return;
 							}
 							else
@@ -456,14 +458,14 @@ io.on('connection', function(socket)
 								else
 								{
 									socket.emit('information', "[INFO] Your username was not accepted.");
-									socket.conn.close();
+									socket.disconnect();
 								}
 							}
 						}
 						else
 						{
 							socket.emit('information', "reCaptcha verification unsuccessful. Did you complete it?");
-							socket.conn.close();
+							socket.disconnect();
 						}
 					}
 				}
@@ -499,7 +501,7 @@ io.on('connection', function(socket)
 						var user = getUserByNick(nick);
 						if (!user)
 						{
-							socket.conn.close();
+							socket.disconnect();
 							clearInterval(intv);
 						}
 					}, 3000);
@@ -520,7 +522,7 @@ io.on('connection', function(socket)
 			if (mmShutdown)
 			{
 				socket.emit('information', "[INFO] We're sorry, but Matchmaking is currently shut down for the coming restart, at the turn of the hour. Please rejoin us then.");
-				socket.conn.close();
+				socket.disconnect();
 				return;
 			}
 			
@@ -671,7 +673,7 @@ io.on('connection', function(socket)
                     {
                         socket.emit('information', "[INFO] Your message was too long.")
                         console.log(user.nick+" has sent a really long message: "+data.message.length.toString()+" characters.")
-                        socket.conn.close();
+                        socket.disconnect();
                         return;
                     }
                     message = data.message;
@@ -703,7 +705,7 @@ io.on('connection', function(socket)
                                 }
                                 socket.emit('information', "[INFO] You've said a banned word or phrase.")
                                 console.log(user.nick+" has sent a message with a banned word/phrase.")
-                                socket.conn.close();
+                                socket.disconnect();
                                 return;
                             }
                         }
@@ -1163,7 +1165,7 @@ io.on('connection', function(socket)
                         {
                             io.to('bigroom').emit('information', "[INFO] " + tokick.nick + " has been kicked by "+user.nick+".");
                             tokick.socket.leave('bigroom');
-                            tokick.socket.conn.close();
+                            tokick.socket.disconnect();
                         }
                         else
                         {
@@ -1202,7 +1204,7 @@ io.on('connection', function(socket)
                             var dateTill = new Date();
                             dateTill.setDate(dateTill.getDate()+days);
                             tokick.socket.emit('nab', dateTill);
-                            setTimeout(function() { tokick.socket.conn.close(); }, 500);
+                            setTimeout(function() { tokick.socket.disconnect(); }, 500);
                             
                             var replaced = false;
                             for (var i = 0; i < banList.length; i++)
@@ -1267,7 +1269,7 @@ io.on('connection', function(socket)
                             var dateTill = new Date();
                             dateTill.setDate(dateTill.getDate()+days);
                             tokick.socket.emit('nab', dateTill);
-                            setTimeout(function() { tokick.socket.conn.close(); }, 500);
+                            setTimeout(function() { tokick.socket.disconnect(); }, 500);
 
                             var replaced = false;
                             for (var i = 0; i < banList.length; i++)
@@ -1383,7 +1385,7 @@ io.on('connection', function(socket)
                             var dateTill = new Date();
                             dateTill.setDate(dateTill.getDate()+days);
                             tokick.socket.emit('nab', dateTill);
-                            setTimeout(function() { tokick.socket.conn.close(); }, 500);
+                            setTimeout(function() { tokick.socket.disconnect(); }, 500);
 
                             var replaced = false;
                             for (var i = 0; i < banList.length; i++)
@@ -1523,7 +1525,7 @@ io.on('connection', function(socket)
                 }
 				else if (!user)
 				{
-					socket.conn.close();
+					socket.disconnect();
 				}
             }
             catch (e)
@@ -1627,10 +1629,10 @@ io.on('connection', function(socket)
 	catch (e)
 	{
 		console.log(e);
-		socket.conn.close();
+		socket.disconnect();
 	}
 	
-});
+}
 
 
 // ==================================
