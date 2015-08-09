@@ -2553,6 +2553,25 @@ setInterval(function()
 	}
 }, 300000); // Every 5 minues
 
+setInterval(function()
+{
+	var before = process.memoryUsage();
+	var after = before;
+	
+	var aTime = new Date().getTime();
+	var bTime = aTime;
+	
+	global.gc();
+	
+	aTime = new Date().getTime();
+	
+	after = process.memoryUsage();
+	
+	var diff = { rss: after.rss - before.rss, heaptotal: after.heapTotal - before.heapTotal, heapUsed: after.heapUsed - before.heapUsed };
+	
+	console.log("GC Enacted. Took " + (aTime - bTime).toString() + "ms.\nBefore GC:  " + JSON.stringify(before) + "\nAfter GC:   " + JSON.stringify(after) + "\nDifference: " + JSON.stringify(diff));
+}, 3600000); // Every hour
+
 app.use(function(req,res,next)
 {
 	req.rooms = privaterooms;
