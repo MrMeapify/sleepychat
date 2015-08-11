@@ -220,7 +220,10 @@ $(document).ready(function()
             setCookie("disclaimer", "accepted");
             if (wasConnectionAllowed)
             {
-                $('#login-modal').modal({keyboard: false, backdrop: 'static'});
+                setTimeout(function() {
+					
+					$('#login-modal').modal({keyboard: false, backdrop: 'static'});
+				}, 500);
             }
         });
         $('#deny-button').click(function() {
