@@ -2570,7 +2570,7 @@ setInterval(function()
 	var diff = { rss: after.rss - before.rss, heaptotal: after.heapTotal - before.heapTotal, heapUsed: after.heapUsed - before.heapUsed };
 	
 	console.log("GC Enacted. Took " + (aTime - bTime).toString() + "ms.\nBefore GC:  " + JSON.stringify(before) + "\nAfter GC:   " + JSON.stringify(after) + "\nDifference: " + JSON.stringify(diff));
-}, 3600000); // Every hour
+}, 900000); // Every h15 minutes
 
 app.use(function(req,res,next)
 {

@@ -8,7 +8,7 @@ exports.config = {
   /**
    * Array of application names.
    */
-  app_name: ['Sleepychat'],
+  app_name: ['Sleepychat Test'],
   /**
    * Your New Relic license key.
    */
