@@ -48,6 +48,7 @@ server.listen(Number(process.env.PORT || 5000));
 
 var index = require('./routes/index');
 var stats = require('./routes/stats');
+var blogs = require('./routes/blogs');
 var privateroom = require('./routes/privateroom');
 
 app.set('views', path.join(__dirname, 'views'));
@@ -2577,11 +2578,13 @@ setInterval(function()
 app.use(function(req,res,next)
 {
 	req.rooms = privaterooms;
+    req.Blog = database.Blog;
 	next();
 });
 
 app.use('/', index);
 app.use('/' + adminP, stats);
+app.use('/blog', blogs);
 app.use('/room', privateroom);
 app.use('/about', function(req, res)
 {

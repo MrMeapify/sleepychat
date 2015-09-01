@@ -49,12 +49,23 @@ var newsSchema = mongoose.Schema({
 newsSchema.set('autoindex', false);
 newsSchema.set('collection', 'chatnews');
 
+var blogSchema = mongoose.Schema({
+    
+    date: Number,
+    title: String,
+    content: String
+});
+
+blogSchema.set('collection', 'chatblog');
+
 var Ban = mongoose.model('Ban', banSchema);
 var News = mongoose.model('News', newsSchema);
+var Blog = mongoose.model('Blog', blogSchema);
 
 module.exports = {
 		
 	Database: db,
 	Ban: Ban,
-	News: News
+	News: News,
+    Blog: Blog
 };
