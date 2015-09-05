@@ -32,7 +32,7 @@ var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "10"));
 
 // Admin/Mod stuff
 var administrators = ["Ely-Senpai", "Mobile-Senpai"];
-var moderators = ["Avaria", "Cloud", "CrispyCritt3r", "FallingInward", "Misty", "TheKittyKat", "MissNoa", "Thea"];
+var moderators = ["Avaria", "Cloud", "CrispyCritt3r", "FallingInward", "Misty", "TheKittyKat", "Thea"];
 var formers = [];
 
 //Acquire the ban list.
