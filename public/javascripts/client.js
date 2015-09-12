@@ -1562,6 +1562,11 @@ function reCaptchaLoad () {
 		'sitekey' : "6Ld-LgoTAAAAAMskEwIkBWfA2Twc5Fx-8011yAyZ",
 		'theme' : (isDay ? "light" : "dark")
 	});
+    
+    setTimeout(function() {
+        $('#g-recaptcha > div > div').css("width", "302px").css("height", "76px");
+        $('#g-recaptcha > div > div > iframe').prop("width", "302px").prop("height", "76px");
+    }, 500);
 }
 
 // -----------
