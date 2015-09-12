@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Sleepychat - Blog | <%= postTitle %></title>
+		<meta name="robots" content="noindex,nofollow">
+		<link rel='stylesheet' href='/stylesheets/bootstrap.min.css' />
+		<link rel='stylesheet' href='/stylesheets/bootstrap-theme.min.css' />
+		<link rel='stylesheet' href='/stylesheets/common.css' />
+		<link rel='stylesheet' href='<%= nightStyle %>' />
+	</head>
+	<body>
+        <div class="body">
+            <a href="/"><img class="center" src="/images/logo-<%= logoType %>.jpg"/></a>
+			<br/>
+            <h1><%= postTitle %></h1>
+            <h3>Posted: <%= postDate %></h3>
+            <a href="./">&lt; Back</a>
+            <p><%- postContent %></p>
+        </div>
+	</body>
+</html>

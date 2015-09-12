@@ -32,7 +32,7 @@ var maxAllowedSimilarIps = parseInt(String(process.env.MAXSIMIPS || "10"));
 
 // Admin/Mod stuff
 var administrators = ["Ely-Senpai", "Mobile-Senpai"];
-var moderators = ["Avaria", "Cloud", "CrispyCritt3r", "FallingInward", "Misty", "TheKittyKat", "MissNoa", "Thea"];
+var moderators = ["Avaria", "Cloud", "CrispyCritt3r", "FallingInward", "Misty", "TheKittyKat", "Thea"];
 var formers = [];
 
 //Acquire the ban list.
@@ -48,6 +48,7 @@ server.listen(Number(process.env.PORT || 5000));
 
 var index = require('./routes/index');
 var stats = require('./routes/stats');
+var blogs = require('./routes/blogs');
 var privateroom = require('./routes/privateroom');
 
 app.set('views', path.join(__dirname, 'views'));
@@ -733,6 +734,7 @@ function OnConnect(socket)
                         var command = '/svrmsg ';
                         var msg = message.substring(command.length);
                         var link = /(?:(?:([^:#\/?\s]+):\/\/)?(((?:[^.\/#?\s]+\.)+)([^.\/#?\s]+)\/((?:(?=\S)[^?\"])*)(?:\?((?:[\w]+=(?:(?=\S)[^?\"& ])*&?)*))?))/g;
+                        msg = msg.replace("&#38;", "&");
                         msg = msg.replace(link, link_replacer);
                         io.sockets.emit('information', "[SERVER MESSAGE] " + msg);
                     }
@@ -741,6 +743,7 @@ function OnConnect(socket)
                         var command = '/rmmsg ';
                         var msg = message.substring(command.length);
                         var link = /(?:(?:([^:#\/?\s]+):\/\/)?(((?:[^.\/#?\s]+\.)+)([^.\/#?\s]+)\/((?:(?=\S)[^?\"])*)(?:\?((?:[\w]+=(?:(?=\S)[^?\"& ])*&?)*))?))/g;
+                        msg = msg.replace("&#38;", "&");
                         msg = msg.replace(link, link_replacer);
                         io.to('bigroom').emit('information', "[ROOM MESSAGE] " + msg);
                     }
@@ -1939,7 +1942,7 @@ function dice_replacer(match, p1, p2, offset, string){
 
 function link_replacer(match, p1, p2, p3, p4, p5, p6, offset, string)
 {
-	var originatingDomain = p2+p3;
+	var originatingDomain = p3+p4;
 	
 	var isImg = true;
 	
@@ -2012,7 +2015,7 @@ function alterForFormatting(str, user)
     ansCopy = ansCopy.replace(strawpoll, "<span style=\"font-size: 24px; font-family: 'Sigmar One', sans-serif; color: #c83232; cursor: pointer;\" onclick=\"modalPoll('$1');\">Straw Poll <span style='font-size: 18px;'>(Click to vote!)</span></span>");
     
     ansCopy = ansCopy.replace(youtube, "^~$1~^~$3~^");
-    
+    ansCopy = ansCopy.replace("&#38;", "&");
 	var prevans = ansCopy;
 	ansCopy = ansCopy.replace(link, link_replacer);
 	if(ansCopy === prevans) // Only if the link replacer hasn't done anything yet.
@@ -2575,11 +2578,13 @@ setInterval(function()
 app.use(function(req,res,next)
 {
 	req.rooms = privaterooms;
+    req.Blog = database.Blog;
 	next();
 });
 
 app.use('/', index);
 app.use('/' + adminP, stats);
+app.use('/blog', blogs);
 app.use('/room', privateroom);
 app.use('/about', function(req, res)
 {

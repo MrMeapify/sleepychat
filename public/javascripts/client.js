@@ -761,6 +761,10 @@ $(document).ready(function()
                 {
                     window.open('/about');
                 }
+                else if (msgInBox == "/blog")
+                {
+                    window.open('/blog');
+                }
                 else if (msgInBox == "/rules")
                 {
                     window.open('/rules');
@@ -928,6 +932,10 @@ $(document).ready(function()
             else if (msgInBox == "/about")
             {
                 window.open('/about');
+            }
+            else if (msgInBox == "/blog")
+            {
+                window.open('/blog');
             }
 			else if (msgInBox == "/rules")
 			{
