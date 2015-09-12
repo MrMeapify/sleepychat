@@ -11,37 +11,7 @@ router.get('/*', function(req, res)
         
         var dateNum = then.getTime();
         
-        req.Blog.find({ date: { $gt: dateNum } }, function(err, posts) {
-            
-            if (err)
-            {
-                res.render('error',
-                {
-                    message: err.message,
-                    error: err
-                });
-            }
-            else if (posts.length == 0)
-            {
-                var isNight = req.cookies.theme == "night";
-                res.render('bloglist', { logoType: (isNight ? "night" : "day"), nightStyle: (isNight ? "/stylesheets/night/common.css" : ""), blogText: "No posts within the past week =/" });
-            }
-            else
-            {
-                var listText = "";
-                
-                for (var i = 0; i < posts.length; i++)
-                {
-                    listText += "<br />";
-                    listText += "<h3><a href='http://www.sleepychat.com/blog/"+posts[i].date.toString()+"'>"+posts[i].title+"</a></h3>";
-                    listText += "<h5>Posted: "+(new Date(posts[i].date).toDateString())+"</h5>";
-                    listText += "<p>"+posts[i].content.substring(0, 197)+"...</p>";
-                }
-                
-                var isNight = req.cookies.theme == "night";
-                res.render('bloglist', { logoType: (isNight ? "night" : "day"), nightStyle: (isNight ? "/stylesheets/night/common.css" : ""), blogText: listText });
-            }
-        });
+        DoBlogList(req.Blog, dateNum, req.cookies.theme, res);
     }
     else
     {
@@ -61,12 +31,21 @@ router.get('/*', function(req, res)
 
         if (isNaN(postID))
         {
-            res.render('error',
+            if (args[0] == "all")
             {
-                message: 'Error: Invalid post ID, "'+args[0]+'".',
-                error: {}
-            });
-            return;
+                DoBlogList(req.Blog, 0, req.cookies.theme, res);
+                
+                return;
+            }
+            else
+            {
+                res.render('error',
+                {
+                    message: 'Error: Invalid post ID, "'+args[0]+'".',
+                    error: {}
+                });
+                return;
+            }
         }
 
         req.Blog.findOne( { date: postID }, function(err, post) {
@@ -95,5 +74,68 @@ router.get('/*', function(req, res)
         });
     }
 });
+
+function DoBlogList(Blog, since, theme, res)
+{
+    Blog.find({ date: { $gt: since } }, function(err, posts) {
+
+        if (err)
+        {
+            res.render('error',
+            {
+                message: err.message,
+                error: err
+            });
+        }
+        else if (posts.length == 0)
+        {
+            var isNight = theme == "night";
+            res.render('bloglist', { logoType: (isNight ? "night" : "day"), nightStyle: (isNight ? "/stylesheets/night/common.css" : ""), blogText: "No posts within the past week =/<br /><a href='/blog/all'>View all posts</a>" });
+        }
+        else
+        {
+            var listText = "";
+
+            for (var i = 0; i < posts.length; i++)
+            {
+                var contents = posts[i].content;
+                
+                if (contents.length > 200)
+                {
+                    contents = contents.substring(0, 197)+"...";
+                }
+                
+                if (contents.indexOf("</p>") != -1)
+                {
+                    contents = contents.substring(0, contents.indexOf("</p>"));
+                    
+                    if (contents[contents.length-1] == '.')
+                    {
+                        contents += "..";
+                    }
+                    else
+                    {
+                        contents += "...";
+                    }
+                }
+                
+                var newText = "<br />";
+                newText += "<h3><a href='/blog/"+posts[i].date.toString()+"'>"+posts[i].title+"</a></h3>";
+                newText += "<h5>Posted: "+(new Date(posts[i].date).toDateString())+"</h5>";
+                newText += "<p>"+contents+"</p>";
+
+                listText = newText + listText;
+            }
+            
+            if (since != 0)
+            {
+                listText += "<br /><a href='/blog/all'>View all posts</a>";
+            }
+
+            var isNight = theme == "night";
+            res.render('bloglist', { logoType: (isNight ? "night" : "day"), nightStyle: (isNight ? "/stylesheets/night/common.css" : ""), blogText: listText });
+        }
+    });
+}
 
 module.exports = router;
