@@ -1479,7 +1479,7 @@ function OnConnect(socket)
                     {
                         try
                         {
-                            io.to(room.token).emit('chat message', alterMessage(message, user, socket, room, users), "eval");
+                            io.to(room.token).emit('chat message', alterMessage(message, user, socket, room, users), "eval", user.nick);
                             privaterooms.remove(room);
                             room.lastchat = new Date().getTime();
                             privaterooms.push(room);
@@ -1647,7 +1647,10 @@ function sendMessage(information, message, user, room, socket)
 	{
 		if(room)
 		{
-			io.to(room.token).emit('chat message', message, "eval");
+			if (user)
+				io.to(room.token).emit('chat message', message, "eval", user.nick);
+			else
+				io.to(room.token).emit('chat message', message, "eval");
 		}
 		else if(user.inBigChat)
 		{
