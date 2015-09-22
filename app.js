@@ -1,4 +1,4 @@
-﻿require('newrelic');
+require('newrelic');
 console.log("App started at: "+new Date().toUTCString());
 
 var express = require('express');
@@ -1655,9 +1655,11 @@ function sendMessage(information, message, user, room, socket)
 		else if(user.inBigChat)
 		{
 			if (user)
-				io.to('bigroom').emit('chat message', message, "eval", user.nick);
+				io.to('bigroom').emit('chat message', message, "eval", user.nick, uniqueMessageId);
 			else
-				io.to('bigroom').emit('chat message', message, "eval");
+				io.to('bigroom').emit('chat message', message, "eval", "", uniqueMessageId);
+            
+            uniqueMessageId++;
 		}
 		else
 		{

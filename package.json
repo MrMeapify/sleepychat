@@ -7,7 +7,7 @@
 		"npm": "2.10.1"
 	},
 	"scripts": {
-		"start": "node ./bin/www"
+		"start": "node --expose-gc app.js"
 	},
 	"dependencies": {
 		"array.prototype.find": "^0.1.1",
