@@ -16,6 +16,7 @@ var io = require('socket.io')(server);
 var fs = require('fs');
 var request = require('request');
 var timespan = require('timespan');
+var keenIO = require('keen.io');
 var database = require('./subapps/database');
 require('array.prototype.find');
 
@@ -180,6 +181,40 @@ setTimeout(function() {
 	throw "RESTARTING...";
 	
 }, restartTime.getTime() - today.getTime());
+
+// Setup Keen
+var keen = keenIO.configure({
+    projectId: process.env.KEEN_PROJECT_ID,
+    writeKey: process.env.KEEN_WRITE_KEY
+});
+
+var keenLogger = setInterval(function() {
+    
+    var totalBigChat = 0;
+    var activeBigChat = 0;
+    
+    var i = 0;
+    
+    for (i = 0; i < users.length; i++)
+    {
+        if (users[i].inBigChat)
+        {
+            totalBigChat++;
+            if (!users[i].AFK)
+            {
+                activeBigChat++;
+            }
+        }
+    }
+    
+    keen.addEvent("userbase", { "totalBigChat": totalBigChat, "activeBigChat": activeBigChat }, function(err, res) {
+        if (err) {
+            console.log("Error logging users. "+err);
+        } else {
+            console.log("Logged users. Total: "+totalBigChat.toString()+", Active: "+activeBigChat.toString());
+        }
+    });
+}, 300000); // Every 5 minutes.
 
 io.on('connection', OnConnect);
 
@@ -2588,7 +2623,7 @@ app.use(function(req,res,next)
 });
 
 app.use('/', index);
-app.use('/' + adminP, stats);
+app.use('/' + moderatorP, stats);
 app.use('/blog', blogs);
 app.use('/room', privateroom);
 app.use('/about', function(req, res)
