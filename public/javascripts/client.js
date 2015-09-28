@@ -285,7 +285,11 @@ $(document).ready(function()
 
 	socket.on('connect', function()
 	{
-        
+		socket.on('ping', function() {
+			
+			socket.emit('pong');
+		});
+		
         $('#ticker-x').click(removeTicker);
         
         var errorLabel = document.getElementById('error-label');

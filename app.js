@@ -315,6 +315,25 @@ function OnConnect(socket)
             if (spamPoints < 0) { spamPoints = 0; }
             else if (spamPoints > 10 && !room) { socket.emit('information', "[INFO] You've been kicked for spamming the chat."); socket.disconnect(); }
         }, 2000);
+		
+		var waitingOnPong = false;
+		var pingInterval = setInterval(function() {
+			
+			waitingOnPong = true;
+			socket.emit('ping');
+			var pongTimeout = setTimeout(function() {
+				
+				if (waitingOnPong)
+				{
+					OnDisconnect();
+				}
+			}, 10000);
+		}, 300000);
+		
+		socket.on('pong', function() {
+			
+			waitingOnPong = false;
+		});
         
         socket.on('login', function(data)
         {
@@ -1563,8 +1582,6 @@ function OnConnect(socket)
                     {
                         try
                         {
-                            //user.partner.socket.emit('chat message', '<' + nick + '> ' + message);
-                            //socket.emit('chat message', '<' + nick + '> ' + message);
                             user.partner.socket.emit('chat message',  alterMessage(message, user, socket, null, users), "them");
                             socket.emit('chat message', alterMessage(message, user, socket, null, users, false), "me");
                             console.log("MM: "+user.nick+"->"+user.partner.nick+": "+message);
@@ -1604,7 +1621,36 @@ function OnConnect(socket)
 
         socket.on('disconnect', function()
         {
-            if(room)
+            OnDisconnect();
+        });
+        
+        socket.on('reqnewroster', function() {
+            
+            socket.emit('rosterupdate', generateRoster(room ? room.here : users));
+        });
+
+        socket.on('AFK', function(data)
+        {
+            user = getUserByNick(data.nick);
+
+            if (user && user.inBigChat)
+            {
+                for(var x = 0; x < users.length; x++)
+                {
+                    if(users[x] === user)
+                    {
+                        users[x].AFK = data.AFK
+                    }
+                }
+                io.to('bigroom').emit('afk', { nick: data.nick, AFK: data.AFK });
+            }
+        });
+		
+		function OnDisconnect()
+		{
+			clearInterval(pingInterval);
+			
+			if(room)
             {
 				if (nick && nick != "")
 				{
@@ -1654,29 +1700,7 @@ function OnConnect(socket)
             }
 
             connections.remove(connection);
-        });
-        
-        socket.on('reqnewroster', function() {
-            
-            socket.emit('rosterupdate', generateRoster(room ? room.here : users));
-        });
-
-        socket.on('AFK', function(data)
-        {
-            user = getUserByNick(data.nick);
-
-            if (user && user.inBigChat)
-            {
-                for(var x = 0; x < users.length; x++)
-                {
-                    if(users[x] === user)
-                    {
-                        users[x].AFK = data.AFK
-                    }
-                }
-                io.to('bigroom').emit('afk', { nick: data.nick, AFK: data.AFK });
-            }
-        });
+		}
 	}
 	catch (e)
 	{
