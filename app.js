@@ -108,7 +108,7 @@ var uniqueMessageId = Number.MIN_VALUE;
 
 var MILSEC_PER_DAY = 86400000;
 
-commandsInAM = ["/names", "/list", '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mod', '/mmsg', '/fmsg'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
+commandsInAM = ["/names", "/list", '/formatting', '/me', '/afk', '/banana', '/banana-cream-pie', '/ping', '/roll', '/mod'] // commands that alterMessage handles. If this list is up-to-date then sleepychat won't incorrectly print "command not recogonized"
 
 var mmShutdown = false;
 
@@ -2112,34 +2112,17 @@ function alterForFormatting(str, user)
 
 function alterForCommands(str, user, socket, room, users)
 {
-	var ans = str; // Copies the variable so V8 can do it's optimizations.
+	var ans = str; // Copies the variable so V8 can do its optimizations.
 	
 
 	// regex's
-	var m_msg = /^\/mmsg (.+)/g; // Matches "/mmsg " followed by anything
-	var f_msg = /^\/fmsg (.+)/g; // Matches "/fmsg " followed by anything
-	var mod_msg = /^\/mod (.+)/g; // Matches "/fmsg " followed by anything
-	var roll = /^\/roll ?([0-9]*)$/; // Matches "roll' or "roll " followed by a number 
-	var binaural = /^\/binaural ?(\d*)?$/;
+	var mod_msg = /^\/mod (.+)/g; // Matches "/mod " followed by anything
+	var roll = /^\/roll ?([0-9]*)$/; // Matches "roll" or "roll " followed by a number
 	var me = /^\/me( .*)/g; // Matches "/me " followed by anything
 
 	// implementations
 
-	//console.log(m_msg.test(ans) || f_msg.test(ans));
-
 	mod_message = mod_msg.test(ans);
-	
-	female_message = f_msg.test(ans);
-	male_message = m_msg.test(ans);
-	//if (binaural.test(ans))
-	//{
-	//	function trigger(match, p1, p2, offset, string)
-	//	{
-	//		socket.emit('binaural', p1); // All "me" does is highlight the message, so we just use that
-	//		return match
-	//	}
-	//	ans.replace(binaural, trigger);
-	//}
 	if (mod_message)
 	{
 		if (!user.mod)
@@ -2153,35 +2136,9 @@ function alterForCommands(str, user, socket, room, users)
 			if(userscopy[x].mod && userscopy[x].inBigChat)
 			{
 				var message = ans.replace(mod_msg, user.nick + alterForFormatting(" sent a mod-only message: $1", user.nick));
-				userscopy[x].socket.emit('chat message', message, 'mod'); // All "me" does is highlight the message, so we just use that
+				userscopy[x].socket.emit('chat message', message, 'mod');
 			}
 		}
-		return null;
-	}
-	else if(male_message || female_message)
-	{
-		if (user.inBigChat)
-		{
-			var gender = male_message ? "male" : "female";
-			var userscopy = users;
-			for(var x = 0; x < userscopy.length; x++)
-			{
-				if(userscopy[x].gender === gender && userscopy[x].inBigChat)
-				{
-					if (gender == "male")
-						var message = ans.replace(m_msg, user.nick + alterForFormatting(" sent a male-only message: $1", user.nick));
-					else if (gender == "female")	// I know I don't need "if (gender == "female")" but it makes it easier to read
-						var message = ans.replace(f_msg, user.nick + alterForFormatting(" sent a female-only message: $1", user.nick));
-					userscopy[x].socket.emit('chat message', message, 'me'); // All "me" does is highlight the message, so we just use that
-				}
-			}
-		}
-		else
-			if (!user.inBigChat)
-			{
-				socket.emit('chat message', ans, 'me');
-				socket.emit('information', '[INFO] You need to be in the big chat to do gender messaging');
-			}
 		return null;
 	}
 	else if(roll.test(ans))
