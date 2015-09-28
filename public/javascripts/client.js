@@ -730,6 +730,132 @@ $(document).ready(function()
 	{
 		loggedIn = true;
 		timeSinceLastMessage = Date.now();
+		
+		$('#chatbar').unbind('submit');
+		$('#chatbar').submit(function()
+		{
+			var msgInBox = $('#m').val();
+			if (msgInBox == "/news")
+			{
+				if (!newsTicker)
+				{
+					replaceTicker();
+				}
+			}
+			else if (msgInBox == "/clear")
+			{
+				msgList.empty();
+			}
+			else if (msgInBox == "/dialog")
+			{
+				$('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
+			}
+			else if (msgInBox == "/about" || msgInBox == "/donate" || msgInBox == "/github")
+			{
+				window.open('/about');
+			}
+			else if (msgInBox == "/blog")
+			{
+				window.open('/blog');
+			}
+			else if (msgInBox == "/rules")
+			{
+				window.open('/rules');
+			}
+			else if (msgInBox == "/contact")
+			{
+				window.open('/contact');
+			}
+			else if (msgInBox == "/help" || msgInBox == "/formatting")
+			{
+				window.open('/help');
+			}
+			else if (msgInBox == "/guide")
+			{
+				window.open('/guidelines');
+			}
+			else if (msgInBox.indexOf("/rainy") == 0)
+			{
+				if (!isMobile.any() && !isConsole.AnyMobile())
+				{
+					toggleRain();
+				}
+				else
+				{
+					msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] For performance reasons, /rainy is disabled on mobile devices. Sorry about that.</span>"));
+				}
+			}
+			else if (msgInBox == "/lightning")
+			{
+				if (!isMobile.any() && !isConsole.AnyMobile())
+				{
+					toggleLightning();
+				}
+				else
+				{
+					msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] For performance reasons, /lightning is disabled on mobile devices. Sorry about that.</span>"));
+				}
+			}
+			else if (msgInBox == "/snowy")
+			{
+				if (!isMobile.any() && !isConsole.AnyMobile())
+				{
+					var thisMonth = new Date().getMonth();
+					if (thisMonth >= 10 || thisMonth <= 1)
+					{
+						toggleSnow();
+					}
+					else
+					{
+						msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] It's not winter, so there's no snow. Sorry about that.</span>"));
+					}
+				}
+				else
+				{
+					msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] For performance reasons, /snowy is disabled on mobile devices. Sorry about that.</span>"));
+				}
+			}
+			else if ((msgInBox == "/list" || msgInBox == "/names") && !isMobile.any() && bigchat)
+			{
+				if (!nameSidebar)
+				{
+					replaceNameList();
+				}
+				else
+				{
+					removeNameList();
+				}
+			}
+			else if (msgInBox != "" && !(/^ +$/.test(msgInBox)))
+			{
+				if (bigchat || chatting)
+				{
+					socket.emit('chat message', { message: msgInBox });
+					scrollDown(true);
+				}
+			}
+
+			$('#m').val('');
+			$('#mhint').val('');
+			return false;
+		});
+		
+		$('#m').on('input', function()
+		{
+			var msgInBox = $('#m').val();
+			if (msgInBox.lastIndexOf("/reply ", 0) === 0 && lastMessenger !== "")
+			{
+				$('#m').val(msgInBox.replace("/reply ", "/msg " + lastMessenger + " "));
+			}
+
+			if (msgInBox.lastIndexOf("/r ", 0) === 0 && lastMessenger !== "")
+			{
+				$('#m').val(msgInBox.replace("/r ", "/msg " + lastMessenger + " "));
+			}
+		});
+		
+		$('#sendbutton').removeAttr('disabled');
+		
 		if(bigchat)
 		{
             if (!isMobile.any())
@@ -737,136 +863,10 @@ $(document).ready(function()
                 $('#m').focus();
             }
 			$('#dcbutton').parent().hide();
-			$('#sendbutton').removeAttr('disabled');
-			$('#chatbar').unbind('submit');
-			$('#chatbar').submit(function()
-			{
-                var msgInBox = $('#m').val();
-                if (msgInBox == "/news")
-                {
-                    if (!newsTicker)
-                    {
-                        replaceTicker();
-                    }
-                }
-                else if (msgInBox == "/clear")
-                {
-                    msgList.empty();
-                }
-                else if (msgInBox == "/dialog")
-                {
-                    $('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
-                }
-                else if (msgInBox == "/about" || msgInBox == "/donate" || msgInBox == "/github")
-                {
-                    window.open('/about');
-                }
-                else if (msgInBox == "/blog")
-                {
-                    window.open('/blog');
-                }
-                else if (msgInBox == "/rules")
-                {
-                    window.open('/rules');
-                }
-                else if (msgInBox == "/contact")
-                {
-                    window.open('/contact');
-                }
-                else if (msgInBox == "/help" || msgInBox == "/formatting")
-                {
-                    window.open('/help');
-                }
-                else if (msgInBox == "/guide")
-                {
-                    window.open('/guidelines');
-                }
-                else if (msgInBox.indexOf("/rainy") == 0)
-                {
-                    if (!isMobile.any() && !isConsole.AnyMobile())
-                    {
-                        toggleRain();
-                    }
-                    else
-                    {
-                        msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] For performance reasons, /rainy is disabled on mobile devices. Sorry about that.</span>"));
-                    }
-                }
-                else if (msgInBox == "/lightning")
-                {
-                    if (!isMobile.any() && !isConsole.AnyMobile())
-                    {
-                        toggleLightning();
-                    }
-                    else
-                    {
-                        msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] For performance reasons, /lightning is disabled on mobile devices. Sorry about that.</span>"));
-                    }
-                }
-                else if (msgInBox == "/snowy")
-                {
-                    if (!isMobile.any() && !isConsole.AnyMobile())
-                    {
-						var thisMonth = new Date().getMonth();
-						if (thisMonth >= 10 || thisMonth <= 1)
-						{
-							toggleSnow();
-						}
-						else
-						{
-							msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] It's not winter, so there's no snow. Sorry about that.</span>"));
-						}
-                    }
-                    else
-                    {
-                        msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] For performance reasons, /snowy is disabled on mobile devices. Sorry about that.</span>"));
-                    }
-                }
-                else if ((msgInBox == "/list" || msgInBox == "/names") && !isMobile.any() && bigchat)
-                {
-                    if (!nameSidebar)
-                    {
-                        replaceNameList();
-                    }
-                    else
-                    {
-                        removeNameList();
-                    }
-                }
-                else if (msgInBox != "" && !(/^ +$/.test(msgInBox)))
-                {
-                    socket.emit('chat message', { message: msgInBox });
-                    scrollDown(true);
-                    
-                }
-				
-                $('#m').val('');
-                $('#mhint').val('');
-				return false;
-			});
-			
-			$('#m').on('input', function()
-			{
-				var msgInBox = $('#m').val();
-				if (msgInBox.lastIndexOf("/reply ", 0) === 0 && lastMessenger !== "")
-				{
-					$('#m').val(msgInBox.replace("/reply ", "/msg " + lastMessenger + " "));
-				}
-				
-				if (msgInBox.lastIndexOf("/r ", 0) === 0 && lastMessenger !== "")
-				{
-					$('#m').val(msgInBox.replace("/r ", "/msg " + lastMessenger + " "));
-				}
-			});
 		}
 		else
 		{
-			$('#chatbar').submit(function()
-			{
-				return false;
-			});
 			socket.emit('getNewChat', { first: true });
-
 		}
 	});
 
@@ -874,7 +874,6 @@ $(document).ready(function()
 	{
 		lastChat = nick;
 		chatting = true;
-		$('#sendbutton').removeAttr('disabled');
 		$('#dcbutton').removeAttr('disabled');
 		$('#dcbutton').unbind('click');
 		$('#dcbutton').click(function()
@@ -885,7 +884,6 @@ $(document).ready(function()
 				newchatclickedonce = false;
 				socket.emit('getNewChat', { first: false, last: lastChat });
 				$('#dcbutton').attr('disabled', true);
-				$('#sendbutton').attr('disabled', true);
 				if(chatting)
 				{
 					var msg = "[INFO] You have disconnected from " + lastChat + ".";
@@ -904,129 +902,6 @@ $(document).ready(function()
 					$('#dcbutton').button('reset');
 					newchatclickedonce = false;
 				}, 3000);
-			}
-		});
-		$('#chatbar').unbind('submit');
-		$('#chatbar').submit(function()
-		{
-            var msgInBox = $('#m').val();
-            if (msgInBox == "/news")
-            {
-                if (!newsTicker)
-                {
-                    replaceTicker();
-                }
-                else
-                {
-                    removeTicker();
-                }
-            }
-            else if (msgInBox == "/clear")
-            {
-                msgList.empty();
-            }
-            else if (msgInBox == "/dialog")
-            {
-                $('#iframe-modal').modal({keyboard: true, backdrop: 'true'});
-            }
-            else if (msgInBox == "/about")
-            {
-                window.open('/about');
-            }
-            else if (msgInBox == "/blog")
-            {
-                window.open('/blog');
-            }
-			else if (msgInBox == "/rules")
-			{
-				window.open('/rules');
-			}
-			else if (msgInBox == "/contact")
-			{
-				window.open('/contact');
-			}
-            else if (msgInBox == "/help" || msgInBox == "/formatting")
-            {
-                window.open('/commands');
-            }
-            else if (msgInBox == "/guide")
-            {
-                window.open('/guidelines');
-            }
-            else if (msgInBox.indexOf("/rainy") == 0)
-            {
-                if (!isMobile.any() && !isConsole.AnyMobile())
-                {
-                    toggleRain();
-                }
-                else
-                {
-                    msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] For performance reasons, /rainy is disabled on mobile devices. Sorry about that.</span>"));
-                }
-            }
-            else if (msgInBox == "/lightning")
-            {
-                if (!isMobile.any() && !isConsole.AnyMobile())
-                {
-                    toggleLightning();
-                }
-                else
-                {
-                    msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] For performance reasons, /lightning is disabled on mobile devices. Sorry about that.</span>"));
-                }
-            }
-            else if (msgInBox == "/snowy")
-            {
-                if (!isMobile.any() && !isConsole.AnyMobile())
-                {
-                    var thisMonth = new Date().getMonth();
-					if (thisMonth >= 10 || thisMonth <= 1)
-					{
-						toggleSnow();
-					}
-					else
-					{
-						msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] It's not winter, so there's no snow. Sorry about that.</span>"));
-					}
-                }
-                else
-                {
-                    msgList.append($('<li>').html(moment().format('h:mm:ss a') + ":  <span class=\"information\">" + "[INFO] For performance reasons, /snowy is disabled on mobile devices. Sorry about that.</span>"));
-                }
-            }
-            if ((msgInBox == "/list" || msgInBox == "/names") && !isMobile.any() && bigchat)
-            {
-                if (!nameSidebar)
-                {
-                    replaceNameList();
-                }
-                else
-                {
-                    removeNameList();
-                }
-            }
-            else if (msgInBox != "" && !(/^ +$/.test(msgInBox)))
-            {
-                socket.emit('chat message', { message: msgInBox });
-                scrollDown(($(window).scrollTop() + $(window).height() + 300 >= $('body,html')[0].scrollHeight));
-            }
-            
-			$('#m').val('');
-			$('#mhint').val('');
-			return false;
-		});
-		
-		$('#m').on('input', function()
-		{
-			var msgInBox = $('#m').val();
-			if (msgInBox.lastIndexOf("/reply ", 0) === 0 && lastMessenger !== "")
-			{
-				$('#m').val(msgInBox.replace("/reply ", "/msg " + lastMessenger + " "));
-			}
-			
-			if (msgInBox.lastIndexOf("/r ", 0) === 0 && lastMessenger !== "")
-			{
-				$('#m').val(msgInBox.replace("/r ", "/msg " + lastMessenger + " "));
 			}
 		});
 	});

@@ -477,7 +477,7 @@ function OnConnect(socket)
 										io.to('bigroom').emit('rosterupdate', generateRoster(users));
 										if (data.isMobile)
 										{
-											socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users, room) + " ]");
+											socket.emit('information', getUsers(users, room));
 										}
 									}
 									else
@@ -1853,6 +1853,7 @@ function getUsers(users, room)
         usercopy = room.users;
     }
 	var list = "";
+	var numPresent = 0;
 	for(var x = 0; x < usercopy.length; x++)
 	{
 		if(usercopy[x].inBigChat)
@@ -1865,9 +1866,10 @@ function getUsers(users, room)
 			{
 				list += "'" + getAuthority(usercopy[x]) + nameAppend(usercopy[x].nick, usercopy[x].gender, usercopy[x].role) + "' ";
 			}
+			numPresent++;
 		}
 	}
-	return list;
+	return "[INFO] " + numPresent.toString() + " users in the chatroom: [ " + list + " ]";
 }
 
 function generateRoster (from)
@@ -2191,7 +2193,14 @@ function alterForCommands(str, user, socket, room, users)
 	else if (ans == "/names" || ans == "/list")
 	{
 		socket.emit('chat message', "&lt;"+user.nick+"&gt; "+ans, "me");
-		socket.emit('information', "[INFO] Users in the chatroom: [ " + getUsers(users, room) + "]");
+		if (user.inBigChat)
+		{
+			socket.emit('information', getUsers(users, room));
+		}
+		else
+		{
+			socket.emit('information', "[INFO] Command only usable in Big Chat.");
+		}
 		return null;
 	}
 	else if (ans == "/modcmd" && (user.mod || mod.admin))
