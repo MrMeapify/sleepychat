@@ -526,31 +526,44 @@ function OnConnect(socket)
                 nick = finduser.nick;
                 if(room)
                 {
-                    socket.join(room.token);
-                    socket.emit('nickupdate', nick);
-                    room.here.push(finduser);
-                    io.to(room.token).emit('rosterupdate', generateRoster(room.here));
-                    socket.emit('information', "[INFO] For your safety, private rooms are logged and viewable only by the Admin and Moderators. The room can opt out of logging if <strong>all</strong> users opt out.<br />You can opt out by typing \"/private\" into chat. You can also force logging for complete safety by typing \"/private never\" into chat.<br />Please only opt out if you trust your hypnotist.");
-                    io.to(room.token).emit('information', "[INFO] " + nick + " has joined.");
-					
-					var intv = setInterval(function() {
-						
-						var user = getUserByNick(nick);
-						if (!user)
-						{
-							socket.disconnect();
-							clearInterval(intv);
-						}
-					}, 3000);
+					if (finduser.inBigChat)
+					{
+						socket.join(room.token);
+						socket.emit('nickupdate', nick);
+						room.here.push(finduser);
+						io.to(room.token).emit('rosterupdate', generateRoster(room.here));
+						socket.emit('information', "[INFO] For your safety, private rooms are logged and viewable only by the Admin and Moderators. The room can opt out of logging if <strong>all</strong> users opt out.<br />You can opt out by typing \"/private\" into chat. You can also force logging for complete safety by typing \"/private never\" into chat.<br />Please only opt out if you trust your hypnotist.");
+						io.to(room.token).emit('information', "[INFO] " + nick + " has joined.");
+
+						// Automatic main-chat disconnect romoval.
+						var intv = setInterval(function() {
+
+							var user = getUserByNick(nick);
+							if (!user)
+							{
+								socket.disconnect();
+								clearInterval(intv);
+							}
+						}, 3000);
+					}
+					else
+					{
+						socket.emit('information', "[INFO] You must be in the Big Chat to join the Playground.");
+						socket.disconnect();
+					}
                 }
                 else
                 {
                     console.log('bad room');
+                    socket.emit('information', "[INFO] There was an error joining this room. Please try again or contact a moderator. Error: Bad Room '"+roomtoken+"'");
+					socket.disconnect();
                 }
             }
             catch(e)
             {
                 console.log('Problems joining a private room. ' + e);
+				socket.emit('information', "[INFO] There was an error joining this room. Please try again or contact a moderator.");
+				socket.disconnect();
             }
         });
 
