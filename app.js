@@ -456,23 +456,24 @@ function OnConnect(socket)
 									{
 										user.donator = false;
 									}
+									
+									// Send the news.
+									var newsToSend = "[INFO] ";
+									for (var i = 0; i < currentMotd.length; i++)
+									{
+										newsToSend += currentMotd[i].news.replace("{USER TOKEN}", user.token);
+										if (i < currentMotd.length - 1)
+										{
+											newsToSend += "<br />";
+										}
+									}
+									socket.emit('information', newsToSend);
 
 									if(data.inBigChat)
 									{
 										socket.join('bigroom');
 										io.to('bigroom').emit('information', "[INFO] " + getAuthority(user) + nameAppend(user.nick, user.gender, user.role) + " has joined.");
 
-										var newsToSend = "[INFO] ";
-										for (var i = 0; i < currentMotd.length; i++)
-										{
-											newsToSend += currentMotd[i].news.replace("{USER TOKEN}", user.token);
-											if (i < currentMotd.length - 1)
-											{
-												newsToSend += "<br />";
-											}
-										}
-
-										socket.emit('information', newsToSend);
 										io.to('bigroom').emit('rosterupdate', generateRoster(users));
 										if (data.isMobile)
 										{
