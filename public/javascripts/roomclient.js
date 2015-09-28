@@ -200,6 +200,11 @@ $(document).ready(function()
 
 	socket.on('connect', function()
 	{
+		socket.on('ping', function() {
+			
+			socket.emit('pong');
+		});
+		
 		var ignore_list = new Array();
 		
 		$('#chatbar').unbind('submit');

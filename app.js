@@ -325,7 +325,7 @@ function OnConnect(socket)
 				
 				if (waitingOnPong)
 				{
-					OnDisconnect();
+					OnDisconnect(true);
 				}
 			}, 10000);
 		}, 300000);
@@ -1621,7 +1621,7 @@ function OnConnect(socket)
 
         socket.on('disconnect', function()
         {
-            OnDisconnect();
+            OnDisconnect(false);
         });
         
         socket.on('reqnewroster', function() {
@@ -1646,12 +1646,13 @@ function OnConnect(socket)
             }
         });
 		
-		function OnDisconnect()
+		function OnDisconnect(forced)
 		{
 			clearInterval(pingInterval);
 			
 			if(room)
             {
+				if (forced) { socket.leave(room.token); }
 				if (nick && nick != "")
 				{
 					io.to(room.token).emit('information', "[INFO] " + nick + " has left.");
@@ -1668,6 +1669,7 @@ function OnConnect(socket)
             }
             else
             {
+				if (forced) { socket.leave('bigroom'); }
                 var user = getUserByNick(nick);
                 if(user)
                 {
