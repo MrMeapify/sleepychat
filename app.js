@@ -2126,24 +2126,20 @@ function alterForCommands(str, user, socket, room, users)
 	//}
 	if (mod_message)
 	{
-		if (user.inBigChat)
+		if (!user.mod)
 		{
-			var userscopy = users;
-			for(var x = 0; x < userscopy.length; x++)
+			socket.emit('chat message', ans, 'me');
+		}
+		
+		var userscopy = users;
+		for(var x = 0; x < userscopy.length; x++)
+		{
+			if(userscopy[x].mod && userscopy[x].inBigChat)
 			{
-				if(userscopy[x].mod && userscopy[x].inBigChat)
-				{
-					var message = ans.replace(mod_msg, user.nick + alterForFormatting(" sent a mod-only message: $1", user.nick));
-					userscopy[x].socket.emit('chat message', message, 'mod'); // All "me" does is highlight the message, so we just use that
-				}
+				var message = ans.replace(mod_msg, user.nick + alterForFormatting(" sent a mod-only message: $1", user.nick));
+				userscopy[x].socket.emit('chat message', message, 'mod'); // All "me" does is highlight the message, so we just use that
 			}
 		}
-		else
-			if (!user.inBigChat)
-			{
-				socket.emit('chat message', ans, 'me');
-				socket.emit('information', '[INFO] You need to be in the big chat to do mod messaging');
-			}
 		return null;
 	}
 	else if(male_message || female_message)
