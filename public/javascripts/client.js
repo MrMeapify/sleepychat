@@ -585,30 +585,69 @@ $(document).ready(function()
 				var isModMesg = false;
 
 				var msgClass = "";
-				var user = msg.match(/&lt;(.+)&gt;/);
-				if(who === "me")
-				{
-					msgClass+= 'self';
-				}
-				else if(who == 'mod')
-				{
-					msgClass+= 'self';
-					isModMesg = true;
-				}
-				else if(who === "eval" && msg.lastIndexOf('&lt;' + nick + '&gt;', 0) === 0)
-				{
-					msgClass+= 'self';
-				}
 				
-				try
+				if (userFrom == nick || who == "mod" || (who === "eval" && (msg.lastIndexOf('&lt;' + nick + '&gt;', 0) == 0 || msg.lastIndexOf("<span style='font-weight: 300'>*" + nick, 0) == 0)))
 				{
-					if(bigchat && msg.split('&gt;')[1].substring(1).indexOf(nick) != -1)
+					msgClass += 'self';
+				}
+				else if (bigchat)
+				{
+					if (msg.indexOf("&gt;") != -1)
 					{
-						msgClass+= (msgClass != "" ? " " : "")+'mention';
-                        isMention = true;
+						if (msg.split('&gt;')[1].substring(1).indexOf(nick) != -1)
+						{
+							msgClass += (msgClass != "" ? " " : "")+'mention';
+							isMention = true;
+						}
+					}
+					else if (msg.indexOf(nick) != -1)
+					{
+						msgClass += (msgClass != "" ? " " : "")+'mention';
+						isMention = true;
 					}
 				}
-				catch(e) {}
+				
+//				if(who === "me")
+//				{
+//					msgClass += 'self';
+//				}
+//				else if(who == 'mod')
+//				{
+//					msgClass += 'self';
+//					isModMesg = true;
+//				}
+//				else if(who === "eval" && msg.lastIndexOf('&lt;' + nick + '&gt;', 0) === 0)
+//				{
+//					msgClass += 'self';
+//				}
+//				
+//				try
+//				{
+//					if (bigchat)
+//					{
+//						if (userFrom != nick)
+//						{
+//							if (msg.indexOf("&gt;") != -1)
+//							{
+//								if (msg.split('&gt;')[1].substring(1).indexOf(nick) != -1)
+//								{
+//									msgClass += (msgClass != "" ? " " : "")+'mention';
+//									isMention = true;
+//								}
+//							}
+//							else if (msg.indexOf(nick) != -1)
+//							{
+//								msgClass += (msgClass != "" ? " " : "")+'mention';
+//								isMention = true;
+//							}
+//						}
+//						else
+//						{
+//							msgClass += 'self';
+//						}
+//					}
+//				}
+//				catch(e) {}
 				
 				if (userFrom && ignore_list.indexOf(userFrom) != -1)
 				{
