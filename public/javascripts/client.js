@@ -743,7 +743,6 @@ $(document).ready(function()
 		socket.on('partnerDC', function(nick)
 		{
 			chatting = false;
-			$('#sendbutton').attr('disabled', true);
 			var themsg = '[INFO] ' + nick + ' has disconnected from you.';
 			var scroll_down = isWithinScrollThreshold();
 			msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information blocking\">" + themsg + "</span>"));
