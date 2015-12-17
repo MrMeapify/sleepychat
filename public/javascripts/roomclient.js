@@ -5,9 +5,9 @@ var newTitle = "*** New message! ***";
 var interval = null;
 var notify = false;
 var snd = new Audio("/sounds/notify.ogg");
-var soundMesg = true;
+var soundMesg = false;
 var soundMent = true;
-var soundJnLv = true;
+var soundJnLv = false;
 var soundSite = true;
 var denied = false;
 
@@ -681,9 +681,9 @@ function setupTooltip(icon)
 
 function setUpSound () {
     
-    soundMesg = getCookie("soundMesg", "true") == "true";
+    soundMesg = getCookie("soundMesg", "false") == "true";
     soundMent = getCookie("soundMent", "true") == "true";
-    soundJnLv = getCookie("soundJnLv", "true") == "true";
+    soundJnLv = getCookie("soundJnLv", "false") == "true";
     soundSite = getCookie("soundSite", "true") == "true";
     $('#mesg-alerts').prop('checked', soundMesg);
     $('#ment-alerts').prop('checked', soundMent);
