@@ -586,9 +586,14 @@ $(document).ready(function()
 
 				var msgClass = "";
 				
-				if (userFrom == nick || who == "mod" || (who === "eval" && (msg.lastIndexOf('&lt;' + nick + '&gt;', 0) == 0 || msg.lastIndexOf("<span style='font-weight: 300'>*" + nick, 0) == 0)))
+				if (userFrom == nick || (who === "eval" && (msg.lastIndexOf('&lt;' + nick + '&gt;', 0) == 0 || msg.lastIndexOf("<span style='font-weight: 300'>*" + nick, 0) == 0)))
 				{
 					msgClass += 'self';
+				}
+				else if (who == "mod")
+				{
+					msgClass += 'self';
+					isModMesg = true;
 				}
 				else if (bigchat)
 				{
@@ -649,13 +654,10 @@ $(document).ready(function()
 //				}
 //				catch(e) {}
 				
-				if (userFrom && ignore_list.indexOf(userFrom) != -1)
+				if (!(userFrom && ignore_list.indexOf(userFrom) != -1))
 				{
-				}
-                else
-                {
 					clearmsg(mid);
-                    msgList.append($('<li class="'+msgClass+'"'+(mid ? ' id="mid'+mid.toString()+'"' : '')+'>').html(((isModOrAdmin && mid) ? '<button class="btn btn-default btn-clearmsg" id="bid'+mid.toString()+'" tabindex="-1"><span class="spn-clearmsg">x</span></button> ' : '') + moment().format('h:mm:ss a') + ": " + msg));
+					msgList.append($('<li class="'+msgClass+'"'+(mid ? ' id="mid'+mid.toString()+'"' : '')+'>').html(((isModOrAdmin && mid) ? '<button class="btn btn-default btn-clearmsg" id="bid'+mid.toString()+'" tabindex="-1"><span class="spn-clearmsg">x</span></button> ' : '') + moment().format('h:mm:ss a') + ": " + msg));
 					if (mid)
 					{
 						$('#bid'+mid.toString()).click(function() {
@@ -663,7 +665,7 @@ $(document).ready(function()
 							clearmsg(mid, true);
 						});
 					}
-                }
+				}
 
 				if(notify)
 				{
