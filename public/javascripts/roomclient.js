@@ -402,7 +402,7 @@ $(document).ready(function()
 					interval = setInterval(changeTitle, 1000);
 				}
 				var scroll_down = isWithinScrollThreshold();
-				msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information blocking\">" + msg + "</span>"));
+				msgList.append($('<li>').html(moment().format('h:mm:ss a') + ": <span class=\"information"+(msg.indexOf("ROLL") == -1 ? " blocking" : "")+"\">" + msg + "</span>"));
 				scrollDown(scroll_down);
 			}
 		});
