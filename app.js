@@ -1828,22 +1828,46 @@ function getAuthority(user){
     
     var toRet = "";
     
-	if (user.nick == "MrMeapify")
-    {
-        toRet = "<img src='/images/creator.png' class='embedded_image' id='icon"+uniqueHiddenId.toString()+"' onload='setupTooltip(\"icon"+uniqueHiddenId.toString()+"\")' data-toggle='tooltip' data-placement='right' title='Creator' />";
-    }
-	else if (user.admin)
+	var rightNow = new Date();
+	
+	if (rightNow.getUTCMonth() == 11 && rightNow.getUTCDate() < 26)
 	{
-		toRet = "<img src='/images/admin.png' class='embedded_image' id='icon"+uniqueHiddenId.toString()+"' onload='setupTooltip(\"icon"+uniqueHiddenId.toString()+"\")' data-toggle='tooltip' data-placement='right' title='Administrator' />";
+		if (user.nick == "MrMeapify")
+		{
+			toRet = "<img src='/images/candy-creator.png' class='embedded_image' id='icon"+uniqueHiddenId.toString()+"' onload='setupTooltip(\"icon"+uniqueHiddenId.toString()+"\")' data-toggle='tooltip' data-placement='right' title='Creator' />";
+		}
+		else if (user.admin)
+		{
+			toRet = "<img src='/images/redhat.png' class='embedded_image' id='icon"+uniqueHiddenId.toString()+"' onload='setupTooltip(\"icon"+uniqueHiddenId.toString()+"\")' data-toggle='tooltip' data-placement='right' title='Administrator' />";
+		}
+		else if (user.mod)
+		{
+			toRet = "<img src='/images/greenhat.png' class='embedded_image' id='icon"+uniqueHiddenId.toString()+"' onload='setupTooltip(\"icon"+uniqueHiddenId.toString()+"\")' data-toggle='tooltip' data-placement='right' title='Moderator' />";
+		}
+		else if (user.donator)
+		{
+			toRet = "<img src='/images/snowflake.png' class='embedded_image' id='icon"+uniqueHiddenId.toString()+"' onload='setupTooltip(\"icon"+uniqueHiddenId.toString()+"\")' data-toggle='tooltip' data-placement='right' title='Donator' />";
+		}
 	}
-	else if (user.mod)
+	else
 	{
-		toRet = "<img src='/images/mod.png' class='embedded_image' id='icon"+uniqueHiddenId.toString()+"' onload='setupTooltip(\"icon"+uniqueHiddenId.toString()+"\")' data-toggle='tooltip' data-placement='right' title='Moderator' />";
+		if (user.nick == "MrMeapify")
+		{
+			toRet = "<img src='/images/creator.png' class='embedded_image' id='icon"+uniqueHiddenId.toString()+"' onload='setupTooltip(\"icon"+uniqueHiddenId.toString()+"\")' data-toggle='tooltip' data-placement='right' title='Creator' />";
+		}
+		else if (user.admin)
+		{
+			toRet = "<img src='/images/admin.png' class='embedded_image' id='icon"+uniqueHiddenId.toString()+"' onload='setupTooltip(\"icon"+uniqueHiddenId.toString()+"\")' data-toggle='tooltip' data-placement='right' title='Administrator' />";
+		}
+		else if (user.mod)
+		{
+			toRet = "<img src='/images/mod.png' class='embedded_image' id='icon"+uniqueHiddenId.toString()+"' onload='setupTooltip(\"icon"+uniqueHiddenId.toString()+"\")' data-toggle='tooltip' data-placement='right' title='Moderator' />";
+		}
+		else if (user.donator)
+		{
+			toRet = "<img src='/images/donator.png' class='embedded_image' id='icon"+uniqueHiddenId.toString()+"' onload='setupTooltip(\"icon"+uniqueHiddenId.toString()+"\")' data-toggle='tooltip' data-placement='right' title='Donator' />";
+		}
 	}
-    else if (user.donator)
-    {
-        toRet = "<img src='/images/donator.png' class='embedded_image' id='icon"+uniqueHiddenId.toString()+"' onload='setupTooltip(\"icon"+uniqueHiddenId.toString()+"\")' data-toggle='tooltip' data-placement='right' title='Donator' />";
-    }
     
     if (toRet != "")
     {
