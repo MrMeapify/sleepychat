@@ -1170,8 +1170,31 @@ function updateNameList()
 {
     if (users != null)
     {
-
-        users.sort(function(a, b) {
+		function GetUserScore(user)
+		{
+			if (user.authority.indexOf("admin.png") != -1 || user.authority.indexOf("redhat.png") != -1)
+			{
+				return 4;
+			}
+			else if (user.authority.indexOf("creator.png") != -1 || user.authority.indexOf("candy-creator.png") != -1)
+			{
+				return 3;
+			}
+			else if (user.authority.indexOf("mod.png") != -1 || user.authority.indexOf("greenhat.png") != -1)
+			{
+				return 2;
+			}
+			else if (user.authority.indexOf("donator.png") != -1 || user.authority.indexOf("snowflake.png") != -1)
+			{
+				return 1;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+		
+		users.sort(function(a, b) {
             var retVal = 0;
         
             if (sorting == "alpha")
@@ -1189,13 +1212,11 @@ function updateNameList()
         
             if (adminModsFirst)
             {
-                if(a.authority.indexOf("mod.png") != -1 && b.authority.indexOf("mod.png") == -1) retVal = -1;
-                if(a.authority.indexOf("creator.png") != -1 && b.authority.indexOf("creator.png") == -1) retVal = -1;
-                if(a.authority.indexOf("admin.png") != -1 && b.authority.indexOf("admin.png") == -1) retVal = -1;
-
-                if(a.authority.indexOf("admin.png") == -1 && b.authority.indexOf("admin.png") != -1) retVal = 1;
-                if(a.authority.indexOf("creator.png") == -1 && b.authority.indexOf("creator.png") != -1) retVal = 1;
-                if(a.authority.indexOf("mod.png") == -1 && b.authority.indexOf("mod.png") != -1) retVal = 1;
+				var aScore = GetUserScore(a);
+				var bScore = GetUserScore(b);
+				
+				if (aScore > bScore) { return -1; }
+				else if (bScore > aScore) { return 1; }
             }
             
             return retVal;
