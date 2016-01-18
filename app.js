@@ -325,6 +325,8 @@ function OnConnect(socket)
 				
 				if (waitingOnPong)
 				{
+                    console.log(nick + " didn't pong back.");
+                    
 					OnDisconnect(true);
 				}
 			}, 10000);
@@ -339,21 +341,21 @@ function OnConnect(socket)
         {
             if (data == null || typeof data == 'undefined')
             {
-                console.log("@ " + ip + ": Attempted crash using invalid data.");
+                console.log("@ " + ip + ": Attempted crash using invalid data. (data)");
                 socket.disconnect();
                 return;
             }
 
             if (data.nick == null || typeof data.nick == 'undefined')
             {
-                console.log("@ " + ip + ": Attempted crash using invalid data.");
+                console.log("@ " + ip + ": Attempted crash using invalid data. (nick)");
                 socket.disconnect();
                 return;
             }
 
             if (data.reCaptchaResponse == null || typeof data.reCaptchaResponse == 'undefined')
             {
-                console.log("@ " + ip + ": Attempted crash using invalid data.");
+                console.log("@ " + ip + ": Attempted crash using invalid data. (reCaptcha)");
                 socket.disconnect();
                 return;
             }
@@ -521,6 +523,7 @@ function OnConnect(socket)
 						else
 						{
 							socket.emit('information', "reCaptcha verification unsuccessful. Did you complete it?");
+                            console.log("Failed reCaptcha. (" + data.nick + ")");
 							socket.disconnect();
 						}
 					}
@@ -1075,7 +1078,7 @@ function OnConnect(socket)
                                 else
                                 {
                                     toKick.socket.leave(room.token);
-                                    room.user.remove(toKick);
+                                    room.users.remove(toKick);
                                 }
                             }
                             else
@@ -1621,6 +1624,8 @@ function OnConnect(socket)
 
         socket.on('disconnect', function()
         {
+            console.log(nick + " fired disconnect event.");
+            
             OnDisconnect(false);
         });
         
@@ -1648,6 +1653,8 @@ function OnConnect(socket)
 		
 		function OnDisconnect(forced)
 		{
+            console.log("Disconnecting " + nick + "." + (forced ? " Forced." : ""));
+            
 			clearInterval(pingInterval);
 			
 			if(room)
@@ -1680,12 +1687,31 @@ function OnConnect(socket)
                         delete user.partner.partner;
                         users.push(user.partner);
                         user.partner.socket.emit('partnerDC', user.nick);
+                        
+                        console.log(nick + " was in MM with " + user.partner.nick + ".");
+                        
+                        var listing = "";
+                        for (var i = 0; i < users.length; i++)
+                        {
+                            listing += users[i].nick + ", ";
+                        }
+                        
+                        console.log(listing);
                     }
                     if(user.inBigChat)
                     {
                         io.to('bigroom').emit('information', "[INFO] " + nick + " has left.");
                         io.to('bigroom').emit('rosterupdate', generateRoster(users));
-						console.log(nick+" has disconnected.");
+						
+                        console.log(nick + " was in BC.");
+                        
+                        var listing = "";
+                        for (var i = 0; i < users.length; i++)
+                        {
+                            listing += users[i].nick + ", ";
+                        }
+                        
+                        console.log(listing);
                     }
 					if (NickSimilar(nick))
 					{
@@ -1698,6 +1724,18 @@ function OnConnect(socket)
 							}
 						}
 					}
+                }
+                else
+                {
+                    console.log("Couldn't find " + nick + " in the user list.");
+                    
+                    var listing = "";
+                    for (var i = 0; i < users.length; i++)
+                    {
+                        listing += users[i].nick + ", ";
+                    }
+
+                    console.log(listing);
                 }
             }
 
