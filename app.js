@@ -1661,7 +1661,9 @@ function OnConnect(socket)
 		
 		function OnDisconnect(forced)
 		{
-            console.log("Disconnecting " + nick + "." + (forced ? " Forced." : ""));
+			console.log("Disconnecting " + nick + "." + (forced ? " Forced." : ""));
+			
+			didDisconnect = true;
             
 			clearInterval(pingInterval);
 			
