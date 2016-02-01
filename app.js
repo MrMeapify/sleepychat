@@ -327,9 +327,7 @@ function OnConnect(socket)
 				
 				if (waitingOnPong)
 				{
-                    console.log(nick + " didn't pong back.");
-                    
-					OnDisconnect(true);
+                    OnDisconnect(true);
 				}
 			}, 10000);
 		}, 300000);
@@ -378,7 +376,6 @@ function OnConnect(socket)
 
 					if (didDisconnect)
 					{
-						console.log("Disconnected before reCaptcha verification completed. " + data.nick);
 						return;
 					}
 
@@ -532,7 +529,6 @@ function OnConnect(socket)
 					else
 					{
 						socket.emit('information', "reCaptcha verification unsuccessful. Did you complete it?");
-						console.log("Failed reCaptcha. (" + data.nick + ")");
 						socket.disconnect();
 					}
 				}
@@ -1632,8 +1628,6 @@ function OnConnect(socket)
 
         socket.on('disconnect', function()
         {
-            console.log(nick + " fired disconnect event.");
-            
             OnDisconnect(false);
         });
         
@@ -1661,8 +1655,6 @@ function OnConnect(socket)
 		
 		function OnDisconnect(forced)
 		{
-			console.log("Disconnecting " + nick + "." + (forced ? " Forced." : ""));
-			
 			didDisconnect = true;
             
 			clearInterval(pingInterval);
@@ -1697,31 +1689,11 @@ function OnConnect(socket)
                         delete user.partner.partner;
                         users.push(user.partner);
                         user.partner.socket.emit('partnerDC', user.nick);
-                        
-                        console.log(nick + " was in MM with " + user.partner.nick + ".");
-                        
-                        var listing = "";
-                        for (var i = 0; i < users.length; i++)
-                        {
-                            listing += users[i].nick + ", ";
-                        }
-                        
-                        console.log(listing);
                     }
                     if(user.inBigChat)
                     {
                         io.to('bigroom').emit('information', "[INFO] " + nick + " has left.");
                         io.to('bigroom').emit('rosterupdate', generateRoster(users));
-						
-                        console.log(nick + " was in BC.");
-                        
-                        var listing = "";
-                        for (var i = 0; i < users.length; i++)
-                        {
-                            listing += users[i].nick + ", ";
-                        }
-                        
-                        console.log(listing);
                     }
 					if (NickSimilar(nick))
 					{
@@ -1734,18 +1706,6 @@ function OnConnect(socket)
 							}
 						}
 					}
-                }
-                else
-                {
-                    console.log("Couldn't find " + nick + " in the user list.");
-                    
-                    var listing = "";
-                    for (var i = 0; i < users.length; i++)
-                    {
-                        listing += users[i].nick + ", ";
-                    }
-
-                    console.log(listing);
                 }
             }
 
