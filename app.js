@@ -315,7 +315,7 @@ function OnConnect(socket)
             
             spamPoints--;
             if (spamPoints < 0) { spamPoints = 0; }
-            else if (spamPoints > 10 && !room) { socket.emit('information', "[INFO] You've been kicked for spamming the chat."); socket.disconnect(); }
+            else if (spamPoints > 10 && !room) { socket.emit('information', "[INFO] You've been kicked for spamming the chat."); socket.disconnect(); io.sockets.emit('remove spam', nick); }
         }, 2000);
 		
 		var waitingOnPong = false;

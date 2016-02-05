@@ -509,6 +509,11 @@ $(document).ready(function()
 			setTimeout(function() { $('#toclick').click(); $('#toclick').attr("id","clicked"); }, 500);
 		});
 		
+		socket.on('remove spam', function(spammer)
+		{
+			$('li[sender="' + spammer + '"]').remove();
+		});
+		
 		socket.on('whisper', function(sender, receiver, msg)
 		{
 			if (msg){
@@ -657,7 +662,7 @@ $(document).ready(function()
 				if (!(userFrom && ignore_list.indexOf(userFrom) != -1))
 				{
 					clearmsg(mid);
-					msgList.append($('<li class="'+msgClass+'"'+(mid ? ' id="mid'+mid.toString()+'"' : '')+'>').html(((isModOrAdmin && mid) ? '<button class="btn btn-default btn-clearmsg" id="bid'+mid.toString()+'" tabindex="-1"><span class="spn-clearmsg">x</span></button> ' : '') + moment().format('h:mm:ss a') + ": " + msg));
+					msgList.append($('<li class="'+msgClass+'"'+(mid ? ' id="mid'+mid.toString()+'"' : '')+' sender="' + userFrom + '">').html(((isModOrAdmin && mid) ? '<button class="btn btn-default btn-clearmsg" id="bid'+mid.toString()+'" tabindex="-1"><span class="spn-clearmsg">x</span></button> ' : '') + moment().format('h:mm:ss a') + ": " + msg));
 					if (mid)
 					{
 						$('#bid'+mid.toString()).click(function() {
